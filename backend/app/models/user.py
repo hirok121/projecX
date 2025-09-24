@@ -11,6 +11,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=True)
     full_name = Column(String, nullable=True)
     hashed_password = Column(String, nullable=True)  # Nullable for OAuth users
+    phone_number = Column(String, nullable=True)
     
     # OAuth fields
     google_id = Column(String, unique=True, nullable=True)
@@ -20,7 +21,9 @@ class User(Base):
     # User management fields
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
-    is_verified = Column(Boolean, default=False)
+    is_email_verified = Column(Boolean, default=False)
+    is_phone_verified = Column(Boolean, default=False)
+    is_staff = Column(Boolean, default=False)
     
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)

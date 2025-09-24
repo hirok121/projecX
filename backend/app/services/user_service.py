@@ -26,18 +26,21 @@ class UserService:
     
     @staticmethod
     def create_user(db: Session, user: UserCreate) -> User:
-        """Create a new user with email and password."""
+        """Create a new user with email verification required (inactive by default)."""
         hashed_password = get_password_hash(user.password)
         db_user = User(
             email=user.email,
             username=user.username,
             full_name=user.full_name,
+            phone_number=user.phone_number,
             hashed_password=hashed_password,
             bio=user.bio,
             location=user.location,
             website=user.website,
             provider="local",
-            is_verified=False  # Email verification can be added later
+            is_active=False,  # Inactive until email is verified
+            is_email_verified=False,
+            is_phone_verified=False
         )
         db.add(db_user)
         db.commit()
@@ -48,9 +51,12 @@ class UserService:
     def link_password_to_oauth_user(db: Session, user: User, password: str) -> User:
         """Link a password to an existing OAuth user."""
         hashed_password = get_password_hash(password)
-        user.hashed_password = hashed_password
-        user.provider = "both"  # Now supports both login methods
-        user.updated_at = datetime.utcnow()
+        # Use SQLAlchemy update to avoid type checker issues
+        db.query(User).filter(User.id == user.id).update({
+            User.hashed_password: hashed_password,
+            User.provider: "both",
+            User.updated_at: datetime.utcnow()
+        })
         db.commit()
         db.refresh(user)
         return user
@@ -59,6 +65,10 @@ class UserService:
     def create_google_user(db: Session, google_user: GoogleUser) -> User:
         """Create a new user from Google OAuth."""
         username = google_user.email.split('@')[0]  # Generate username from email
+        
+        # Extract values to avoid type checker issues with GoogleUser attributes
+        verified_email = bool(getattr(google_user, 'verified_email', True))
+        
         db_user = User(
             email=google_user.email,
             username=username,
@@ -66,8 +76,8 @@ class UserService:
             google_id=google_user.id,
             provider="google",
             avatar_url=google_user.picture,
-            is_verified=google_user.verified_email,
-            is_active=True
+            is_email_verified=verified_email,
+            is_active=verified_email
         )
         db.add(db_user)
         db.commit()
@@ -78,9 +88,15 @@ class UserService:
     def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
         """Authenticate user with email and password."""
         user = UserService.get_user_by_email(db, email)
-        if not user or not user.hashed_password:
+        if not user:
             return None
-        if not verify_password(password, user.hashed_password):
+        
+        # Use getattr to safely access hashed_password
+        hashed_password = getattr(user, 'hashed_password', None)
+        if not hashed_password:
+            return None
+            
+        if not verify_password(password, hashed_password):
             return None
         return user
     
@@ -92,10 +108,18 @@ class UserService:
             return None
         
         update_data = user_update.model_dump(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(user, field, value)
         
-        user.updated_at = datetime.utcnow()
+        # Map field names to SQLAlchemy columns for safe update
+        column_updates = {}
+        for field, value in update_data.items():
+            if hasattr(User, field):
+                column_updates[getattr(User, field)] = value
+        
+        # Always update the timestamp
+        column_updates[User.updated_at] = datetime.utcnow()
+        
+        # Use SQLAlchemy update to avoid type issues
+        db.query(User).filter(User.id == user_id).update(column_updates)
         db.commit()
         db.refresh(user)
         return user
@@ -103,29 +127,89 @@ class UserService:
     @staticmethod
     def update_last_login(db: Session, user_id: int) -> None:
         """Update user's last login timestamp."""
-        user = UserService.get_user_by_id(db, user_id)
-        if user:
-            user.last_login = datetime.utcnow()
-            db.commit()
-    
-    @staticmethod
-    def deactivate_user(db: Session, user_id: int) -> Optional[User]:
-        """Deactivate a user account."""
-        user = UserService.get_user_by_id(db, user_id)
-        if user:
-            user.is_active = False
-            user.updated_at = datetime.utcnow()
-            db.commit()
-            db.refresh(user)
-        return user
+        db.query(User).filter(User.id == user_id).update({
+            User.last_login: datetime.utcnow()
+        })
+        db.commit()
     
     @staticmethod
     def activate_user(db: Session, user_id: int) -> Optional[User]:
         """Activate a user account."""
         user = UserService.get_user_by_id(db, user_id)
         if user:
-            user.is_active = True
-            user.updated_at = datetime.utcnow()
+            db.query(User).filter(User.id == user_id).update({
+                User.is_active: True,
+                User.updated_at: datetime.utcnow()
+            })
             db.commit()
             db.refresh(user)
+        return user
+    
+    @staticmethod
+    def deactivate_user(db: Session, user_id: int) -> Optional[User]:
+        """Deactivate a user account."""
+        user = UserService.get_user_by_id(db, user_id)
+        if user:
+            db.query(User).filter(User.id == user_id).update({
+                User.is_active: False,
+                User.updated_at: datetime.utcnow()
+            })
+            db.commit()
+            db.refresh(user)
+        return user
+    
+    @staticmethod
+    def verify_user_email(db: Session, email: str) -> Optional[User]:
+        """Verify user email and activate account."""
+        user = UserService.get_user_by_email(db, email)
+        if user:
+            # Use SQLAlchemy query to update the user
+            db.query(User).filter(User.email == email).update({
+                User.is_email_verified: True,
+                User.is_active: True,
+                User.updated_at: datetime.utcnow()
+            })
+            db.commit()
+            # Refresh the user object to get updated values
+            db.refresh(user)
+        return user
+    
+    @staticmethod
+    def reset_user_password(db: Session, email: str, new_password: str) -> Optional[User]:
+        """Reset user password."""
+        user = UserService.get_user_by_email(db, email)
+        if user:
+            hashed_password = get_password_hash(new_password)
+            db.query(User).filter(User.email == email).update({
+                User.hashed_password: hashed_password,
+                User.updated_at: datetime.utcnow()
+            })
+            db.commit()
+            db.refresh(user)
+        return user
+    
+    @staticmethod
+    def change_user_password(db: Session, user_id: int, current_password: str, new_password: str) -> Optional[User]:
+        """Change user password after verifying current password."""
+        user = UserService.get_user_by_id(db, user_id)
+        if not user:
+            return None
+        
+        # Get current hashed password safely
+        current_hashed = getattr(user, 'hashed_password', None)
+        if not current_hashed:
+            return None  # User has no password (OAuth only)
+        
+        # Verify current password
+        if not verify_password(current_password, current_hashed):
+            return None  # Current password is incorrect
+        
+        # Update to new password
+        new_hashed_password = get_password_hash(new_password)
+        db.query(User).filter(User.id == user_id).update({
+            User.hashed_password: new_hashed_password,
+            User.updated_at: datetime.utcnow()
+        })
+        db.commit()
+        db.refresh(user)
         return user
