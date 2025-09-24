@@ -3,13 +3,14 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from datetime import timedelta, datetime
 from pydantic import BaseModel
-from app.models.user import get_db
+from app.db.connection import get_db
 from app.schemas.user import UserLogin, UserCreate, Token, User
 from app.services.user_service import UserService
 from app.services.oauth_service import GoogleOAuthService
 from app.core.security import create_access_token, verify_token
 from app.core.config import settings
-from app.core.logging import log_endpoint_activity, get_client_ip, track_endpoint_performance
+from app.core.logging import log_endpoint_activity, track_endpoint_performance
+from app.utils.helpers import get_client_ip
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 security = HTTPBearer()

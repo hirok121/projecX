@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate, GoogleUser
-from app.core.security import get_password_hash, verify_password
+from app.utils.security import get_password_hash, verify_password
 
 
 class UserService:

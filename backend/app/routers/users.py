@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
-from app.models.user import get_db
+from app.db.connection import get_db
 from app.schemas.user import User, UserUpdate
 from app.services.user_service import UserService
 from app.routers.auth import get_current_user
-from app.core.logging import track_endpoint_performance, get_client_ip, log_endpoint_activity
+from app.core.logging import track_endpoint_performance, log_endpoint_activity
+from app.utils.helpers import get_client_ip
 
 router = APIRouter(prefix="/users", tags=["users"])
 

@@ -1,21 +1,6 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
 from datetime import datetime
-from app.core.config import settings
-
-engine = create_engine(settings.database_url, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-
-def get_db():
-    """Database dependency."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+from app.db.connection import Base
 
 
 class User(Base):
@@ -49,7 +34,3 @@ class User(Base):
     
     def __repr__(self):
         return f"<User(email='{self.email}', username='{self.username}')>"
-
-
-# Create tables
-Base.metadata.create_all(bind=engine)

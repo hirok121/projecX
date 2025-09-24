@@ -4,6 +4,10 @@ from app.routers import auth, users
 from app.core.config import settings
 from app.core.logging import app_logger
 from app.middleware.logging import LoggingMiddleware
+from app.db.connection import init_db
+
+# Initialize database
+init_db()
 
 app = FastAPI(
     title="FastAPI Authentication App",

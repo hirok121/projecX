@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 import functools
 from logging.handlers import TimedRotatingFileHandler
-from fastapi import Request
+from app.utils.helpers import get_client_ip
 
 def setup_logging():
     """Setup logging configuration with main app log for common events"""
@@ -219,22 +219,6 @@ def track_endpoint_performance(logger_name: str, action: str):
             return sync_wrapper
                 
     return decorator
-
-# Utility function to extract IP from request
-def get_client_ip(request: Request) -> str:
-    """Extract client IP address from request"""
-    # Check for forwarded IP (for load balancers/proxies)
-    forwarded_for = request.headers.get("X-Forwarded-For")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
-    
-    # Check for real IP header
-    real_ip = request.headers.get("X-Real-IP")
-    if real_ip:
-        return real_ip
-    
-    # Fallback to direct client IP
-    return request.client.host if request.client else "unknown"
 
 # Pre-configured loggers for common features (creates their own log files)
 auth_logger = get_logger("auth")           # logs/auth.log

@@ -1,7 +1,7 @@
 import time
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.core.logging import get_client_ip
+from app.utils.helpers import get_client_ip
 import logging
 
 class LoggingMiddleware(BaseHTTPMiddleware):

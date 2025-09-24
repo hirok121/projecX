@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, Request
 from app.core.logging import (
     get_logger, 
     log_endpoint_activity, 
-    track_endpoint_performance, 
-    get_client_ip
+    track_endpoint_performance
 )
+from app.utils.helpers import get_client_ip
 
 # Example 1: User Profile Management Feature
 router = APIRouter(prefix="/profile", tags=["user_profile"])
