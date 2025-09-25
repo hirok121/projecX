@@ -12,6 +12,10 @@ class UserBase(BaseModel):
     bio: Optional[str] = None
     location: Optional[str] = None
     website: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    postal_code: Optional[str] = None
     
     @validator('phone_number')
     def validate_phone_number(cls, v):
@@ -24,7 +28,9 @@ class UserBase(BaseModel):
         return v
 
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
+    email: EmailStr
+    full_name: str
     password: str
 
 
@@ -35,6 +41,10 @@ class UserUpdate(BaseModel):
     bio: Optional[str] = None
     location: Optional[str] = None
     website: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    postal_code: Optional[str] = None
 
 
 class UserInDB(UserBase):

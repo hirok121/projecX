@@ -18,10 +18,10 @@ class Settings(BaseSettings):
     # Google OAuth settings
     google_client_id: Optional[str] = None
     google_client_secret: Optional[str] = None
-    google_redirect_uri: str = "http://localhost:3000/auth/google/callback"
+    google_redirect_uri: str = "http://localhost:5173/auth/google/callback"
     
     # Frontend settings
-    frontend_url: str = "http://localhost:3000"
+    frontend_url: str = "http://localhost:5173"
     
     # Email settings
     smtp_enabled: bool = False
@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     smtp_username: Optional[str] = None
     smtp_password: Optional[str] = None
     smtp_from_email: Optional[str] = None
+
+    # Superuser settings
+    superuser_email: str = ""
+    superuser_key: str = ""
     
     class Config:
         env_file = ".env"

@@ -29,15 +29,22 @@ class EmailService:
             
             # Send email
             if settings.smtp_enabled and settings.smtp_from_email:
+                logger.info(f"Attempting to send email to {to_email} via SMTP")
                 context = ssl.create_default_context()
                 with smtplib.SMTP(settings.smtp_server, settings.smtp_port) as server:
+                    logger.info(f"Connected to SMTP server {settings.smtp_server}:{settings.smtp_port}")
+                    
                     if settings.smtp_tls:
                         server.starttls(context=context)
+                        logger.info("TLS started successfully")
+                    
                     if settings.smtp_username and settings.smtp_password:
                         server.login(settings.smtp_username, settings.smtp_password)
+                        logger.info(f"SMTP login successful for {settings.smtp_username}")
+                    
                     server.sendmail(settings.smtp_from_email, to_email, message.as_string())
+                    logger.info(f"Email sent successfully to {to_email}")
                 
-                logger.info(f"Email sent successfully to {to_email}")
                 return True
             else:
                 # Log for development (when SMTP is disabled)
@@ -46,8 +53,19 @@ class EmailService:
                 print(f"📩 To: {to_email}")
                 return True
                 
+        except smtplib.SMTPAuthenticationError as e:
+            logger.error(f"SMTP Authentication failed for {to_email}: {str(e)}")
+            return False
+        except smtplib.SMTPRecipientsRefused as e:
+            logger.error(f"SMTP Recipients refused for {to_email}: {str(e)}")
+            return False
+        except smtplib.SMTPServerDisconnected as e:
+            logger.error(f"SMTP Server disconnected for {to_email}: {str(e)}")
+            return False
         except Exception as e:
             logger.error(f"Failed to send email to {to_email}: {str(e)}")
+            import traceback
+            logger.error(f"Full traceback: {traceback.format_exc()}")
             return False
 
     @staticmethod
