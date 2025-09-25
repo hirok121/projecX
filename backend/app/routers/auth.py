@@ -69,11 +69,13 @@ def register(user: UserCreate, request: Request, db: Session = Depends(get_db)):
     # Check if user already exists
     db_user = UserService.get_user_by_email(db, email=user.email)
     if db_user:
-        # If user exists with Google OAuth but no password, link the account
         # Use getattr to safely access SQLAlchemy attributes
         provider = getattr(db_user, 'provider', None)
         has_password = getattr(db_user, 'hashed_password', None) is not None
+        is_email_verified = getattr(db_user, 'is_email_verified', False)
+        is_active = getattr(db_user, 'is_active', True)
         
+        # If user exists with Google OAuth but no password, link the account
         if provider == "google" and not has_password:
             # Link the account by adding password (Google users are already verified)
             linked_user = UserService.link_password_to_oauth_user(db, db_user, user.password)
@@ -85,13 +87,48 @@ def register(user: UserCreate, request: Request, db: Session = Depends(get_db)):
                 message="Password successfully added to your Google account! You can now login with email and password.",
                 email=user.email
             )
+        # If user exists but email is not verified, update info and resend verification
+        elif not is_email_verified and not is_active:
+            # Update user information with new data
+            from app.utils.security import get_password_hash
+            
+            # Update user fields using SQLAlchemy column references
+            db.query(UserModel).filter(UserModel.id == db_user.id).update({
+                UserModel.full_name: user.full_name,
+                UserModel.hashed_password: get_password_hash(user.password),
+                UserModel.updated_at: datetime.utcnow()
+            })
+            db.commit()
+            db.refresh(db_user)
+            
+            # Generate new verification token
+            verification_token = generate_verification_token(user.email)
+            
+            # Send verification email
+            email_sent = EmailService.send_verification_email(
+                to_email=user.email,
+                verification_token=verification_token,
+                user_name=user.full_name or "User"
+            )
+            
+            if not email_sent:
+                log_endpoint_activity("auth", "email_send_failed", user.email, client_ip, 
+                                    success=False, additional_info={"reason": "smtp_error"})
+            
+            log_endpoint_activity("auth", "registration_updated", user.email, client_ip, 
+                                additional_info={"type": "unverified_user_updated", "email_sent": email_sent})
+            
+            return RegistrationResponse(
+                message="Your information has been updated! Please check your email for a new verification link.",
+                email=user.email
+            )
         else:
-            # User already exists with local account or both providers
+            # User already exists and is verified/active
             log_endpoint_activity("auth", "registration_failed", user.email, client_ip, 
-                                success=False, additional_info={"reason": "email_exists"})
+                                success=False, additional_info={"reason": "email_already_verified"})
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered with a password"
+                detail="Email already registered and verified"
             )
     
     # Create new user (inactive by default for email verification)
@@ -174,6 +211,15 @@ def login(user_credentials: UserLogin, request: Request, db: Session = Depends(g
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user"
+        )
+    
+    is_email_verified = getattr(user, 'is_email_verified', False)
+    if not is_email_verified:
+        log_endpoint_activity("auth", "login_failed", user_credentials.email, client_ip, 
+                            success=False, additional_info={"reason": "email_not_verified"})
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email not verified. Please check your email for the verification link."
         )
     
     # Update last login - use getattr for safe access
@@ -261,6 +307,9 @@ async def google_callback(request: GoogleCallbackRequest, req: Request, db: Sess
                 if not current_fullname and google_user.name:
                     update_data["full_name"] = google_user.name
                 
+                # Always verify email when linking Google account (Google has already verified it)
+                update_data["is_email_verified"] = True
+
                 # Update provider based on current status
                 if current_provider == "local" and has_password:
                     update_data["provider"] = "both"

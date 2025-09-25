@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
 from sqlalchemy.orm import Session
+from typing import List
 from app.db.connection import get_db
 from app.schemas.user import User, UserUpdate
 from app.services.user_service import UserService
@@ -8,6 +9,73 @@ from app.core.logging import track_endpoint_performance, log_endpoint_activity
 from app.utils.helpers import get_client_ip
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+@router.get("", response_model=List[User])
+@track_endpoint_performance("admin", "get_all_users")
+def get_all_users(
+    request: Request,
+    skip: int = Query(0, ge=0, description="Number of users to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of users to return"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all users (superuser or staff only)."""
+    client_ip = get_client_ip(request)
+    
+    # Log admin access attempt
+    log_endpoint_activity(
+        "admin", 
+        "get_all_users_attempt", 
+        user_email=current_user.email,
+        ip_address=client_ip,
+        additional_info={
+            "admin_id": current_user.id,
+            "is_superuser": current_user.is_superuser,
+            "is_staff": current_user.is_staff,
+            "skip": skip,
+            "limit": limit
+        }
+    )
+    
+    # Check if user has sufficient privileges (superuser or staff)
+    if not (current_user.is_superuser or current_user.is_staff):
+        log_endpoint_activity(
+            "admin", 
+            "unauthorized_get_all_users", 
+            user_email=current_user.email,
+            ip_address=client_ip,
+            success=False,
+            additional_info={
+                "admin_id": current_user.id,
+                "reason": "insufficient_permissions",
+                "is_superuser": current_user.is_superuser,
+                "is_staff": current_user.is_staff
+            }
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions. Staff or superuser access required."
+        )
+    
+    users = UserService.get_all_users(db, skip=skip, limit=limit)
+    
+    # Log successful operation
+    log_endpoint_activity(
+        "admin", 
+        "get_all_users_successful", 
+        user_email=current_user.email,
+        ip_address=client_ip,
+        additional_info={
+            "admin_id": current_user.id,
+            "is_superuser": current_user.is_superuser,
+            "is_staff": current_user.is_staff,
+            "users_returned": len(users),
+            "skip": skip,
+            "limit": limit
+        }
+    )
+    
+    return users
 
 
 @router.get("/profile", response_model=User)
@@ -86,6 +154,8 @@ def update_profile(
     )
     
     return updated_user
+
+
 
 
 # Admin endpoints (require superuser)
@@ -318,3 +388,157 @@ def deactivate_user(
     )
     
     return {"message": f"User {user.email} deactivated successfully"}
+
+
+@router.post("/{user_id}/promote-to-staff")
+@track_endpoint_performance("admin", "promote_user_to_staff")
+def promote_user_to_staff(
+    user_id: int,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Promote user to staff status (superuser only)."""
+    client_ip = get_client_ip(request)
+    
+    # Log admin action attempt
+    log_endpoint_activity(
+        "admin", 
+        "staff_promotion_attempt", 
+        user_email=current_user.email,
+        ip_address=client_ip,
+        additional_info={
+            "admin_id": current_user.id,
+            "target_user_id": user_id,
+            "is_superuser": current_user.is_superuser
+        }
+    )
+    
+    if not current_user.is_superuser:
+        log_endpoint_activity(
+            "admin", 
+            "unauthorized_staff_promotion", 
+            user_email=current_user.email,
+            ip_address=client_ip,
+            success=False,
+            additional_info={
+                "admin_id": current_user.id,
+                "target_user_id": user_id,
+                "reason": "insufficient_permissions"
+            }
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    user = UserService.promote_to_staff(db, user_id)
+    if not user:
+        log_endpoint_activity(
+            "admin", 
+            "staff_promotion_failed", 
+            user_email=current_user.email,
+            ip_address=client_ip,
+            success=False,
+            additional_info={
+                "admin_id": current_user.id,
+                "target_user_id": user_id,
+                "reason": "user_not_found"
+            }
+        )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Log successful promotion - Critical admin event
+    log_endpoint_activity(
+        "admin", 
+        "user_promoted_to_staff", 
+        user_email=current_user.email,
+        ip_address=client_ip,
+        additional_info={
+            "admin_id": current_user.id,
+            "target_user_id": user_id,
+            "target_user_email": user.email
+        }
+    )
+    
+    return {"message": f"User {user.email} promoted to staff successfully"}
+
+
+@router.post("/{user_id}/demote-from-staff")
+@track_endpoint_performance("admin", "demote_user_from_staff")
+def demote_user_from_staff(
+    user_id: int,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Demote user from staff status (superuser only)."""
+    client_ip = get_client_ip(request)
+    
+    # Log admin action attempt
+    log_endpoint_activity(
+        "admin", 
+        "staff_demotion_attempt", 
+        user_email=current_user.email,
+        ip_address=client_ip,
+        additional_info={
+            "admin_id": current_user.id,
+            "target_user_id": user_id,
+            "is_superuser": current_user.is_superuser
+        }
+    )
+    
+    if not current_user.is_superuser:
+        log_endpoint_activity(
+            "admin", 
+            "unauthorized_staff_demotion", 
+            user_email=current_user.email,
+            ip_address=client_ip,
+            success=False,
+            additional_info={
+                "admin_id": current_user.id,
+                "target_user_id": user_id,
+                "reason": "insufficient_permissions"
+            }
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    user = UserService.demote_from_staff(db, user_id)
+    if not user:
+        log_endpoint_activity(
+            "admin", 
+            "staff_demotion_failed", 
+            user_email=current_user.email,
+            ip_address=client_ip,
+            success=False,
+            additional_info={
+                "admin_id": current_user.id,
+                "target_user_id": user_id,
+                "reason": "user_not_found"
+            }
+        )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Log successful demotion - Critical admin event
+    log_endpoint_activity(
+        "admin", 
+        "user_demoted_from_staff", 
+        user_email=current_user.email,
+        ip_address=client_ip,
+        additional_info={
+            "admin_id": current_user.id,
+            "target_user_id": user_id,
+            "target_user_email": user.email
+        }
+    )
+    
+    return {"message": f"User {user.email} demoted from staff successfully"}

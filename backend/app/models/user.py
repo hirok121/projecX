@@ -34,6 +34,10 @@ class User(Base):
     bio = Column(Text, nullable=True)
     location = Column(String, nullable=True)
     website = Column(String, nullable=True)
+    city = Column(String, nullable=True)
+    state = Column(String, nullable=True)
+    country = Column(String, nullable=True)
+    postal_code = Column(String, nullable=True)
     
     def __repr__(self):
         return f"<User(email='{self.email}', username='{self.username}')>"

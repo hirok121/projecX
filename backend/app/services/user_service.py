@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate, GoogleUser
-from app.utils.security import get_password_hash, verify_password
+from app.utils.security import get_password_hash, verify_password, is_super_user
 
 
 class UserService:
@@ -28,17 +28,29 @@ class UserService:
     def create_user(db: Session, user: UserCreate) -> User:
         """Create a new user with email verification required (inactive by default)."""
         hashed_password = get_password_hash(user.password)
+        
+        # Extract username from email (part before @)
+        username = user.email.split('@')[0]
+        
+        # Check if username already exists, if so, make it unique
+        existing_user = db.query(User).filter(User.username == username).first()
+        if existing_user:
+            # Add a number to make it unique
+            counter = 1
+            base_username = username
+            while existing_user:
+                username = f"{base_username}{counter}"
+                existing_user = db.query(User).filter(User.username == username).first()
+                counter += 1
+        
         db_user = User(
             email=user.email,
-            username=user.username,
+            username=username,
             full_name=user.full_name,
-            phone_number=user.phone_number,
             hashed_password=hashed_password,
-            bio=user.bio,
-            location=user.location,
-            website=user.website,
             provider="local",
-            is_active=False,  # Inactive until email is verified
+            is_active=True,  # Active by default
+            is_superuser=is_super_user(user.email),
             is_email_verified=False,
             is_phone_verified=False
         )
@@ -77,7 +89,8 @@ class UserService:
             provider="google",
             avatar_url=google_user.picture,
             is_email_verified=verified_email,
-            is_active=verified_email
+            is_active=verified_email,
+            is_superuser=is_super_user(google_user.email)
         )
         db.add(db_user)
         db.commit()
@@ -213,3 +226,40 @@ class UserService:
         db.commit()
         db.refresh(user)
         return user
+    
+    @staticmethod
+    def promote_to_staff(db: Session, user_id: int) -> Optional[User]:
+        """Promote a user to staff status."""
+        user = UserService.get_user_by_id(db, user_id)
+        if not user:
+            return None
+        
+        # Update user to staff
+        db.query(User).filter(User.id == user_id).update({
+            User.is_staff: True,
+            User.updated_at: datetime.utcnow()
+        })
+        db.commit()
+        db.refresh(user)
+        return user
+    
+    @staticmethod
+    def demote_from_staff(db: Session, user_id: int) -> Optional[User]:
+        """Demote a user from staff status."""
+        user = UserService.get_user_by_id(db, user_id)
+        if not user:
+            return None
+        
+        # Update user to remove staff status
+        db.query(User).filter(User.id == user_id).update({
+            User.is_staff: False,
+            User.updated_at: datetime.utcnow()
+        })
+        db.commit()
+        db.refresh(user)
+        return user
+    
+    @staticmethod
+    def get_all_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
+        """Get all users (admin only operation)."""
+        return db.query(User).offset(skip).limit(limit).all()
