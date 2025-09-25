@@ -37,7 +37,7 @@ import {
   Close as CloseIcon,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../hooks/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "@mui/material/styles";
 import { HepatoCAIIcon } from "../ui/CustomIcons";
 

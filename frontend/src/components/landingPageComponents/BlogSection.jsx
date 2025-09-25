@@ -20,9 +20,9 @@ import {
   Science,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom"; // Add this import for navigation
-import image1 from "../../assets/blogimages/image5.jpg";
-import image2 from "../../assets/blogimages/image.png";
-import image3 from "../../assets/blogimages/virus2.jpg";
+import image1 from "../../assets/world.png";
+import image2 from "../../assets/world.png";
+import image3 from "../../assets/world.png";
 
 // Animations
 const fadeInAnimation = keyframes`

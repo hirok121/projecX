@@ -42,7 +42,7 @@ import {
   Storage,
   Memory,
 } from "@mui/icons-material";
-import { useAuth } from "../../hooks/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import AdminNavBar from "../../components/admin/AdminNavbar";
 

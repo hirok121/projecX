@@ -7,7 +7,6 @@ import { LazyComponents, PerformanceMonitor } from "./config/performance";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuthCallback from "./components/auth/AuthCallback";
 import AuthDebugPanel from "./components/auth/AuthDebugPanel";
-import TokenRedirectHandler from "./components/auth/TokenRedirectHandler";
 import { AuthProvider } from "./context/AuthContext";
 
 // add constants for API and AUTH configuration
@@ -32,7 +31,6 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-          <TokenRedirectHandler>
             <Suspense fallback={<LoadingFallback />}>
             {/* Global AuthDebugPanel for development */}
             {FEATURES.ENABLE_DEBUG_CONSOLE && <AuthDebugPanel />}
@@ -132,43 +130,6 @@ function App() {
                 path="/patient-education"
                 element={<LazyComponents.PatientEducation />}
               />
-              {/* Blog Pages */}
-              <Route
-                path="/blogs/understanding-hepatitis-types"
-                element={<LazyComponents.UnderstandingHepatitisTypes />}
-              />
-              <Route
-                path="/blogs/prevention-guidelines"
-                element={<LazyComponents.PreventionGuidelines />}
-              />
-              <Route
-                path="/blogs/treatment-options"
-                element={<LazyComponents.TreatmentOptions />}
-              />
-              <Route
-                path="/blogs/living-with-hepatitis"
-                element={<LazyComponents.LivingWithHepatitis />}
-              />
-              <Route
-                path="/blogs/nutrition-guide"
-                element={<LazyComponents.NutritionGuide />}
-              />
-              <Route
-                path="/blogs/faqs-about-hepatitis"
-                element={<LazyComponents.FaqsAboutHepatitis />}
-              />
-              <Route
-                path="/blogs/understanding-hcv"
-                element={<LazyComponents.UnderstandingHcv />}
-              />
-              <Route
-                path="/blogs/machine-learning-liver-disease"
-                element={<LazyComponents.MachineLearningLiverDisease />}
-              />
-              <Route
-                path="/blogs/biomarker-analysis"
-                element={<LazyComponents.BiomarkerAnalysis />}
-              />
               <Route path="/research" element={<LazyComponents.Research />} />
               <Route path="/faq" element={<LazyComponents.FAQ />} />
               <Route
@@ -212,7 +173,6 @@ function App() {
               ></Route>{" "}
             </Routes>
             </Suspense>
-          </TokenRedirectHandler>
         </BrowserRouter>
       </AuthProvider>
     );
