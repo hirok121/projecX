@@ -138,7 +138,7 @@ fastapi_react/
    npm start
    ```
    
-   The React app will be available at `http://localhost:3000`
+   The React app will be available at `http://localhost:5173`
 
 ### Google OAuth Setup
 
@@ -151,7 +151,7 @@ fastapi_react/
    - Go to "Credentials" section
    - Create OAuth 2.0 Client ID
    - Set authorized redirect URIs:
-     - `http://localhost:3000/auth/google/callback`
+     - `http://localhost:5173/auth/google/callback`
 
 3. **Update Environment**:
    - Copy Client ID and Client Secret to backend `.env` file
