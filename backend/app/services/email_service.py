@@ -1,7 +1,6 @@
 import smtplib
 import ssl
 from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from typing import Optional
 from datetime import datetime
 from app.core.config import settings
@@ -14,18 +13,21 @@ class EmailService:
     """Simple email service for sending verification and reset emails"""
     
     @staticmethod
-    def _send_email(to_email: str, subject: str, html_content: str, text_content: str) -> bool:
+    def _send_email(to_email: str, subject: str, html_content: str) -> bool:
         """Internal method to send email"""
         try:
-            # Create message
-            message = MIMEMultipart("alternative")
+            # Create HTML message
+            message = MIMEText(html_content, "html")
             message["Subject"] = subject
-            message["From"] = settings.smtp_from_email or "noreply@projectx.com"
-            message["To"] = to_email
             
-            # Add content
-            message.attach(MIMEText(text_content, "plain"))
-            message.attach(MIMEText(html_content, "html"))
+            # Format sender with display name
+            if settings.smtp_from_email:
+                from_name = getattr(settings, 'smtp_from_name', 'ProjectX')
+                message["From"] = f"{from_name} <{settings.smtp_from_email}>"
+            else:
+                message["From"] = "ProjectX <noreply@projectx.com>"
+            
+            message["To"] = to_email
             
             # Send email
             if settings.smtp_enabled and settings.smtp_from_email:
@@ -89,6 +91,7 @@ class EmailService:
                 .content {{ background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px; }}
                 .btn {{ display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; }}
                 .link {{ word-break: break-all; background-color: #f1f1f1; padding: 10px; border-radius: 3px; }}
+                .h1 {{color : white;}}
             </style>
         </head>
         <body>
@@ -112,22 +115,7 @@ class EmailService:
         </html>
         """
         
-        # Simple text template
-        text_content = f"""
-        Hello{greeting}!
-        
-        Thank you for registering with {settings.app_name}. Please verify your email address by visiting this link:
-        
-        {verification_url}
-        
-        This link expires in 24 hours.
-        
-        If you didn't create an account, please ignore this email.
-        
-        © {datetime.now().year} {settings.app_name}
-        """
-        
-        return EmailService._send_email(to_email, subject, html_content, text_content)
+        return EmailService._send_email(to_email, subject, html_content)
 
     @staticmethod
     def send_password_reset_email(to_email: str, reset_token: str, user_name: Optional[str] = None) -> bool:
@@ -173,19 +161,4 @@ class EmailService:
         </html>
         """
         
-        # Simple text template
-        text_content = f"""
-        Hello{greeting},
-        
-        We received a request to reset your password for your {settings.app_name} account. Visit this link to reset it:
-        
-        {reset_url}
-        
-        This link expires in 1 hour.
-        
-        If you didn't request this, please ignore this email.
-        
-        © {datetime.now().year} {settings.app_name}
-        """
-        
-        return EmailService._send_email(to_email, subject, html_content, text_content)
+        return EmailService._send_email(to_email, subject, html_content)

@@ -4,7 +4,9 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # App settings
-    app_name: str = "FastAPI React Auth"
+    app_name: str = "ProjectX"
+    app_description: str = "A modern web application with FastAPI and React"
+    app_version: str = "1.0.0"
     
     # Security settings
     secret_key: str = "your-secret-key-change-this-in-production"
@@ -31,6 +33,7 @@ class Settings(BaseSettings):
     smtp_username: Optional[str] = None
     smtp_password: Optional[str] = None
     smtp_from_email: Optional[str] = None
+    smtp_from_name: str = "ProjectX"
 
     # Superuser settings
     superuser_email: str = ""

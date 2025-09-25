@@ -10,9 +10,9 @@ from app.db.connection import init_db
 init_db()
 
 app = FastAPI(
-    title="FastAPI Authentication App",
-    description="A FastAPI application with authentication and Google OAuth",
-    version="1.0.0"
+    title=settings.app_name,
+    description=settings.app_description,
+    version=settings.app_version
 )
 
 # Add logging middleware

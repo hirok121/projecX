@@ -258,3 +258,8 @@ class UserService:
         db.commit()
         db.refresh(user)
         return user
+    
+    @staticmethod
+    def get_all_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
+        """Get all users (admin only operation)."""
+        return db.query(User).offset(skip).limit(limit).all()
