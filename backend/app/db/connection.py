@@ -5,8 +5,11 @@ from app.core.config import settings
 
 # Create database engine
 engine = create_engine(
-    settings.database_url, 
-    connect_args={"check_same_thread": False}
+    settings.database_url,
+    pool_size=5,
+    max_overflow=10,
+    pool_pre_ping=True,
+    echo=False
 )
 
 # Create session factory
