@@ -159,45 +159,6 @@ export const debounce = (func, delay = PERFORMANCE_CONFIG.DEBOUNCE_DELAY) => {
   };
 };
 
-export const throttle = (func, delay = PERFORMANCE_CONFIG.THROTTLE_DELAY) => {
-  let lastCall = 0;
-  return (...args) => {
-    const now = Date.now();
-    if (now - lastCall >= delay) {
-      lastCall = now;
-      return func.apply(null, args);
-    }
-  };
-};
-
-// Image optimization utilities
-export const optimizeImage = (src, width, height) => {
-  if (!PERFORMANCE_CONFIG.IMAGE_OPTIMIZATION) {
-    return src;
-  }
-  
-  // Add image optimization parameters (if using a service like Cloudinary)
-  // This is a placeholder - implement based on your image service
-  return `${src}?w=${width}&h=${height}&f=auto&q=auto`;
-};
-
-// Bundle analysis utility (development only)
-export const analyzeBundle = () => {
-  if (PERFORMANCE_CONFIG.IS_DEVELOPMENT && window.performance) {
-    const navigation = performance.getEntriesByType('navigation')[0];
-    const paintEntries = performance.getEntriesByType('paint');
-    
-    console.group('Bundle Performance Analysis');
-    console.log('DOM Content Loaded:', `${navigation.domContentLoadedEventEnd}ms`);
-    console.log('Load Complete:', `${navigation.loadEventEnd}ms`);
-    
-    paintEntries.forEach(entry => {
-      console.log(`${entry.name}:`, `${entry.startTime}ms`);
-    });
-    
-    console.groupEnd();
-  }
-};
 
 // React performance hooks
 export const usePerformanceMonitoring = (componentName) => {

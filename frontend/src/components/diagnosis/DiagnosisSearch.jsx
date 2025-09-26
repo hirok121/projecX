@@ -10,7 +10,7 @@ import {
   Button,
 } from "@mui/material";
 import { Search, Clear } from "@mui/icons-material";
-import { useDebounce } from "../../hooks/useDebounce";
+import { useDebouncedValue } from "../../config/performance";
 
 const DiagnosisSearch = ({
   onSearch,
@@ -25,17 +25,18 @@ const DiagnosisSearch = ({
   });
 
   // Debounce the search term
-  const debouncedPatientName = useDebounce(filters.patient_name, 300);
+  const debouncedPatientName = useDebouncedValue(filters.patient_name, 300);
 
   useEffect(() => {
     if (onFiltersChange) {
-      onFiltersChange(filters);
+      // Use debounced patient name for the filters
+      const updatedFilters = {
+        ...filters,
+        patient_name: debouncedPatientName,
+      };
+      onFiltersChange(updatedFilters);
     }
-  }, [filters, onFiltersChange]);
-
-  useEffect(() => {
-    setFilters((prev) => ({ ...prev, patient_name: debouncedPatientName }));
-  }, [debouncedPatientName]);
+  }, [filters, debouncedPatientName, onFiltersChange]);
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({
@@ -46,7 +47,11 @@ const DiagnosisSearch = ({
 
   const handleSearch = () => {
     if (onSearch) {
-      onSearch(filters);
+      const searchFilters = {
+        ...filters,
+        patient_name: debouncedPatientName,
+      };
+      onSearch(searchFilters);
     }
   };
 
