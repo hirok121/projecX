@@ -126,9 +126,13 @@ async def get_chat_detail(
         log_endpoint_activity("aiassistant", "get_chat_detail", current_user.email, get_client_ip(request), True,
                             {"chat_id": chat_id, "message_count": len(chat_with_messages.messages)})
         
-        # Convert messages to dict format
+        # Convert messages to dict format, excluding internal messages
         messages = []
         for msg in chat_with_messages.messages:
+            # Skip internal messages (used for AI context but not shown to user)
+            if getattr(msg, 'is_internal', False):
+                continue
+                
             messages.append({
                 "id": msg.id,
                 "chat_id": msg.chat_id,
@@ -292,16 +296,19 @@ async def upload_file(
 
         user_message = ChatService.add_message(
             db, chat_id, user_content, "user", "file",
-            file_metadata=ai_result.get("file_metadata", {})
+            file_metadata=ai_result.get("file_metadata", {}),
+            is_internal=True
         )
-        
+
+        ai_response= f"{ai_result.get("content", "Sorry, I couldn't process the file.")} (Analyzed from file: {filename}) . anything you asked about the file (image/pdf) will be answered based on this description. answer like you saw the file visually. dont tell like 'Based on the text description provided,'"
 
         # Add AI response
         assistant_message = ChatService.add_message(
-            db, chat_id, ai_result.get("content", ""), "assistant", "text",
+            db, chat_id, ai_response, "assistant", "text",
             model_used=ai_result.get("model_used", "unknown"),
             processing_time=ai_result.get("processing_time", 0.0),
-            tokens_used=ai_result.get("tokens_used", 0)
+            tokens_used=ai_result.get("tokens_used", 0),
+            is_internal=True
         )
         
         log_endpoint_activity("aiassistant", "upload_file", current_user.email, get_client_ip(request), True,

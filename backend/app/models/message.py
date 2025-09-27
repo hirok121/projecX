@@ -34,6 +34,7 @@ class Message(Base):
     # Message status
     is_edited = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
+    is_internal = Column(Boolean, default=False)  # Hide from user interface but keep for AI context
     error_message = Column(Text, nullable=True)  # Store error details if processing failed
     
     # Timestamps

@@ -103,7 +103,8 @@ class ChatService:
         file_metadata: dict = None,
         model_used: str = None,
         tokens_used: int = None,
-        processing_time: float = None
+        processing_time: float = None,
+        is_internal: bool = False
     ) -> Message:
         """Add a message to a chat."""
         try:
@@ -116,6 +117,7 @@ class ChatService:
                 model_used=model_used,
                 tokens_used=tokens_used,
                 processing_time=processing_time,
+                is_internal=is_internal,
                 processed_at=datetime.utcnow() if role == "assistant" else None
             )
             
