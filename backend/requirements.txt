@@ -14,3 +14,11 @@ httpx==0.25.2
 pydantic==2.5.0
 pydantic-settings==2.1.0
 email-validator==2.1.0
+
+# AI Assistant dependencies
+langchain-groq==0.1.5
+langchain-core==0.1.0
+langchain-community==0.0.38
+pillow==10.0.0
+pypdf2==3.0.1
+aiofiles==23.2.1

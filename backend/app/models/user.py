@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db.connection import Base
 
@@ -38,6 +39,9 @@ class User(Base):
     state = Column(String, nullable=True)
     country = Column(String, nullable=True)
     postal_code = Column(String, nullable=True)
+    
+    # Relationships
+    chats = relationship("Chat", back_populates="user", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<User(email='{self.email}', username='{self.username}')>"

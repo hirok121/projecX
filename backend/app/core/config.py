@@ -39,6 +39,15 @@ class Settings(BaseSettings):
     superuser_email: str = ""
     superuser_key: str = ""
     
+    # AI Assistant settings
+    groq_api_key: Optional[str] = None
+    groq_model: str = "llama-3.3-70b-versatile"
+    groq_temperature: float = 0.7
+    llama_vision_model: str = "meta-llama/llama-4-maverick-17b-128e-instruct"  # For image processing
+    max_file_size: int = 10 * 1024 * 1024  # 10MB
+    allowed_file_types: list = ["image/jpeg", "image/png", "image/webp", "application/pdf"]
+    max_tokens: int = 4000
+    
     class Config:
         env_file = ".env"
 
