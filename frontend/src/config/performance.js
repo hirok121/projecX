@@ -31,6 +31,14 @@ export const LazyComponents = {
     // Main Application Components
   Home: lazy(() => import('../pages/Home')),
   Diagnosis: lazy(() => import('../pages/diagnosis/Diagnosis')),
+  
+  // New Diagnosis Platform Components
+  DiagnosisMain: lazy(() => import('../pages/diagnosis/DiagnosisMain')),
+  ModalitySelector: lazy(() => import('../pages/diagnosis/ModalitySelector')),
+  ModelSelector: lazy(() => import('../pages/diagnosis/ModelSelector')),
+  PredictionForm: lazy(() => import('../pages/diagnosis/PredictionForm')),
+  ResultsPage: lazy(() => import('../pages/diagnosis/ResultsPage')),
+  
   Analytics: lazy(() => import('../pages/AnalyticsPage')),
   AIAssistant: lazy(() => import('../pages/AIAssistant')),
   PatientEducation: lazy(() => import('../pages/PatientEducation')),

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, users, aiassistant
+from app.routers import auth, users, aiassistant, diagnosis
 from app.core.config import settings
 from app.core.logging import app_logger
 from app.middleware.logging import LoggingMiddleware
@@ -12,7 +12,7 @@ init_db()
 app = FastAPI(
     title=settings.app_name,
     description=settings.app_description,
-    version=settings.app_version
+    version=settings.app_version,
 )
 
 # Add logging middleware
@@ -31,7 +31,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(aiassistant.router)
-app.include_router(aiassistant.router)
+app.include_router(diagnosis.router)
 
 
 @app.get("/")

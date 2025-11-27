@@ -1,6 +1,44 @@
 import api from "./api";
 
+const API_BASE = "/diagnosis";
+
 export const diagnosisAPI = {
+  // Get all diseases
+  getDiseases: () => api.get(`${API_BASE}/diseases`),
+
+  // Get single disease by ID
+  getDisease: (diseaseId) => api.get(`${API_BASE}/diseases/${diseaseId}`),
+
+  // Get classifiers for a disease
+  getDiseaseClassifiers: (diseaseId) =>
+    api.get(`${API_BASE}/diseases/${diseaseId}/classifiers`),
+
+  // Get classifiers filtered by modality
+  getClassifiersByModality: (diseaseId, modality) =>
+    api.get(`${API_BASE}/diseases/${diseaseId}/classifiers`, {
+      params: { modality },
+    }),
+
+  // Submit prediction
+  predict: (formData) =>
+    api.post(`${API_BASE}/predict`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+
+  // Get prediction result by ID
+  getPredictionResult: (predictionId) =>
+    api.get(`${API_BASE}/predictions/${predictionId}`),
+
+  // Get user's prediction history
+  getUserPredictions: (userId) =>
+    api.get(`${API_BASE}/predictions/user/${userId}`),
+
+  // Get all predictions (admin only)
+  getAllPredictions: () => api.get(`${API_BASE}/predictions`),
+
+  // Legacy HCV-specific endpoints (keep for backward compatibility)
   // Create new diagnosis
   createDiagnosis: async (patientData) => {
     try {
