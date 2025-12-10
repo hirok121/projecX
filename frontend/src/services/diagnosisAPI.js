@@ -173,4 +173,90 @@ export const diagnosisAPI = {
       throw error;
     }
   },
+
+  // Admin Disease Management
+  adminCreateDisease: async (diseaseData) => {
+    try {
+      const response = await api.post("/admin/diagnosis/diseases", diseaseData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating disease:", error);
+      throw error;
+    }
+  },
+
+  adminUpdateDisease: async (diseaseId, diseaseData) => {
+    try {
+      const response = await api.put(`/admin/diagnosis/diseases/${diseaseId}`, diseaseData);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating disease:", error);
+      throw error;
+    }
+  },
+
+  adminDeleteDisease: async (diseaseId, hardDelete = false) => {
+    try {
+      const response = await api.delete(`/admin/diagnosis/diseases/${diseaseId}`, {
+        params: { hard_delete: hardDelete }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting disease:", error);
+      throw error;
+    }
+  },
+
+  // Admin Classifier Management
+  adminCreateClassifier: async (formData) => {
+    try {
+      const response = await api.post("/admin/diagnosis/classifiers", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error creating classifier:", error);
+      throw error;
+    }
+  },
+
+  adminUpdateClassifier: async (classifierId, formData) => {
+    try {
+      const response = await api.put(`/admin/diagnosis/classifiers/${classifierId}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating classifier:", error);
+      throw error;
+    }
+  },
+
+  adminDeleteClassifier: async (classifierId, hardDelete = false) => {
+    try {
+      const response = await api.delete(`/admin/diagnosis/classifiers/${classifierId}`, {
+        params: { hard_delete: hardDelete }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting classifier:", error);
+      throw error;
+    }
+  },
+
+  adminListClassifiers: async (filters = {}) => {
+    try {
+      const response = await api.get("/admin/diagnosis/classifiers", {
+        params: filters
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error listing classifiers:", error);
+      throw error;
+    }
+  },
 };

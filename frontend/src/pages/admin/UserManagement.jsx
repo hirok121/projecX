@@ -57,7 +57,7 @@ import {
   LoginRounded,
 } from "@mui/icons-material";
 import PropTypes from "prop-types";
-import { useAuth } from "../../hooks/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import AdminNavbar from "../../components/admin/AdminNavbar";
 

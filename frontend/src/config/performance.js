@@ -28,6 +28,7 @@ export const LazyComponents = {
   AdminSystem: lazy(() => import('../pages/admin/AdminSystem')),
   AdminDebugConsole: lazy(() => import('../pages/admin/AdminDebugConsole')),
   AdminDiagnosisManagement: lazy(() => import('../pages/admin/AdminDiagnosisManagement')),
+  AdminDiseaseUpload: lazy(() => import('../pages/admin/AdminDiseaseUpload')),
     // Main Application Components
   Home: lazy(() => import('../pages/Home')),
   Diagnosis: lazy(() => import('../pages/diagnosis/Diagnosis')),

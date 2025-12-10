@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, users, aiassistant, diagnosis
+from app.routers import auth, users, aiassistant, diagnosis, admin_diagnosis
 from app.core.config import settings
 from app.core.logging import app_logger
 from app.middleware.logging import LoggingMiddleware
@@ -32,6 +32,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(aiassistant.router)
 app.include_router(diagnosis.router)
+app.include_router(admin_diagnosis.router)
 
 
 @app.get("/")

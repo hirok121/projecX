@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -29,6 +30,8 @@ import {
   Insights,
   ExpandMore,
   ExpandLess,
+  Upload,
+  Settings,
 } from "@mui/icons-material";
 import {
   ResponsiveContainer,
@@ -62,6 +65,7 @@ const COLORS = {
 };
 
 function AdminDiagnosisManagement() {
+  const navigate = useNavigate();
   const { data: analytics, isLoading, error } = useAdminAnalytics();
 
   // Search functionality state
@@ -376,15 +380,25 @@ function AdminDiagnosisManagement() {
                 Comprehensive diagnosis analytics and management for
                 administrators
               </Typography>
-            </Box>{" "}
-            <Button
-              variant="contained"
-              startIcon={<FileDownload />}
-              onClick={handleExportMenuClick}
-              sx={{ minWidth: 150 }}
-            >
-              Export Data
-            </Button>{" "}
+            </Box>
+            <Box display="flex" gap={2}>
+              <Button
+                variant="outlined"
+                startIcon={<Upload />}
+                onClick={() => navigate("/admin/disease-upload")}
+                sx={{ minWidth: 180 }}
+              >
+                Manage Diseases & Models
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<FileDownload />}
+                onClick={handleExportMenuClick}
+                sx={{ minWidth: 150 }}
+              >
+                Export Data
+              </Button>
+            </Box>
             <Menu
               anchorEl={exportAnchorEl}
               open={openExportMenu}

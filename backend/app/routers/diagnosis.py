@@ -1,122 +1,98 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import numpy as np
+import json
+from datetime import datetime
+import logging
+import time
+import shutil
+from pathlib import Path
+
 from app.db.connection import get_db
 from app.models.user import User
+from app.models.disease import Disease
+from app.models.classifier import Classifier
+from app.models.prediction import PredictionResult, PredictionStatus
 from app.routers.auth import get_current_user
 from app.core.logging import track_endpoint_performance, log_endpoint_activity
-import logging
+from app.schemas.diagnosis import (
+    DiseaseResponse,
+    ClassifierResponse,
+    PredictionResponse,
+    PredictionListResponse,
+)
+from app.services.model_service import model_service
 
 router = APIRouter(prefix="/diagnosis", tags=["diagnosis"])
 logger = logging.getLogger(__name__)
 
+# Upload directory for user files
+UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads" / "predictions"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-@router.get("/diseases")
+
+@router.get("/diseases", response_model=List[DiseaseResponse])
 @track_endpoint_performance("diagnosis", "get_diseases")
 async def get_diseases(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+    skip: int = 0,
+    limit: int = 100,
+    category: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
-    Get all available diseases for diagnosis
+    Get all available diseases for diagnosis.
+
+    - **skip**: Number of records to skip (pagination)
+    - **limit**: Maximum number of records to return
+    - **category**: Filter by disease category (optional)
     """
-    log_endpoint_activity("diagnosis", "get_diseases", current_user.email, "list")
+    log_endpoint_activity(
+        "diagnosis", "get_diseases", getattr(current_user, "email", None), "list"
+    )
 
-    # TODO: Replace with actual database query
-    # For now, return sample data
-    sample_diseases = [
-        {
-            "id": 1,
-            "name": "Hepatocellular Carcinoma (HCV)",
-            "category": "Hepatic",
-            "description": "Liver disease diagnosis using clinical laboratory data",
-            "input_type": "tabular",
-            "created_at": "2025-01-01T00:00:00",
-        },
-        {
-            "id": 2,
-            "name": "Diabetes Mellitus",
-            "category": "Metabolic",
-            "description": "Diabetes prediction using blood test results",
-            "input_type": "tabular",
-            "created_at": "2025-01-01T00:00:00",
-        },
-        {
-            "id": 3,
-            "name": "Pneumonia Detection",
-            "category": "Respiratory",
-            "description": "Pneumonia detection from chest X-rays",
-            "input_type": "xray",
-            "created_at": "2025-01-01T00:00:00",
-        },
-    ]
+    query = db.query(Disease).filter(Disease.is_active == True)
 
-    return sample_diseases
+    if category:
+        query = query.filter(Disease.category == category)
+
+    diseases = query.offset(skip).limit(limit).all()
+
+    logger.info(f"✅ Retrieved {len(diseases)} diseases")
+    return diseases
 
 
-@router.get("/diseases/{disease_id}")
+@router.get("/diseases/{disease_id}", response_model=DiseaseResponse)
 @track_endpoint_performance("diagnosis", "get_disease")
 async def get_disease(
     disease_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Get specific disease by ID
-    """
+    """Get detailed information about a specific disease."""
     log_endpoint_activity(
-        "diagnosis", "get_disease", current_user.email, str(disease_id)
+        "diagnosis",
+        "get_disease",
+        getattr(current_user, "email", None),
+        f"disease_id={disease_id}",
     )
 
-    # TODO: Replace with actual database query
-    sample_diseases = {
-        1: {
-            "id": 1,
-            "name": "Hepatocellular Carcinoma (HCV)",
-            "category": "Hepatic",
-            "description": "Liver disease diagnosis using clinical laboratory data",
-            "input_type": "tabular",
-            "required_features": [
-                "Age",
-                "Sex",
-                "ALB",
-                "ALP",
-                "ALT",
-                "AST",
-                "BIL",
-                "CHE",
-                "CHOL",
-                "CREA",
-                "GGT",
-                "PROT",
-            ],
-            "created_at": "2025-01-01T00:00:00",
-        },
-        2: {
-            "id": 2,
-            "name": "Diabetes Mellitus",
-            "category": "Metabolic",
-            "description": "Diabetes prediction using blood test results",
-            "input_type": "tabular",
-            "required_features": ["Age", "BMI", "BloodPressure", "Glucose", "Insulin"],
-            "created_at": "2025-01-01T00:00:00",
-        },
-        3: {
-            "id": 3,
-            "name": "Pneumonia Detection",
-            "category": "Respiratory",
-            "description": "Pneumonia detection from chest X-rays",
-            "input_type": "xray",
-            "created_at": "2025-01-01T00:00:00",
-        },
-    }
+    disease = (
+        db.query(Disease)
+        .filter(Disease.id == disease_id, Disease.is_active == True)
+        .first()
+    )
 
-    if disease_id not in sample_diseases:
+    if not disease:
         raise HTTPException(status_code=404, detail="Disease not found")
 
-    return sample_diseases[disease_id]
+    return disease
 
 
-@router.get("/diseases/{disease_id}/classifiers")
+@router.get(
+    "/diseases/{disease_id}/classifiers", response_model=List[ClassifierResponse]
+)
 @track_endpoint_performance("diagnosis", "get_classifiers")
 async def get_disease_classifiers(
     disease_id: int,
@@ -125,74 +101,33 @@ async def get_disease_classifiers(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Get all classifiers for a specific disease
-    Optionally filter by modality
+    Get all available classifiers for a disease.
+
+    - **disease_id**: ID of the disease
+    - **modality**: Filter by modality type (MRI, CT, X-Ray, Tabular)
     """
     log_endpoint_activity(
-        "diagnosis", "get_classifiers", current_user.email, f"disease_{disease_id}"
+        "diagnosis",
+        "get_classifiers",
+        getattr(current_user, "email", None),
+        f"disease_id={disease_id}",
     )
 
-    # TODO: Replace with actual database query
-    sample_classifiers = {
-        1: [
-            {
-                "id": 1,
-                "name": "Random Forest Classifier",
-                "disease_id": 1,
-                "model_type": "RandomForest",
-                "accuracy": 0.92,
-                "description": "Ensemble model with high accuracy",
-                "modality": "tabular",
-                "created_at": "2025-01-01T00:00:00",
-            },
-            {
-                "id": 2,
-                "name": "Gradient Boosting Model",
-                "disease_id": 1,
-                "model_type": "GradientBoosting",
-                "accuracy": 0.89,
-                "description": "Boosting algorithm for liver disease",
-                "modality": "tabular",
-                "created_at": "2025-01-01T00:00:00",
-            },
-        ],
-        2: [
-            {
-                "id": 3,
-                "name": "Logistic Regression",
-                "disease_id": 2,
-                "model_type": "LogisticRegression",
-                "accuracy": 0.85,
-                "description": "Simple and interpretable model",
-                "modality": "tabular",
-                "created_at": "2025-01-01T00:00:00",
-            }
-        ],
-        3: [
-            {
-                "id": 4,
-                "name": "CNN Pneumonia Detector",
-                "disease_id": 3,
-                "model_type": "CNN",
-                "accuracy": 0.94,
-                "description": "Deep learning model for X-ray analysis",
-                "modality": "xray",
-                "created_at": "2025-01-01T00:00:00",
-            }
-        ],
-    }
+    # Verify disease exists
+    disease = db.query(Disease).filter(Disease.id == disease_id).first()
+    if not disease:
+        raise HTTPException(status_code=404, detail="Disease not found")
 
-    if disease_id not in sample_classifiers:
-        return []
+    query = db.query(Classifier).filter(
+        Classifier.disease_id == disease_id, Classifier.is_active == True
+    )
 
-    classifiers = sample_classifiers[disease_id]
-
-    # Filter by modality if provided
     if modality:
-        classifiers = [
-            c for c in classifiers if c.get("modality", "").lower() == modality.lower()
-        ]
+        query = query.filter(Classifier.modality == modality)
 
+    classifiers = query.all()
+
+    logger.info(f"✅ Retrieved {len(classifiers)} classifiers for disease {disease_id}")
     return classifiers
 
 
@@ -201,115 +136,260 @@ async def get_disease_classifiers(
 async def predict(
     disease_id: int = Form(...),
     classifier_ids: str = Form(...),  # JSON string of list
-    input_data: Optional[str] = Form(None),  # JSON string for tabular data
-    image: Optional[UploadFile] = File(None),  # For image modalities
-    modality: Optional[str] = Form(None),
+    modality: str = Form(...),
+    image: Optional[UploadFile] = File(None),
+    input_data: Optional[str] = Form(None),  # JSON string
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
-    Run prediction using selected classifiers
-    """
-    import json
+    Make a prediction using selected classifiers.
 
+    - **disease_id**: ID of the disease
+    - **classifier_ids**: JSON array of classifier IDs to use
+    - **modality**: Modality type (MRI, CT, X-Ray, Tabular)
+    - **image**: Image file for image-based predictions (optional)
+    - **input_data**: JSON object with tabular data (optional)
+    """
+    start_time = time.time()
     log_endpoint_activity(
-        "diagnosis", "predict", current_user.email, f"disease_{disease_id}"
+        "diagnosis",
+        "predict",
+        getattr(current_user, "email", None),
+        f"disease_id={disease_id}",
     )
 
     # Parse classifier IDs
     try:
         classifier_id_list = json.loads(classifier_ids)
-    except:
+    except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid classifier_ids format")
 
-    # TODO: Implement actual prediction logic
-    # For now, return mock results
+    # Verify disease exists
+    disease = db.query(Disease).filter(Disease.id == disease_id).first()
+    if not disease:
+        raise HTTPException(status_code=404, detail="Disease not found")
+
     results = []
+
     for classifier_id in classifier_id_list:
-        result = {
-            "id": len(results) + 1,
-            "user_id": current_user.id,
-            "disease_id": disease_id,
-            "classifier_id": classifier_id,
-            "classifier_name": f"Model {classifier_id}",
-            "prediction": "Positive" if classifier_id % 2 == 0 else "Negative",
-            "confidence_score": 0.85 + (classifier_id * 0.02),
-            "created_at": "2025-11-26T18:30:00",
-        }
-        results.append(result)
+        # Get classifier
+        classifier = (
+            db.query(Classifier)
+            .filter(
+                Classifier.id == classifier_id,
+                Classifier.disease_id == disease_id,
+                Classifier.is_active == True,
+            )
+            .first()
+        )
 
-    logger.info(
-        f"✅ Prediction completed for user {current_user.email} - {len(results)} results"
-    )
+        if not classifier:
+            logger.warning(f"⚠️ Classifier {classifier_id} not found or inactive")
+            continue
 
-    return results
+        # Create prediction record
+        prediction_record = PredictionResult(
+            user_id=current_user.id,
+            disease_id=disease_id,
+            classifier_id=classifier_id,
+            modality=modality,
+            status=PredictionStatus.PENDING,
+        )
+
+        try:
+            # Handle image upload
+            if image and modality in ["MRI", "CT", "X-Ray"]:
+                # Save uploaded file
+                file_extension = image.filename.split(".")[-1]
+                filename = f"{current_user.id}_{disease_id}_{classifier_id}_{int(time.time())}.{file_extension}"
+                file_path = UPLOAD_DIR / filename
+
+                with file_path.open("wb") as buffer:
+                    shutil.copyfileobj(image.file, buffer)
+
+                prediction_record.input_file = str(file_path)
+
+                # TODO: Process image and extract features
+                # For now, use dummy features
+                features = np.random.rand(1, 10)
+
+            elif input_data and modality == "Tabular":
+                # Parse tabular data
+                try:
+                    data_dict = json.loads(input_data)
+                    prediction_record.input_data = data_dict
+
+                    # Convert to numpy array (preserve feature order from required_features)
+                    if disease.required_features:
+                        features_list = [
+                            float(data_dict.get(key, 0))
+                            for key in disease.required_features.keys()
+                        ]
+                        features = np.array([features_list])
+                    else:
+                        features = np.array([list(data_dict.values())])
+
+                except (json.JSONDecodeError, ValueError) as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Invalid input_data: {str(e)}"
+                    )
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Missing required input (image or input_data)",
+                )
+
+            # Make prediction
+            prediction, confidence, probabilities = model_service.predict(
+                classifier_id=classifier_id,
+                model_file=classifier.model_file,
+                input_data=features,
+            )
+
+            # Update prediction record
+            prediction_record.prediction = prediction
+            prediction_record.confidence = confidence
+            prediction_record.probabilities = probabilities
+            prediction_record.status = PredictionStatus.COMPLETED
+            prediction_record.completed_at = datetime.now()
+            prediction_record.processing_time = time.time() - start_time
+
+            logger.info(f"✅ Prediction successful: {prediction} ({confidence:.2%})")
+
+        except Exception as e:
+            logger.error(f"❌ Prediction failed: {str(e)}")
+            prediction_record.status = PredictionStatus.FAILED
+            prediction_record.error_message = str(e)
+            prediction_record.processing_time = time.time() - start_time
+
+        # Save to database
+        db.add(prediction_record)
+        db.commit()
+        db.refresh(prediction_record)
+
+        results.append(prediction_record.id)
+
+    if not results:
+        raise HTTPException(status_code=400, detail="No valid classifiers found")
+
+    return {"prediction_ids": results, "message": "Predictions completed"}
 
 
-@router.get("/predictions/{prediction_id}")
+@router.get("/predictions/{prediction_id}", response_model=PredictionResponse)
 @track_endpoint_performance("diagnosis", "get_prediction")
 async def get_prediction_result(
     prediction_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Get specific prediction result by ID
-    """
+    """Get a specific prediction result."""
     log_endpoint_activity(
-        "diagnosis", "get_prediction", current_user.email, str(prediction_id)
+        "diagnosis",
+        "get_prediction",
+        getattr(current_user, "email", None),
+        f"prediction_id={prediction_id}",
     )
 
-    # TODO: Replace with actual database query
-    result = {
-        "id": prediction_id,
-        "user_id": current_user.id,
-        "disease_id": 1,
-        "classifier_id": 1,
-        "classifier_name": "Random Forest Classifier",
-        "prediction": "Positive",
-        "confidence_score": 0.87,
-        "created_at": "2025-11-26T18:30:00",
-    }
+    prediction = (
+        db.query(PredictionResult)
+        .filter(
+            PredictionResult.id == prediction_id,
+            PredictionResult.user_id == current_user.id,
+        )
+        .first()
+    )
 
-    return result
+    if not prediction:
+        raise HTTPException(status_code=404, detail="Prediction not found")
+
+    return prediction
 
 
-@router.get("/predictions/user/{user_id}")
+@router.get("/predictions/user/{user_id}", response_model=PredictionListResponse)
 @track_endpoint_performance("diagnosis", "get_user_predictions")
 async def get_user_predictions(
     user_id: int,
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get all predictions for a specific user (user can only access their own)."""
+    log_endpoint_activity(
+        "diagnosis",
+        "get_user_predictions",
+        getattr(current_user, "email", None),
+        f"user_id={user_id}",
+    )
+
+    # Users can only view their own predictions (unless admin)
+    user_current_id = getattr(current_user, "id", None)
+    is_staff = getattr(current_user, "is_staff", False)
+    is_superuser = getattr(current_user, "is_superuser", False)
+
+    if user_current_id != user_id and not (is_staff or is_superuser):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    query = db.query(PredictionResult).filter(PredictionResult.user_id == user_id)
+
+    total = query.count()
+    predictions = (
+        query.order_by(PredictionResult.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+    return {"predictions": predictions, "total": total}
+
+
+@router.get("/predictions", response_model=PredictionListResponse)
+@track_endpoint_performance("diagnosis", "get_all_predictions")
+async def get_all_predictions(
+    skip: int = 0,
+    limit: int = 50,
+    disease_id: Optional[int] = None,
+    status: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
-    Get all predictions for a specific user
+    Get all predictions (admin only).
+
+    - **skip**: Number of records to skip
+    - **limit**: Maximum number of records to return
+    - **disease_id**: Filter by disease (optional)
+    - **status**: Filter by status (pending, completed, failed)
     """
-    # Check if requesting own data or is admin
-    if current_user.id != user_id and not current_user.is_staff:
-        raise HTTPException(status_code=403, detail="Not authorized to view this data")
-
-    log_endpoint_activity(
-        "diagnosis", "get_user_predictions", current_user.email, str(user_id)
-    )
-
-    # TODO: Replace with actual database query
-    return []
-
-
-@router.get("/predictions")
-@track_endpoint_performance("diagnosis", "get_all_predictions")
-async def get_all_predictions(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
-):
-    """
-    Get all predictions (admin only)
-    """
-    if not current_user.is_staff:
+    # Admin only
+    if not (
+        getattr(current_user, "is_staff", False)
+        or getattr(current_user, "is_superuser", False)
+    ):
         raise HTTPException(status_code=403, detail="Admin access required")
 
     log_endpoint_activity(
-        "diagnosis", "get_all_predictions", current_user.email, "admin"
+        "diagnosis",
+        "get_all_predictions",
+        getattr(current_user, "email", None),
+        "admin_list",
     )
 
-    # TODO: Replace with actual database query
-    return []
+    query = db.query(PredictionResult)
+
+    if disease_id:
+        query = query.filter(PredictionResult.disease_id == disease_id)
+
+    if status:
+        query = query.filter(PredictionResult.status == status)
+
+    total = query.count()
+    predictions = (
+        query.order_by(PredictionResult.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+    return {"predictions": predictions, "total": total}

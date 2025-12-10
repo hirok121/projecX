@@ -161,6 +161,14 @@ function App() {
               }
             />
             <Route
+              path="/admin/disease-upload"
+              element={
+                <ProtectedRoute>
+                  <LazyComponents.AdminDiseaseUpload />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/ai-assistant"
               element={
                 <ProtectedRoute>

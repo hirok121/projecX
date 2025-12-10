@@ -35,6 +35,7 @@ import {
   MedicalServices,
   Menu as MenuIcon,
   Close as CloseIcon,
+  Upload,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -70,6 +71,11 @@ function AdminNavbar() {
       label: "Diagnosis Management",
       path: "/admin/diagnosis-management",
       icon: MedicalServices,
+    },
+    {
+      label: "Disease & Models",
+      path: "/admin/disease-upload",
+      icon: Upload,
     },
     { label: "Debug Console", path: "/admin/debug", icon: BugReport },
     { label: "Analytics", path: "/admin/analytics", icon: Analytics },
