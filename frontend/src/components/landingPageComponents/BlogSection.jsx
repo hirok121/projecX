@@ -30,17 +30,17 @@ const fadeInAnimation = keyframes`
   to { opacity: 1; transform: translateY(0); }
 `;
 
-// Styled components - Matching DiagnosticToolSection style
+// Styled components
 const StyledSection = styled(Paper)(({ theme }) => ({
-  paddingTop: theme.spacing(10),
-  paddingBottom: theme.spacing(10),
-  backgroundColor: theme.palette.background.sectionDefault,
+  paddingTop: theme.spacing(12),
+  paddingBottom: theme.spacing(12),
+  backgroundColor: "#F8F9FA",
   borderRadius: 0,
   boxShadow: "none",
-  background: theme.palette.background.sectionDefault,
+  borderBottom: "1px solid #E8EAED",
   "@media (max-width: 600px)": {
-    paddingTop: theme.spacing(6),
-    paddingBottom: theme.spacing(6),
+    paddingTop: theme.spacing(8),
+    paddingBottom: theme.spacing(8),
   },
 }));
 
@@ -50,21 +50,24 @@ const AnimatedBox = styled(Box)(({ animationDelay = "0s" }) => ({
 
 const BlogCard = styled(Card)(({ theme }) => ({
   height: "100%",
-  borderRadius: "12px",
-  boxShadow: theme.shadows[2],
-  transition: "all 0.3s ease",
+  borderRadius: "8px",
+  border: "1px solid #E8EAED",
+  boxShadow: "none",
+  transition: "all 0.2s ease",
   cursor: "pointer",
+  backgroundColor: "#FFFFFF",
   "&:hover": {
-    transform: "translateY(-8px)",
-    boxShadow: theme.shadows[8],
+    transform: "translateY(-2px)",
+    boxShadow: "0 2px 8px rgba(44, 62, 80, 0.08)",
+    borderColor: "#D1D5DB",
   },
 }));
 
 // Theme matching DiagnosticToolSection
 const theme = createTheme({
   palette: {
-    primary: { main: "#2563EB" },
-    secondary: { main: "#4F46E5" },
+    primary: { main: "#10B981" },
+    secondary: { main: "#34D399" },
     background: {
       default: "#F0F4F8",
       paper: "#FFFFFF",
@@ -124,11 +127,11 @@ const theme = createTheme({
         },
         containedPrimary: {
           color: "white",
-          "&:hover": { backgroundColor: "#1D4ED8", transform: "scale(1.03)" },
+          "&:hover": { backgroundColor: "#059669", transform: "scale(1.03)" },
         },
         outlinedPrimary: {
-          borderColor: "#2563EB",
-          color: "#2563EB",
+          borderColor: "#10B981",
+          color: "#10B981",
           "&:hover": {
             backgroundColor: "rgba(37, 99, 235, 0.04)",
             borderColor: "#1D4ED8",

@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import SvgIcon from "@mui/material/SvgIcon";
 import { Box } from "@mui/system";
 import { Typography } from "@mui/material";
-import HepatoCAIminiIcon from "../../assets/HepatoCAIminiIcon.png";
+import deepmedIcon from "../../assets/deepmed.png";
 
 export function HepatoCAIIcon() {
   return (
@@ -11,31 +11,19 @@ export function HepatoCAIIcon() {
       <Typography
         variant="h5"
         component="span"
-        sx={{ fontWeight: "bold", color: "#000000" }} // Black for "Hepato"
+        sx={{ fontWeight: "bold", color: "#1E293B" }} // Dark slate for "Deep"
       >
-        Hepato
+        Deep
       </Typography>
       <Typography
         variant="h5"
         component="span"
         sx={{
           fontWeight: "bold",
-          color: "#4CAF50", // Green for "C" (using a common green shade)
-          // No marginLeft here to make "Hepato" and "C" feel closer
+          color: "#10B981", // Green for "Med"
         }}
       >
-        C
-      </Typography>
-      <Typography
-        variant="h5"
-        component="span"
-        sx={{
-          fontWeight: "bold",
-          color: "#2563EB", // Blue for "AI" (using a common blue shade)
-          marginLeft: "0.2rem", // A small margin to separate "C" and "AI"
-        }}
-      >
-        AI
+        Med
       </Typography>
     </Box>
   );
@@ -45,8 +33,8 @@ export function HepatoCAIIconMini({ sx }) {
   return (
     <Box
       component="img"
-      src={HepatoCAIminiIcon}
-      alt="HepatoCAI Logo"
+      src={deepmedIcon}
+      alt="DeepMed Logo"
       sx={{
         height: "40px",
         width: "auto",

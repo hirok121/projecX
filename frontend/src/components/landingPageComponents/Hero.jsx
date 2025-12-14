@@ -14,81 +14,88 @@ import heroImage from "../../assets/hero.png";
 // Theme configuration
 const theme = createTheme({
   palette: {
-    primary: { main: "#2563EB" },
-    secondary: { main: "#4F46E5" },
+    primary: { main: "#2C3E50" },
+    secondary: { main: "#34495E" },
     background: {
-      default: "#F0F4F8",
+      default: "#FAFAFA",
       paper: "#FFFFFF",
-      hero: "#0F172A",
-      sectionAlternate: "#FFFFFF",
-      sectionDefault: "#F0F4F8",
+      hero: "#FFFFFF",
+      sectionAlternate: "#F8F9FA",
+      sectionDefault: "#FFFFFF",
     },
     text: {
-      primary: "#1E293B",
-      secondary: "#475569",
-      heroPrimary: "#FFFFFF",
-      heroSecondary: "rgba(255, 255, 255, 0.85)",
+      primary: "#2C3E50",
+      secondary: "#5D6D7E",
+      heroPrimary: "#2C3E50",
+      heroSecondary: "#5D6D7E",
     },
   },
   typography: {
-    fontFamily: "Inter, sans-serif",
+    fontFamily:
+      "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     h1: {
-      fontWeight: 700,
+      fontWeight: 600,
       fontSize: "2.5rem",
-      lineHeight: 1.2,
-      color: "white",
+      lineHeight: 1.3,
+      color: "#2C3E50",
       "@media (min-width:600px)": { fontSize: "3rem" },
-      "@media (min-width:900px)": { fontSize: "3.75rem" },
-      letterSpacing: "-0.5px",
+      "@media (min-width:900px)": { fontSize: "3.5rem" },
+      letterSpacing: "-0.02em",
     },
     h2: {
-      fontWeight: 700,
-      fontSize: "2.25rem",
+      fontWeight: 600,
+      fontSize: "2rem",
       marginBottom: "1rem",
-      color: "#1E293B",
-      "@media (min-width:600px)": { fontSize: "2.75rem" },
+      color: "#2C3E50",
+      "@media (min-width:600px)": { fontSize: "2.5rem" },
+      letterSpacing: "-0.01em",
     },
     h3: {
-      fontWeight: 600,
+      fontWeight: 500,
       fontSize: "1.5rem",
       marginBottom: "0.75rem",
-      color: "#1E293B",
+      color: "#2C3E50",
     },
-    h4: { fontWeight: 600, fontSize: "1.25rem", color: "#1E293B" },
-    body1: { fontSize: "1rem", lineHeight: 1.7, color: "#475569" },
-    body2: { fontSize: "0.875rem", lineHeight: 1.6, color: "#64748B" },
+    h4: { fontWeight: 500, fontSize: "1.25rem", color: "#2C3E50" },
+    body1: { fontSize: "1.0625rem", lineHeight: 1.6, color: "#5D6D7E" },
+    body2: { fontSize: "0.9375rem", lineHeight: 1.5, color: "#7F8C8D" },
     subtitle1: {
       fontSize: "1.125rem",
-      color: "#475569",
+      color: "#5D6D7E",
       marginBottom: "3rem",
       maxWidth: "70ch",
       marginLeft: "auto",
       marginRight: "auto",
-      lineHeight: 1.7,
-      "@media (min-width:600px)": { fontSize: "1.25rem" },
+      lineHeight: 1.6,
+      "@media (min-width:600px)": { fontSize: "1.1875rem" },
     },
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "8px",
+          borderRadius: "4px",
           textTransform: "none",
-          padding: "10px 24px",
-          fontWeight: 600,
+          padding: "12px 32px",
+          fontWeight: 500,
           boxShadow: "none",
-          transition: "background-color 0.3s ease, transform 0.2s ease",
+          transition: "all 0.2s ease",
+          fontSize: "1rem",
         },
         containedPrimary: {
+          backgroundColor: "#2C3E50",
           color: "white",
-          "&:hover": { backgroundColor: "#1D4ED8", transform: "scale(1.03)" },
+          "&:hover": { backgroundColor: "#34495E", boxShadow: "none" },
         },
-        containedSizeLarge: { padding: "12px 28px", fontSize: "1rem" },
+        containedSizeLarge: { padding: "14px 36px", fontSize: "1.0625rem" },
         outlinedPrimary: {
-          borderColor: "#2563EB",
+          borderColor: "#2C3E50",
+          borderWidth: "1.5px",
+          color: "#2C3E50",
           "&:hover": {
-            backgroundColor: "rgba(37, 99, 235, 0.04)",
-            borderColor: "#1D4ED8",
+            backgroundColor: "rgba(44, 62, 80, 0.04)",
+            borderColor: "#34495E",
+            borderWidth: "1.5px",
           },
         },
       },
@@ -97,25 +104,25 @@ const theme = createTheme({
       defaultProps: { elevation: 0 },
       styleOverrides: {
         root: {
-          borderRadius: "12px",
-          border: "1px solid #E2E8F0",
-          transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+          borderRadius: "8px",
+          border: "1px solid #E8EAED",
+          transition: "all 0.2s ease",
           "&:hover": {
-            borderColor: "#CBD5E1",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+            borderColor: "#D1D5DB",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
           },
         },
       },
     },
     MuiPaper: {
-      styleOverrides: { root: { transition: "box-shadow 0.3s ease" } },
+      styleOverrides: { root: { transition: "all 0.2s ease" } },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: "rgba(255, 255, 255, 0.8)",
-          backdropFilter: "blur(8px)",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.03)",
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 1px 0 rgba(0,0,0,0.05)",
         },
       },
     },
@@ -129,17 +136,15 @@ const fadeInAnimation = keyframes`
 `;
 
 const StyledSection = styled(Paper)(({ theme }) => ({
-  paddingTop: theme.spacing(10),
-  paddingBottom: theme.spacing(10),
-  backgroundColor: theme.palette.background.hero,
+  paddingTop: theme.spacing(12),
+  paddingBottom: theme.spacing(12),
+  backgroundColor: "#F8F9FA",
   borderRadius: 0,
   boxShadow: "none",
-  background: `linear-gradient(135deg, ${theme.palette.background.hero} 0%, ${
-    theme.palette.primary.dark || "#1E3A8A"
-  } 100%)`,
+  borderBottom: "1px solid #E8EAED",
   "@media (max-width: 600px)": {
-    paddingTop: theme.spacing(6),
-    paddingBottom: theme.spacing(6),
+    paddingTop: theme.spacing(8),
+    paddingBottom: theme.spacing(8),
   },
 }));
 
@@ -150,10 +155,11 @@ const AnimatedBox = styled(Box)(({ animationDelay = "0s" }) => ({
 const HeroImage = styled("img")(({ theme }) => ({
   width: "100%",
   height: "auto",
-  borderRadius: "12px",
-  boxShadow: theme.shadows[3],
+  borderRadius: "8px",
+  border: "1px solid #E8EAED",
   objectFit: "cover",
   maxHeight: "450px",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
   "@media (max-width: 600px)": {
     maxHeight: "300px",
   },
@@ -164,106 +170,115 @@ const Hero = () => (
     <StyledSection
       elevation={0}
       sx={{
-        backgroundColor: "transparent",
         mt: 0,
-        pt: { xs: 6, md: 10 },
-        pb: { xs: 6, md: 8 },
+        pt: { xs: 10, md: 12 },
+        pb: { xs: 8, md: 10 },
+        minHeight: { xs: "80vh", md: "85vh" },
+        display: "flex",
+        alignItems: "center",
       }}
     >
       <Container maxWidth="lg">
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: { xs: "column", md: "row" },
             alignItems: "center",
-            gap: { xs: 4, md: 6 },
-            height: "80vh", // Changed from minHeight: "60vh" to height: "100vh"
+            gap: { xs: 4, md: 8 },
           }}
         >
           {/* Text content - Left side */}
           <Box
             sx={{
-              flex: { xs: "1 1 100%", sm: "1 1 66.66%" },
-              textAlign: { xs: "center", sm: "left" },
-              maxWidth: { xs: "100%", sm: "66.66%" },
+              flex: { xs: "1 1 100%", md: "1 1 55%" },
+              textAlign: { xs: "center", md: "left" },
             }}
           >
             <AnimatedBox animationDelay="0s">
               <Typography variant="h1" gutterBottom sx={{ mb: 3 }}>
-                Advanced HCV <br /> Stage Detection <br />
+                AI-Powered Medical Diagnosis{" "}
                 <Box
                   component="span"
                   sx={{ color: theme.palette.primary.main }}
                 >
-                  Powered by AI
+                  Platform
                 </Box>
               </Typography>
               <Typography
                 variant="h5"
-                color="text.heroSecondary"
+                color="text.secondary"
                 paragraph
                 sx={{
-                  mb: 4,
-                  maxWidth: { xs: "90%", sm: "55ch" },
-                  mx: { xs: "auto", sm: 0 },
-                  color: "rgba(255, 255, 255, 0.85)",
+                  mb: 5,
+                  maxWidth: { xs: "100%", md: "55ch" },
+                  mx: { xs: "auto", md: 0 },
+                  fontSize: { xs: "1.1rem", md: "1.25rem" },
+                  lineHeight: 1.6,
                 }}
               >
-                Leveraging cutting-edge artificial intelligence to provide rapid
-                and accurate Hepatitis C stage analysis. Empowering healthcare
-                through innovation.
+                Access research-grade machine learning models from scientists
+                worldwide. Diagnose multiple diseases through X-rays, lab data,
+                and clinical parameters—all in one platform.
               </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                onClick={() => {
-                  document.getElementById("diagnostic-tool")?.scrollIntoView({
-                    behavior: "smooth",
-                  });
-                }}
+              <Box
                 sx={{
-                  mr: { xs: 0, sm: 2 },
-                  mb: { xs: 2, sm: 0 },
-                  minWidth: "180px",
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: 2,
+                  justifyContent: { xs: "center", md: "flex-start" },
                 }}
               >
-                Learn About AI Diagnostics
-              </Button>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="large"
-                onClick={() => {
-                  document
-                    .getElementById("ai-medical-assistant")
-                    ?.scrollIntoView({
-                      behavior: "smooth",
-                    });
-                }}
-                sx={{
-                  minWidth: "180px",
-                  borderColor: "rgba(255, 255, 255, 0.3)",
-                  color: "white",
-                  "&:hover": {
-                    borderColor: "rgba(255, 255, 255, 0.5)",
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  },
-                }}
-              >
-                Ask Your AI Medical Assistant
-              </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  onClick={() => {
+                    window.location.href = "/diagnosis";
+                  }}
+                  sx={{
+                    minWidth: "200px",
+                    backgroundColor: "#10B981",
+                    "&:hover": {
+                      backgroundColor: "#059669",
+                    },
+                  }}
+                >
+                  Explore Diagnosis Tools
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  size="large"
+                  onClick={() => {
+                    document
+                      .getElementById("disease-showcase")
+                      ?.scrollIntoView({
+                        behavior: "smooth",
+                      });
+                  }}
+                  sx={{
+                    minWidth: "200px",
+                    color: "#10B981",
+                    borderColor: "#10B981",
+                    "&:hover": {
+                      borderColor: "#059669",
+                      backgroundColor: "rgba(16, 185, 129, 0.04)",
+                    },
+                  }}
+                >
+                  View Available Diseases
+                </Button>
+              </Box>
             </AnimatedBox>
           </Box>
 
           {/* Image content - Right side */}
           <Box
             sx={{
-              flex: { xs: "1 1 100%", sm: "1 1 33.33%" },
+              flex: { xs: "1 1 100%", md: "1 1 45%" },
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              maxWidth: { xs: "100%", sm: "33.33%" },
             }}
           >
             <AnimatedBox
@@ -271,16 +286,14 @@ const Hero = () => (
               sx={{
                 width: "100%",
                 maxWidth: {
-                  xs: "380px",
-                  sm: "300px",
-                  md: "350px",
-                  lg: "400px",
+                  xs: "400px",
+                  md: "500px",
                 },
               }}
             >
               <HeroImage
                 src={heroImage}
-                alt="AI assisting medical professional in HCV detection"
+                alt="AI-powered medical diagnosis platform"
               />
             </AnimatedBox>
           </Box>

@@ -142,9 +142,9 @@ function NavBar() {
           onClick={onDrawerClose}
           size="small"
           sx={{
-            color: "#000000",
+            color: "#2C3E50",
             "&:hover": {
-              backgroundColor: "rgba(37, 99, 235, 0.08)",
+              backgroundColor: "#ECFDF5",
             },
           }}
         >
@@ -164,26 +164,22 @@ function NavBar() {
           >
             <ListItemButton
               sx={{
-                py: 1.2, // Reduced padding
+                py: 1.2,
                 px: 3,
                 backgroundColor:
-                  location.pathname === item.path
-                    ? "rgba(37, 99, 235, 0.08)"
-                    : "transparent",
+                  location.pathname === item.path ? "#ECFDF5" : "transparent",
                 "&:hover": {
-                  backgroundColor:
-                    item.label === "AI Assistant"
-                      ? "rgba(37, 99, 235, 0.08)"
-                      : "rgba(37, 99, 235, 0.08)",
+                  backgroundColor: "#ECFDF5",
                 },
               }}
             >
               <ListItemIcon
                 sx={{
-                  color: item.label === "AI Assistant" ? "#2563EB" : "#000000",
-                  minWidth: "40px", // Reduced from 44px
+                  color:
+                    location.pathname === item.path ? "#10B981" : "#5D6D7E",
+                  minWidth: "40px",
                   "& .MuiSvgIcon-root": {
-                    fontSize: "1.2rem", // Reduced from 1.4rem
+                    fontSize: "1.2rem",
                   },
                 }}
               >
@@ -192,9 +188,10 @@ function NavBar() {
               <ListItemText
                 primary={item.label}
                 primaryTypographyProps={{
-                  fontWeight: 700,
-                  fontSize: "0.95rem", // Reduced from 1.1rem
-                  color: item.label === "AI Assistant" ? "#2563EB" : "#000000",
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  color:
+                    location.pathname === item.path ? "#10B981" : "#2C3E50",
                 }}
               />
               {(item.label === "Diagnosis Tool" ||
@@ -203,14 +200,11 @@ function NavBar() {
                   label="New"
                   size="small"
                   sx={{
-                    height: 18, // Reduced from 20
-                    fontSize: "0.6rem", // Reduced from 0.7rem
-                    backgroundColor:
-                      item.label === "AI Assistant"
-                        ? "#2563EB"
-                        : theme.palette.primary.main,
+                    height: 18,
+                    fontSize: "0.6rem",
+                    backgroundColor: "#10B981",
                     color: "white",
-                    fontWeight: 700,
+                    fontWeight: 600,
                   }}
                 />
               )}
@@ -237,13 +231,16 @@ function NavBar() {
                 startIcon={<LoginIcon />}
                 sx={{
                   mb: 1,
-                  backgroundColor: "#000000",
-                  color: "white",
-                  fontWeight: 700,
-                  fontSize: "0.9rem", // Reduced from 1rem
-                  py: 1.2, // Reduced from 1.5
+                  backgroundColor: "transparent",
+                  color: "#10B981",
+                  border: "1px solid #10B981",
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  py: 1.2,
+                  textTransform: "none",
                   "&:hover": {
-                    backgroundColor: "#333333",
+                    backgroundColor: "#ECFDF5",
+                    borderColor: "#059669",
                   },
                 }}
               >
@@ -256,13 +253,15 @@ function NavBar() {
                 onClick={onDrawerClose}
                 startIcon={<PersonAddIcon />}
                 sx={{
-                  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  backgroundColor: "#10B981",
                   color: "white",
-                  fontWeight: 700,
-                  fontSize: "0.9rem", // Reduced from 1rem
-                  py: 1.2, // Reduced from 1.5
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  py: 1.2,
+                  textTransform: "none",
+                  boxShadow: "none",
                   "&:hover": {
-                    background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+                    backgroundColor: "#059669",
                   },
                 }}
               >
@@ -307,13 +306,9 @@ function NavBar() {
       <AppBar
         position="static"
         sx={{
-          background: `linear-gradient(135deg, 
-            ${theme.palette.background.paper} 0%, 
-            rgba(255, 255, 255, 0.95) 50%, 
-            ${theme.palette.background.paper} 100%)`,
-          backdropFilter: "blur(10px)",
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+          backgroundColor: "#FFFFFF",
+          borderBottom: "1px solid #E8EAED",
+          boxShadow: "none",
         }}
       >
         {" "}
@@ -327,10 +322,10 @@ function NavBar() {
               aria-label="open navigation drawer"
               sx={{
                 mr: 1,
-                color: "#000000",
-                borderRadius: "12px",
+                color: "#2C3E50",
+                borderRadius: "8px",
                 "&:hover": {
-                  backgroundColor: "rgba(37, 99, 235, 0.08)",
+                  backgroundColor: "#ECFDF5",
                   transform: "scale(1.05)",
                 },
                 transition: "all 0.2s ease",
@@ -378,29 +373,27 @@ function NavBar() {
                     to={item.path}
                     sx={{
                       color:
-                        item.label === "AI Assistant" ? "#2563EB" : "#000000",
+                        location.pathname === item.path ? "#10B981" : "#5D6D7E",
                       mx: 0.5,
                       px: 2,
                       py: 1,
-                      borderRadius: "12px",
-                      fontWeight: 700,
+                      borderRadius: "8px",
+                      fontWeight: 600,
                       fontSize: "0.9rem",
                       position: "relative",
                       backgroundColor:
                         location.pathname === item.path
-                          ? "rgba(37, 99, 235, 0.08)"
+                          ? "#ECFDF5"
                           : "transparent",
                       "&:hover": {
-                        backgroundColor:
-                          item.label === "AI Assistant"
-                            ? "rgba(37, 99, 235, 0.08)"
-                            : "rgba(37, 99, 235, 0.08)",
+                        backgroundColor: "#ECFDF5",
+                        color: "#10B981",
                         transform: "translateY(-2px)",
                         "& .nav-underline": {
                           width: "100%",
                         },
                       },
-                      transition: "all 0.3s ease",
+                      transition: "all 0.2s ease",
                     }}
                   >
                     {item.label}
@@ -414,10 +407,7 @@ function NavBar() {
                           right: -8,
                           height: 16,
                           fontSize: "0.55rem",
-                          backgroundColor:
-                            item.label === "AI Assistant"
-                              ? "#2563EB"
-                              : theme.palette.primary.main,
+                          backgroundColor: "#10B981",
                           color: "white",
                           fontWeight: 600,
                         }}
@@ -432,12 +422,9 @@ function NavBar() {
                         transform: "translateX(-50%)",
                         width: location.pathname === item.path ? "100%" : 0,
                         height: 2,
-                        backgroundColor:
-                          item.label === "AI Assistant"
-                            ? "#2563EB"
-                            : theme.palette.primary.main,
+                        backgroundColor: "#10B981",
                         borderRadius: 1,
-                        transition: "width 0.3s ease",
+                        transition: "width 0.2s ease",
                       }}
                     />
                   </Button>
@@ -451,10 +438,10 @@ function NavBar() {
                 {/* Notifications */}
                 <IconButton
                   sx={{
-                    color: "#000000",
-                    borderRadius: "12px",
+                    color: "#2C3E50",
+                    borderRadius: "8px",
                     "&:hover": {
-                      backgroundColor: "rgba(37, 99, 235, 0.08)",
+                      backgroundColor: "#ECFDF5",
                       transform: "scale(1.05)",
                     },
                     transition: "all 0.2s ease",
@@ -518,13 +505,13 @@ function NavBar() {
                     >
                       <Avatar
                         sx={{
-                          background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                          backgroundColor: "#10B981",
                           width: { xs: 40, sm: 46 },
                           height: { xs: 40, sm: 46 },
                           color: "white",
-                          fontWeight: 700,
+                          fontWeight: 600,
                           fontSize: "1.2rem",
-                          boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+                          boxShadow: "0 2px 8px rgba(16, 185, 129, 0.2)",
                         }}
                         alt={user?.full_name || user?.email || "User"}
                         src={user?.profile_picture || undefined}
@@ -555,19 +542,21 @@ function NavBar() {
                   to="/signin"
                   startIcon={<LoginIcon />}
                   sx={{
-                    color: "white",
-                    backgroundColor: "#000000",
-                    borderRadius: "12px",
+                    color: "#10B981",
+                    backgroundColor: "transparent",
+                    border: "1px solid #10B981",
+                    borderRadius: "8px",
                     px: 3,
-                    py: 1.2,
-                    fontWeight: 700,
-                    fontSize: "0.9rem", // Reduced from 1.05rem
+                    py: 1,
+                    fontWeight: 600,
+                    fontSize: "0.9rem",
+                    textTransform: "none",
                     "&:hover": {
-                      backgroundColor: "#333333",
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
+                      backgroundColor: "#ECFDF5",
+                      borderColor: "#059669",
+                      color: "#059669",
                     },
-                    transition: "all 0.3s ease",
+                    transition: "all 0.2s ease",
                   }}
                 >
                   Sign In
@@ -580,19 +569,19 @@ function NavBar() {
                   startIcon={<PersonAddIcon />}
                   sx={{
                     color: "white",
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                    borderRadius: "12px",
+                    backgroundColor: "#10B981",
+                    borderRadius: "8px",
                     px: 3,
-                    py: 1.2,
-                    fontWeight: 700,
-                    fontSize: "0.9rem", // Reduced from 1.05rem
-                    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+                    py: 1,
+                    fontWeight: 600,
+                    fontSize: "0.9rem",
+                    textTransform: "none",
+                    boxShadow: "none",
                     "&:hover": {
-                      background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 8px 24px rgba(37, 99, 235, 0.4)",
+                      backgroundColor: "#059669",
+                      boxShadow: "0 2px 8px rgba(16, 185, 129, 0.2)",
                     },
-                    transition: "all 0.3s ease",
+                    transition: "all 0.2s ease",
                   }}
                 >
                   Sign Up
@@ -606,14 +595,14 @@ function NavBar() {
       {loading && (
         <LinearProgress
           sx={{
-            height: "4px",
+            height: "3px",
             position: "absolute",
             width: "100%",
             top: 0,
             zIndex: 1200,
-            background: "rgba(37, 99, 235, 0.1)",
+            background: "#ECFDF5",
             "& .MuiLinearProgress-bar": {
-              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              backgroundColor: "#10B981",
             },
           }}
         />
@@ -680,9 +669,9 @@ function NavBar() {
                   position: "absolute",
                   top: 16,
                   right: 16,
-                  color: "#000000",
+                  color: "#2C3E50",
                   "&:hover": {
-                    backgroundColor: "rgba(37, 99, 235, 0.08)",
+                    backgroundColor: "#ECFDF5",
                   },
                 }}
               >
@@ -693,9 +682,9 @@ function NavBar() {
                   width: 72,
                   height: 72,
                   mb: 2,
-                  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  backgroundColor: "#10B981",
                   color: "white",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: "1.8rem",
                 }}
                 alt={user?.full_name || user?.email || "User"}
@@ -739,7 +728,7 @@ function NavBar() {
                   size="small"
                   sx={{
                     mt: 1,
-                    backgroundColor: "#DC2626",
+                    backgroundColor: "#059669",
                     color: "white",
                     fontWeight: 600,
                     fontSize: "0.7rem",
@@ -751,7 +740,7 @@ function NavBar() {
                   size="small"
                   sx={{
                     mt: 1,
-                    backgroundColor: "#2563EB",
+                    backgroundColor: "#10B981",
                     color: "white",
                     fontWeight: 600,
                     fontSize: "0.7rem",
@@ -763,7 +752,7 @@ function NavBar() {
                   size="small"
                   sx={{
                     mt: 1,
-                    backgroundColor: "#16A34A",
+                    backgroundColor: "#34D399",
                     color: "white",
                     fontWeight: 600,
                     fontSize: "0.7rem",
@@ -791,20 +780,13 @@ function NavBar() {
                         backgroundColor:
                           item.label === "Logout"
                             ? "rgba(239, 68, 68, 0.08)"
-                            : item.label === "Admin Console"
-                            ? "rgba(37, 99, 235, 0.08)"
-                            : "rgba(37, 99, 235, 0.08)",
+                            : "#ECFDF5",
                       },
                     }}
                   >
                     <ListItemIcon
                       sx={{
-                        color:
-                          item.label === "Logout"
-                            ? "#EF4444"
-                            : item.label === "Admin Console"
-                            ? "#2563EB"
-                            : "#000000",
+                        color: item.label === "Logout" ? "#EF4444" : "#10B981",
                         minWidth: "44px",
                         "& .MuiSvgIcon-root": {
                           fontSize: "1.4rem",
@@ -816,14 +798,9 @@ function NavBar() {
                     <ListItemText
                       primary={item.label}
                       primaryTypographyProps={{
-                        fontWeight: 700,
+                        fontWeight: 600,
                         fontSize: "0.95rem",
-                        color:
-                          item.label === "Logout"
-                            ? "#EF4444"
-                            : item.label === "Admin Console"
-                            ? "#2563EB"
-                            : "#000000",
+                        color: item.label === "Logout" ? "#EF4444" : "#2C3E50",
                       }}
                     />{" "}
                     {item.label === "Admin Console" && (
@@ -833,9 +810,9 @@ function NavBar() {
                         sx={{
                           height: 18,
                           fontSize: "0.6rem",
-                          backgroundColor: isSuperuser ? "#DC2626" : "#2563EB",
+                          backgroundColor: isSuperuser ? "#059669" : "#10B981",
                           color: "white",
-                          fontWeight: 700,
+                          fontWeight: 600,
                         }}
                       />
                     )}

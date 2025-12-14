@@ -25,6 +25,7 @@ import {
   AutoAwesome,
   School,
   Support,
+  Assessment,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
@@ -34,22 +35,17 @@ const fadeInAnimation = keyframes`
   to { opacity: 1; transform: translateY(0); }
 `;
 
-const floatAnimation = keyframes`
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-`;
-
-// Styled components - Matching DiagnosticToolSection
+// Styled components
 const StyledSection = styled(Paper)(({ theme }) => ({
-  paddingTop: theme.spacing(10),
-  paddingBottom: theme.spacing(10),
-  backgroundColor: theme.palette.background.sectionDefault,
+  paddingTop: theme.spacing(12),
+  paddingBottom: theme.spacing(12),
+  backgroundColor: "#FFFFFF",
   borderRadius: 0,
   boxShadow: "none",
-  background: theme.palette.background.sectionDefault,
+  borderBottom: "1px solid #E8EAED",
   "@media (max-width: 600px)": {
-    paddingTop: theme.spacing(6),
-    paddingBottom: theme.spacing(6),
+    paddingTop: theme.spacing(8),
+    paddingBottom: theme.spacing(8),
   },
 }));
 
@@ -59,35 +55,35 @@ const AnimatedBox = styled(Box)(({ animationDelay = "0s" }) => ({
 
 const FeatureCard = styled(Card)(({ theme }) => ({
   height: "100%",
-  borderRadius: "16px",
-  border: "1px solid rgba(37, 99, 235, 0.1)",
-  boxShadow: "0 4px 20px rgba(37, 99, 235, 0.08)",
-  transition: "all 0.3s ease",
+  borderRadius: "8px",
+  border: "1px solid #E8EAED",
+  boxShadow: "none",
+  transition: "all 0.2s ease",
+  backgroundColor: "#F8F9FA",
   "&:hover": {
-    transform: "translateY(-8px)",
-    boxShadow: "0 12px 40px rgba(37, 99, 235, 0.15)",
-    borderColor: "rgba(37, 99, 235, 0.2)",
+    transform: "translateY(-2px)",
+    boxShadow: "0 2px 8px rgba(44, 62, 80, 0.08)",
+    borderColor: "#D1D5DB",
   },
 }));
 
 const IconWrapper = styled(Box)(({ theme }) => ({
-  width: "64px",
-  height: "64px",
-  borderRadius: "16px",
+  width: "48px",
+  height: "48px",
+  borderRadius: "50%",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-  color: "white",
+  backgroundColor: "#ECFDF5",
+  color: "#10B981",
   marginBottom: theme.spacing(2),
-  animation: `${floatAnimation} 3s ease-in-out infinite`,
 }));
 
 // Matching theme from DiagnosticToolSection
 const theme = createTheme({
   palette: {
-    primary: { main: "#2563EB" },
-    secondary: { main: "#4F46E5" },
+    primary: { main: "#10B981" },
+    secondary: { main: "#34D399" },
     background: {
       default: "#F0F4F8",
       paper: "#FFFFFF",
@@ -147,12 +143,12 @@ const theme = createTheme({
         },
         containedPrimary: {
           color: "white",
-          "&:hover": { backgroundColor: "#1D4ED8", transform: "scale(1.03)" },
+          "&:hover": { backgroundColor: "#059669", transform: "scale(1.03)" },
         },
         containedSizeLarge: { padding: "12px 28px", fontSize: "1rem" },
         outlinedPrimary: {
-          borderColor: "#2563EB",
-          color: "#2563EB",
+          borderColor: "#10B981",
+          color: "#10B981",
           "&:hover": {
             backgroundColor: "rgba(37, 99, 235, 0.04)",
             borderColor: "#1D4ED8",
@@ -168,33 +164,33 @@ const AiMedicalAssistant = ({ id }) => {
   const features = [
     {
       icon: <Psychology />,
-      title: "HCV Stage Education",
-      desc: "Comprehensive guidance on fibrosis stages F0-F4, understanding disease progression, and what each stage means for your health journey.",
-    },
-    {
-      icon: <HealthAndSafety />,
-      title: "Symptom Analysis",
-      desc: "Detailed explanations of HCV symptoms, from early signs to advanced stages, helping you recognize and understand your health indicators.",
+      title: "Disease Information",
+      desc: "Learn about symptoms, stages, and progression of various medical conditions with comprehensive, easy-to-understand explanations.",
     },
     {
       icon: <Medication />,
       title: "Treatment Options",
-      desc: "In-depth information on DAA therapies, medication protocols, side effects management, and treatment success rates.",
+      desc: "Explore therapies, medications, and treatment protocols across different diseases with detailed information on effectiveness and considerations.",
     },
     {
       icon: <Science />,
       title: "Research Insights",
-      desc: "Latest medical research findings, clinical trial results, and evidence-based treatment guidelines from leading hepatology sources.",
+      desc: "Access latest clinical studies, research findings, and evidence-based guidelines from leading medical institutions worldwide.",
+    },
+    {
+      icon: <Assessment />,
+      title: "Understanding Test Results",
+      desc: "Interpret lab values, biomarkers, and diagnostic test results with clear explanations of what different measurements indicate.",
     },
     {
       icon: <School />,
-      title: "Patient Education",
-      desc: "Clear, easy-to-understand explanations of complex medical concepts, lab results, and liver function terminology.",
+      title: "Medical Education",
+      desc: "Decode medical terminology and complex healthcare concepts with straightforward, accessible language you can understand.",
     },
     {
       icon: <Support />,
       title: "Care Support",
-      desc: "Guidance on lifestyle modifications, dietary recommendations, and supportive care strategies during treatment.",
+      desc: "Receive lifestyle guidance, dietary recommendations, and preventive measures tailored to various health conditions.",
     },
   ];
 
@@ -231,7 +227,7 @@ const AiMedicalAssistant = ({ id }) => {
                     component="span"
                     sx={{ color: theme.palette.primary.main }}
                   >
-                    HCV Health Companion
+                    Medical Research Companion
                   </Box>
                 </Typography>
               </Box>
@@ -246,8 +242,8 @@ const AiMedicalAssistant = ({ id }) => {
                   mb: 4,
                 }}
               >
-                Get instant, evidence-based answers about Hepatitis C. Our AI
-                assistant provides{" "}
+                Get instant, evidence-based answers about any medical condition.
+                Our AI assistant provides{" "}
                 <Box
                   component="span"
                   sx={{
@@ -259,10 +255,11 @@ const AiMedicalAssistant = ({ id }) => {
                     borderRadius: "4px",
                   }}
                 >
-                  personalized guidance on stages, symptoms, treatments
+                  comprehensive guidance on diseases, symptoms, treatments
                 </Box>{" "}
-                and medications, helping you understand your HCV journey with
-                reliable, up-to-date medical information.
+                and diagnostic processes, helping you understand medical
+                information with reliable, up-to-date research from trusted
+                sources.
               </Typography>
 
               {/* Educational Notice */}
@@ -283,10 +280,11 @@ const AiMedicalAssistant = ({ id }) => {
                   variant="body2"
                   sx={{ color: "#059669", fontWeight: 600 }}
                 >
-                  Educational Medical Information
+                  Educational & Research Platform
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#475569" }}>
-                  • Always consult healthcare professionals for medical advice
+                  • Always consult qualified healthcare professionals for
+                  medical decisions
                 </Typography>
               </Box>
             </Box>
@@ -400,7 +398,8 @@ const AiMedicalAssistant = ({ id }) => {
                 sx={{ mb: 4, maxWidth: "60ch", mx: "auto" }}
               >
                 Begin your journey with our AI-powered medical assistant and
-                access comprehensive HCV information tailored to your needs.
+                access comprehensive health information across multiple
+                conditions.
               </Typography>
 
               <Box

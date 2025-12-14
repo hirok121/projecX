@@ -30,8 +30,8 @@ import {
 // Matching theme from Hero
 const theme = createTheme({
   palette: {
-    primary: { main: "#2563EB" },
-    secondary: { main: "#4F46E5" },
+    primary: { main: "#10B981" },
+    secondary: { main: "#34D399" },
     background: {
       default: "#F0F4F8",
       paper: "#FFFFFF",
@@ -96,7 +96,7 @@ const theme = createTheme({
         },
         containedPrimary: {
           color: "white",
-          "&:hover": { backgroundColor: "#1D4ED8", transform: "scale(1.03)" },
+          "&:hover": { backgroundColor: "#059669", transform: "scale(1.03)" },
         },
         containedSizeLarge: { padding: "12px 28px", fontSize: "1rem" },
         outlinedPrimary: {
@@ -115,12 +115,9 @@ const theme = createTheme({
 const StyledFooter = styled(Paper)(({ theme }) => ({
   paddingTop: theme.spacing(8),
   paddingBottom: theme.spacing(4),
-  backgroundColor: theme.palette.background.hero,
+  backgroundColor: "#2C3E50",
   borderRadius: 0,
   boxShadow: "none",
-  background: `linear-gradient(135deg, ${theme.palette.background.hero} 0%, ${
-    theme.palette.primary.dark || "#1E3A8A"
-  } 100%)`,
   marginTop: 0,
 }));
 
@@ -189,12 +186,12 @@ const Footer = () => {
             <Grid item xs={12} md={4}>
               <FooterSection>
                 <Typography variant="h4" gutterBottom sx={{ mb: 2 }}>
-                  HepatoCAI
+                  DeepMed
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 3, maxWidth: "300px" }}>
-                  Advanced AI-powered Hepatitis C detection and analysis
-                  platform. Empowering healthcare professionals with
-                  cutting-edge diagnostic tools.
+                  AI-powered medical diagnosis platform providing access to
+                  research-grade machine learning models for multiple diseases.
+                  Empowering healthcare through innovation.
                 </Typography>
 
                 {/* Features */}
@@ -297,9 +294,7 @@ const Footer = () => {
                 <Box>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                     <Email sx={{ mr: 1, color: theme.palette.primary.main }} />
-                    <Typography variant="body2">
-                      support@hepatocai.com
-                    </Typography>
+                    <Typography variant="body2">support@deepmed.com</Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                     <Phone sx={{ mr: 1, color: theme.palette.primary.main }} />
@@ -343,8 +338,8 @@ const Footer = () => {
               variant="body2"
               sx={{ color: "rgba(255, 255, 255, 0.6)" }}
             >
-              © {currentYear} HepatoCAI. All rights reserved. | Built with ❤️
-              for healthcare innovation
+              © {currentYear} DeepMed. All rights reserved. | Built with ❤️ for
+              healthcare innovation
             </Typography>
 
             <Box
@@ -376,11 +371,11 @@ const Footer = () => {
               variant="body2"
               sx={{ color: "rgba(255, 255, 255, 0.7)", textAlign: "center" }}
             >
-              <strong>Medical Disclaimer:</strong> HepatoCAI is an educational
-              and diagnostic assistance platform. All results should be
-              interpreted by qualified healthcare professionals. This platform
-              does not replace professional medical advice, diagnosis, or
-              treatment.
+              <strong>Medical Disclaimer:</strong> MediScan AI is an educational
+              and research platform providing access to published machine
+              learning models. All results should be interpreted by qualified
+              healthcare professionals. This platform does not replace
+              professional medical advice, diagnosis, or treatment.
             </Typography>
           </Box>
         </Container>
