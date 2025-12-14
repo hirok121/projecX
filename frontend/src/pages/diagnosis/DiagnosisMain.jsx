@@ -15,6 +15,7 @@ import { diagnosisAPI } from "../../services/diagnosisAPI";
 import DiseaseCard from "../../components/diagnosis/DiseaseCard";
 import NavBar from "../../components/layout/NavBar";
 import Footer from "../../components/landingPageComponents/Footer";
+import { DIAGNOSIS_CATEGORIES } from "../../const/disease";
 
 function DiagnosisMain() {
   const [diseases, setDiseases] = useState([]);
@@ -25,15 +26,7 @@ function DiagnosisMain() {
   const [page, setPage] = useState(1);
   const itemsPerPage = 8;
 
-  const categories = [
-    "All",
-    "Cardiovascular",
-    "Hepatic",
-    "Neurological",
-    "Respiratory",
-    "Oncology",
-    "Metabolic",
-  ];
+  const categories = DIAGNOSIS_CATEGORIES;
 
   useEffect(() => {
     fetchDiseases();

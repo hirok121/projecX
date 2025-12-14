@@ -21,16 +21,15 @@ import {
   Chip,
   Alert,
   CircularProgress,
-  Tabs,
-  Tab,
+  Container,
   Grid,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
   Tooltip,
-  Switch,
-  FormControlLabel,
+  InputAdornment,
+  TablePagination,
 } from "@mui/material";
 import {
   Add,
@@ -38,29 +37,36 @@ import {
   Delete,
   Upload,
   CloudUpload,
-  Description,
   CheckCircle,
   Cancel,
-  Info,
   Refresh,
+  Search,
+  FilterList,
 } from "@mui/icons-material";
 import AdminNavbar from "../../components/admin/AdminNavbar";
 import { diagnosisAPI } from "../../services/diagnosisAPI";
-
-function TabPanel({ children, value, index }) {
-  return (
-    <div hidden={value !== index}>
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+import { MODALITY_OPTIONS, CATEGORY_OPTIONS } from "../../const/disease";
 
 function AdminDiseaseUpload() {
-  const [tabValue, setTabValue] = useState(0);
+  const [viewMode, setViewMode] = useState("diseases"); // 'diseases' or 'classifiers'
   const [diseases, setDiseases] = useState([]);
   const [classifiers, setClassifiers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("info");
+
+  // Search and filter states
+  const [diseaseSearch, setDiseaseSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [classifierSearch, setClassifierSearch] = useState("");
+  const [diseaseFilter, setDiseaseFilter] = useState("all");
+  const [modalityFilter, setModalityFilter] = useState("all");
+
+  // Pagination
+  const [diseasePage, setDiseasePage] = useState(0);
+  const [diseaseRowsPerPage, setDiseaseRowsPerPage] = useState(10);
+  const [classifierPage, setClassifierPage] = useState(0);
+  const [classifierRowsPerPage, setClassifierRowsPerPage] = useState(10);
 
   // Disease dialog state
   const [diseaseDialogOpen, setDiseaseDialogOpen] = useState(false);
@@ -70,7 +76,6 @@ function AdminDiseaseUpload() {
     description: "",
     category: "",
     available_modalities: [],
-    required_features: {},
   });
 
   // Classifier dialog state
@@ -83,15 +88,9 @@ function AdminDiseaseUpload() {
     modality: "",
     model_type: "",
     accuracy: "",
-    precision: "",
-    recall: "",
-    f1_score: "",
-    training_samples: "",
     version: "",
   });
   const [modelFile, setModelFile] = useState(null);
-
-  const modalityOptions = ["MRI", "CT", "X-Ray", "Tabular"];
 
   // Load data
   useEffect(() => {
@@ -103,9 +102,6 @@ function AdminDiseaseUpload() {
     try {
       setLoading(true);
       const response = await diagnosisAPI.getDiseases();
-      console.log("Diseases API response:", response);
-
-      // Handle different possible response structures
       let diseasesData = [];
       if (response.data?.data) {
         diseasesData = response.data.data;
@@ -116,12 +112,11 @@ function AdminDiseaseUpload() {
       } else if (Array.isArray(response)) {
         diseasesData = response;
       }
-
-      console.log("Parsed diseases:", diseasesData);
       setDiseases(diseasesData);
-      setError(null);
+      setMessage("");
     } catch (err) {
-      setError("Failed to load diseases");
+      setMessage("Failed to load diseases");
+      setMessageType("error");
       console.error("Failed to load diseases:", err);
     } finally {
       setLoading(false);
@@ -133,12 +128,34 @@ function AdminDiseaseUpload() {
       const response = await diagnosisAPI.adminListClassifiers({
         include_inactive: true,
       });
-      console.log("Classifiers API response:", response);
       setClassifiers(Array.isArray(response) ? response : []);
     } catch (err) {
       console.error("Failed to load classifiers:", err);
     }
   };
+
+  // Filter diseases
+  const filteredDiseases = diseases.filter((disease) => {
+    const matchesSearch = disease.name
+      ?.toLowerCase()
+      .includes(diseaseSearch.toLowerCase());
+    const matchesCategory =
+      categoryFilter === "all" || disease.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
+  // Filter classifiers
+  const filteredClassifiers = classifiers.filter((classifier) => {
+    const matchesSearch = classifier.name
+      ?.toLowerCase()
+      .includes(classifierSearch.toLowerCase());
+    const matchesDisease =
+      diseaseFilter === "all" ||
+      classifier.disease_id === parseInt(diseaseFilter);
+    const matchesModality =
+      modalityFilter === "all" || classifier.modality === modalityFilter;
+    return matchesSearch && matchesDisease && matchesModality;
+  });
 
   // Disease handlers
   const handleDiseaseDialogOpen = (disease = null) => {
@@ -149,7 +166,6 @@ function AdminDiseaseUpload() {
         description: disease.description || "",
         category: disease.category || "",
         available_modalities: disease.available_modalities || [],
-        required_features: disease.required_features || {},
       });
     } else {
       setEditingDisease(null);
@@ -158,7 +174,6 @@ function AdminDiseaseUpload() {
         description: "",
         category: "",
         available_modalities: [],
-        required_features: {},
       });
     }
     setDiseaseDialogOpen(true);
@@ -169,15 +184,17 @@ function AdminDiseaseUpload() {
       setLoading(true);
       if (editingDisease) {
         await diagnosisAPI.adminUpdateDisease(editingDisease.id, diseaseForm);
-        alert("Disease updated successfully");
+        setMessage("Disease updated successfully");
       } else {
         await diagnosisAPI.adminCreateDisease(diseaseForm);
-        alert("Disease created successfully");
+        setMessage("Disease created successfully");
       }
+      setMessageType("success");
       setDiseaseDialogOpen(false);
-      await loadDiseases(); // Wait for reload to ensure data is fresh
+      await loadDiseases();
     } catch (err) {
-      alert(err.response?.data?.detail || "Failed to save disease");
+      setMessage(err.response?.data?.detail || "Failed to save disease");
+      setMessageType("error");
     } finally {
       setLoading(false);
     }
@@ -195,10 +212,14 @@ function AdminDiseaseUpload() {
     }
     try {
       await diagnosisAPI.adminDeleteDisease(diseaseId, hardDelete);
-      alert(hardDelete ? "Disease deleted permanently" : "Disease deactivated");
+      setMessage(
+        hardDelete ? "Disease deleted permanently" : "Disease deactivated"
+      );
+      setMessageType("success");
       loadDiseases();
     } catch (err) {
-      alert("Failed to delete disease");
+      setMessage("Failed to delete disease");
+      setMessageType("error");
     }
   };
 
@@ -213,10 +234,6 @@ function AdminDiseaseUpload() {
         modality: classifier.modality || "",
         model_type: classifier.model_type || "",
         accuracy: classifier.accuracy || "",
-        precision: classifier.precision || "",
-        recall: classifier.recall || "",
-        f1_score: classifier.f1_score || "",
-        training_samples: classifier.training_samples || "",
         version: classifier.version || "",
       });
     } else {
@@ -228,10 +245,6 @@ function AdminDiseaseUpload() {
         modality: "",
         model_type: "",
         accuracy: "",
-        precision: "",
-        recall: "",
-        f1_score: "",
-        training_samples: "",
         version: "",
       });
     }
@@ -242,7 +255,6 @@ function AdminDiseaseUpload() {
   const handleClassifierSubmit = async () => {
     try {
       setLoading(true);
-
       const formData = new FormData();
       Object.keys(classifierForm).forEach((key) => {
         if (classifierForm[key] !== "" && classifierForm[key] !== null) {
@@ -253,7 +265,8 @@ function AdminDiseaseUpload() {
       if (modelFile) {
         formData.append("model_file", modelFile);
       } else if (!editingClassifier) {
-        alert("Model file is required for new classifiers");
+        setMessage("Model file is required for new classifiers");
+        setMessageType("error");
         setLoading(false);
         return;
       }
@@ -263,15 +276,17 @@ function AdminDiseaseUpload() {
           editingClassifier.id,
           formData
         );
-        alert("Classifier updated successfully");
+        setMessage("Classifier updated successfully");
       } else {
         await diagnosisAPI.adminCreateClassifier(formData);
-        alert("Classifier created successfully");
+        setMessage("Classifier created successfully");
       }
+      setMessageType("success");
       setClassifierDialogOpen(false);
       loadClassifiers();
     } catch (err) {
-      alert(err.response?.data?.detail || "Failed to save classifier");
+      setMessage(err.response?.data?.detail || "Failed to save classifier");
+      setMessageType("error");
     } finally {
       setLoading(false);
     }
@@ -289,12 +304,14 @@ function AdminDiseaseUpload() {
     }
     try {
       await diagnosisAPI.adminDeleteClassifier(classifierId, hardDelete);
-      alert(
+      setMessage(
         hardDelete ? "Classifier deleted permanently" : "Classifier deactivated"
       );
+      setMessageType("success");
       loadClassifiers();
     } catch (err) {
-      alert("Failed to delete classifier");
+      setMessage("Failed to delete classifier");
+      setMessageType("error");
     }
   };
 
@@ -306,318 +323,759 @@ function AdminDiseaseUpload() {
     setDiseaseForm({ ...diseaseForm, available_modalities: updated });
   };
 
+  if (loading && diseases.length === 0 && classifiers.length === 0) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundColor: "#F8F9FA",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress sx={{ color: "#10B981" }} />
+      </Box>
+    );
+  }
+
   return (
-    <Box>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#F8F9FA" }}>
       <AdminNavbar />
-      <Box sx={{ p: 3 }}>
-        <Box mb={3}>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
+
+      <Container maxWidth="xl" sx={{ py: 6 }}>
+        {/* Header */}
+        <Box sx={{ mb: 5 }}>
+          <Typography
+            variant="h3"
+            sx={{ fontWeight: 600, color: "#2C3E50", mb: 1 }}
           >
-            <Box>
-              <Typography variant="h4" gutterBottom>
-                Disease & Classifier Management
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Upload and manage diseases and their ML classifiers
-              </Typography>
-            </Box>
-            <Box display="flex" gap={1}>
-              <Chip
-                label={`${diseases.length} Diseases`}
-                color="primary"
-                size="small"
-              />
-              <Chip
-                label={`${classifiers.length} Classifiers`}
-                color="secondary"
-                size="small"
-              />
-              <Tooltip title="Reload data">
-                <IconButton
-                  onClick={() => {
-                    loadDiseases();
-                    loadClassifiers();
-                  }}
-                  size="small"
-                  color="primary"
-                >
-                  <Refresh />
-                </IconButton>
-              </Tooltip>
-            </Box>
+            Disease & Classifier Management
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Manage diseases and their machine learning classifiers
+          </Typography>
+
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              variant={viewMode === "diseases" ? "contained" : "outlined"}
+              onClick={() => setViewMode("diseases")}
+              sx={{
+                backgroundColor:
+                  viewMode === "diseases" ? "#10B981" : "transparent",
+                borderColor: "#10B981",
+                color: viewMode === "diseases" ? "white" : "#10B981",
+                "&:hover": {
+                  backgroundColor:
+                    viewMode === "diseases" ? "#059669" : "#ECFDF5",
+                  borderColor: "#059669",
+                },
+              }}
+            >
+              Diseases ({diseases.length})
+            </Button>
+            <Button
+              variant={viewMode === "classifiers" ? "contained" : "outlined"}
+              onClick={() => setViewMode("classifiers")}
+              sx={{
+                backgroundColor:
+                  viewMode === "classifiers" ? "#10B981" : "transparent",
+                borderColor: "#10B981",
+                color: viewMode === "classifiers" ? "white" : "#10B981",
+                "&:hover": {
+                  backgroundColor:
+                    viewMode === "classifiers" ? "#059669" : "#ECFDF5",
+                  borderColor: "#059669",
+                },
+              }}
+            >
+              Classifiers ({classifiers.length})
+            </Button>
+            <Box sx={{ flexGrow: 1 }} />
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={() => {
+                loadDiseases();
+                loadClassifiers();
+              }}
+              sx={{
+                borderColor: "#10B981",
+                color: "#10B981",
+                "&:hover": {
+                  borderColor: "#059669",
+                  backgroundColor: "#ECFDF5",
+                },
+              }}
+            >
+              Refresh
+            </Button>
           </Box>
         </Box>
 
-        <Card>
-          <Tabs
-            value={tabValue}
-            onChange={(e, newValue) => setTabValue(newValue)}
-            sx={{ borderBottom: 1, borderColor: "divider" }}
+        {/* Messages */}
+        {message && (
+          <Alert
+            severity={messageType}
+            sx={{ mb: 4, borderRadius: 2 }}
+            onClose={() => setMessage("")}
           >
-            <Tab label="Diseases" icon={<Description />} iconPosition="start" />
-            <Tab
-              label="Classifiers"
-              icon={<CloudUpload />}
-              iconPosition="start"
-            />
-          </Tabs>
+            {message}
+          </Alert>
+        )}
 
-          <TabPanel value={tabValue} index={0}>
-            <Box mb={2}>
-              <Button
-                variant="contained"
-                startIcon={<Add />}
-                onClick={() => handleDiseaseDialogOpen()}
+        {/* Diseases View */}
+        {viewMode === "diseases" && (
+          <Box>
+            {/* Search and Filters */}
+            <Box sx={{ mb: 3 }}>
+              {/* Search Bar */}
+              <TextField
+                fullWidth
+                placeholder="Search diseases..."
+                value={diseaseSearch}
+                onChange={(e) => setDiseaseSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search sx={{ color: "#6B7280", fontSize: 28 }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "white",
+                    fontSize: "1.1rem",
+                    "& fieldset": {
+                      borderColor: "#E5E7EB",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#10B981",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#10B981",
+                      borderWidth: 2,
+                    },
+                  },
+                  "& .MuiInputBase-input": {
+                    py: 2,
+                  },
+                }}
+              />
+
+              {/* Category Chips */}
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 1.5,
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
               >
-                Add New Disease
-              </Button>
+                <Chip
+                  label="All"
+                  onClick={() => setCategoryFilter("all")}
+                  sx={{
+                    px: 1,
+                    fontSize: "0.95rem",
+                    fontWeight: 500,
+                    backgroundColor:
+                      categoryFilter === "all" ? "#10B981" : "#F3F4F6",
+                    color: categoryFilter === "all" ? "white" : "#6B7280",
+                    border: "none",
+                    "&:hover": {
+                      backgroundColor:
+                        categoryFilter === "all" ? "#059669" : "#E5E7EB",
+                    },
+                  }}
+                />
+                {CATEGORY_OPTIONS.map((cat) => (
+                  <Chip
+                    key={cat}
+                    label={cat}
+                    onClick={() => setCategoryFilter(cat)}
+                    sx={{
+                      px: 1,
+                      fontSize: "0.95rem",
+                      fontWeight: 500,
+                      backgroundColor:
+                        categoryFilter === cat ? "#10B981" : "#F3F4F6",
+                      color: categoryFilter === cat ? "white" : "#6B7280",
+                      border: "none",
+                      "&:hover": {
+                        backgroundColor:
+                          categoryFilter === cat ? "#059669" : "#E5E7EB",
+                      },
+                    }}
+                  />
+                ))}
+                <Box sx={{ flexGrow: 1 }} />
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={() => handleDiseaseDialogOpen()}
+                  sx={{
+                    backgroundColor: "#10B981",
+                    px: 3,
+                    "&:hover": { backgroundColor: "#059669" },
+                  }}
+                >
+                  Add Disease
+                </Button>
+              </Box>
             </Box>
 
-            {loading ? (
-              <Box display="flex" justifyContent="center" p={3}>
-                <CircularProgress />
-              </Box>
-            ) : error ? (
-              <Alert severity="error">{error}</Alert>
-            ) : (
-              <TableContainer component={Paper}>
+            {/* Diseases Table */}
+            <Paper sx={{ borderRadius: 2 }}>
+              <TableContainer>
                 <Table>
                   <TableHead>
-                    <TableRow>
-                      <TableCell>Name</TableCell>
-                      <TableCell>Category</TableCell>
-                      <TableCell>Modalities</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Actions</TableCell>
+                    <TableRow sx={{ backgroundColor: "#ECFDF5" }}>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        Disease Name
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Category</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Modalities</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {diseases.map((disease) => (
-                      <TableRow key={disease.id}>
-                        <TableCell>
-                          <Typography variant="subtitle2">
-                            {disease.name}
+                    {filteredDiseases.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
+                          <Typography variant="body1" color="text.secondary">
+                            No diseases found
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {disease.description}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>{disease.category || "N/A"}</TableCell>
-                        <TableCell>
-                          <Box display="flex" gap={0.5} flexWrap="wrap">
-                            {(disease.available_modalities || []).map((mod) => (
-                              <Chip key={mod} label={mod} size="small" />
-                            ))}
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          {disease.is_active ? (
-                            <Chip
-                              icon={<CheckCircle />}
-                              label="Active"
-                              color="success"
-                              size="small"
-                            />
-                          ) : (
-                            <Chip
-                              icon={<Cancel />}
-                              label="Inactive"
-                              color="default"
-                              size="small"
-                            />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Tooltip title="Edit">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleDiseaseDialogOpen(disease)}
-                            >
-                              <Edit />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Deactivate">
-                            <IconButton
-                              size="small"
-                              onClick={() =>
-                                handleDeleteDisease(disease.id, false)
-                              }
-                            >
-                              <Cancel />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete Permanently">
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() =>
-                                handleDeleteDisease(disease.id, true)
-                              }
-                            >
-                              <Delete />
-                            </IconButton>
-                          </Tooltip>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      filteredDiseases
+                        .slice(
+                          diseasePage * diseaseRowsPerPage,
+                          diseasePage * diseaseRowsPerPage + diseaseRowsPerPage
+                        )
+                        .map((disease) => (
+                          <TableRow
+                            key={disease.id}
+                            sx={{ "&:hover": { backgroundColor: "#F8F9FA" } }}
+                          >
+                            <TableCell>
+                              <Typography variant="subtitle2">
+                                {disease.name}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {disease.description}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={disease.category || "N/A"}
+                                size="small"
+                                sx={{
+                                  backgroundColor: "#ECFDF5",
+                                  color: "#10B981",
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Box display="flex" gap={0.5} flexWrap="wrap">
+                                {(disease.available_modalities || []).map(
+                                  (mod) => (
+                                    <Chip
+                                      key={mod}
+                                      label={mod}
+                                      size="small"
+                                      variant="outlined"
+                                    />
+                                  )
+                                )}
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              {disease.is_active ? (
+                                <Chip
+                                  icon={<CheckCircle />}
+                                  label="Active"
+                                  color="success"
+                                  size="small"
+                                />
+                              ) : (
+                                <Chip
+                                  icon={<Cancel />}
+                                  label="Inactive"
+                                  color="default"
+                                  size="small"
+                                />
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Tooltip title="Edit">
+                                <IconButton
+                                  size="small"
+                                  onClick={() =>
+                                    handleDiseaseDialogOpen(disease)
+                                  }
+                                  sx={{ color: "#10B981" }}
+                                >
+                                  <Edit fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Deactivate">
+                                <IconButton
+                                  size="small"
+                                  onClick={() =>
+                                    handleDeleteDisease(disease.id, false)
+                                  }
+                                >
+                                  <Cancel fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Delete">
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() =>
+                                    handleDeleteDisease(disease.id, true)
+                                  }
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
-            )}
-          </TabPanel>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={filteredDiseases.length}
+                rowsPerPage={diseaseRowsPerPage}
+                page={diseasePage}
+                onPageChange={(e, newPage) => setDiseasePage(newPage)}
+                onRowsPerPageChange={(e) => {
+                  setDiseaseRowsPerPage(parseInt(e.target.value, 10));
+                  setDiseasePage(0);
+                }}
+                sx={{ borderTop: "1px solid #E8EAED" }}
+              />
+            </Paper>
+          </Box>
+        )}
 
-          <TabPanel value={tabValue} index={1}>
-            <Box mb={2}>
-              <Button
-                variant="contained"
-                startIcon={<Upload />}
-                onClick={() => handleClassifierDialogOpen()}
+        {/* Classifiers View */}
+        {viewMode === "classifiers" && (
+          <Box>
+            {/* Search and Filters */}
+            <Box sx={{ mb: 3 }}>
+              {/* Search Bar */}
+              <TextField
+                fullWidth
+                placeholder="Search classifiers..."
+                value={classifierSearch}
+                onChange={(e) => setClassifierSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search sx={{ color: "#6B7280", fontSize: 28 }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "white",
+                    fontSize: "1.1rem",
+                    "& fieldset": {
+                      borderColor: "#E5E7EB",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#10B981",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#10B981",
+                      borderWidth: 2,
+                    },
+                  },
+                  "& .MuiInputBase-input": {
+                    py: 2,
+                  },
+                }}
+              />
+
+              {/* Filter Chips Row */}
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
               >
-                Upload New Classifier
-              </Button>
+                {/* Disease Filter - Chips for few, Dropdown for many */}
+                {diseases.length <= 6 ? (
+                  <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                    <Chip
+                      label="All Diseases"
+                      onClick={() => setDiseaseFilter("all")}
+                      sx={{
+                        px: 1,
+                        fontSize: "0.95rem",
+                        fontWeight: 500,
+                        backgroundColor:
+                          diseaseFilter === "all" ? "#10B981" : "#F3F4F6",
+                        color: diseaseFilter === "all" ? "white" : "#6B7280",
+                        border: "none",
+                        "&:hover": {
+                          backgroundColor:
+                            diseaseFilter === "all" ? "#059669" : "#E5E7EB",
+                        },
+                      }}
+                    />
+                    {diseases.map((disease) => (
+                      <Chip
+                        key={disease.id}
+                        label={disease.name}
+                        onClick={() => setDiseaseFilter(disease.id.toString())}
+                        sx={{
+                          px: 1,
+                          fontSize: "0.95rem",
+                          fontWeight: 500,
+                          backgroundColor:
+                            diseaseFilter === disease.id.toString()
+                              ? "#10B981"
+                              : "#F3F4F6",
+                          color:
+                            diseaseFilter === disease.id.toString()
+                              ? "white"
+                              : "#6B7280",
+                          border: "none",
+                          "&:hover": {
+                            backgroundColor:
+                              diseaseFilter === disease.id.toString()
+                                ? "#059669"
+                                : "#E5E7EB",
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                ) : (
+                  <FormControl sx={{ minWidth: 220 }}>
+                    <Select
+                      value={diseaseFilter}
+                      onChange={(e) => setDiseaseFilter(e.target.value)}
+                      displayEmpty
+                      sx={{
+                        backgroundColor: "white",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#E5E7EB",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#10B981",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#10B981",
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">All Diseases</MenuItem>
+                      {diseases.map((disease) => (
+                        <MenuItem
+                          key={disease.id}
+                          value={disease.id.toString()}
+                        >
+                          {disease.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+
+                {/* Divider */}
+                <Box
+                  sx={{ width: 1, height: 24, backgroundColor: "#E5E7EB" }}
+                />
+
+                {/* Modality Filter Chips */}
+                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                  <Chip
+                    label="All Modalities"
+                    onClick={() => setModalityFilter("all")}
+                    sx={{
+                      px: 1,
+                      fontSize: "0.95rem",
+                      fontWeight: 500,
+                      backgroundColor:
+                        modalityFilter === "all" ? "#10B981" : "#F3F4F6",
+                      color: modalityFilter === "all" ? "white" : "#6B7280",
+                      border: "none",
+                      "&:hover": {
+                        backgroundColor:
+                          modalityFilter === "all" ? "#059669" : "#E5E7EB",
+                      },
+                    }}
+                  />
+                  {MODALITY_OPTIONS.map((mod) => (
+                    <Chip
+                      key={mod}
+                      label={mod}
+                      onClick={() => setModalityFilter(mod)}
+                      sx={{
+                        px: 1,
+                        fontSize: "0.95rem",
+                        fontWeight: 500,
+                        backgroundColor:
+                          modalityFilter === mod ? "#10B981" : "#F3F4F6",
+                        color: modalityFilter === mod ? "white" : "#6B7280",
+                        border: "none",
+                        "&:hover": {
+                          backgroundColor:
+                            modalityFilter === mod ? "#059669" : "#E5E7EB",
+                        },
+                      }}
+                    />
+                  ))}
+                </Box>
+
+                <Box sx={{ flexGrow: 1 }} />
+                <Button
+                  variant="contained"
+                  startIcon={<Upload />}
+                  onClick={() => handleClassifierDialogOpen()}
+                  sx={{
+                    backgroundColor: "#10B981",
+                    px: 3,
+                    "&:hover": { backgroundColor: "#059669" },
+                  }}
+                >
+                  Add Classifier
+                </Button>
+              </Box>
             </Box>
 
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Disease</TableCell>
-                    <TableCell>Modality</TableCell>
-                    <TableCell>Performance</TableCell>
-                    <TableCell>Version</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {classifiers.map((classifier) => (
-                    <TableRow key={classifier.id}>
-                      <TableCell>
-                        <Typography variant="subtitle2">
-                          {classifier.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {classifier.model_type}
-                        </Typography>
+            {/* Classifiers Table */}
+            <Paper sx={{ borderRadius: 2 }}>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: "#ECFDF5" }}>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        Classifier Name
                       </TableCell>
-                      <TableCell>{classifier.disease_name || "N/A"}</TableCell>
-                      <TableCell>
-                        <Chip label={classifier.modality} size="small" />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="caption" display="block">
-                          Acc: {(classifier.accuracy * 100).toFixed(1)}%
-                        </Typography>
-                        <Typography variant="caption" display="block">
-                          F1: {(classifier.f1_score * 100).toFixed(1)}%
-                        </Typography>
-                      </TableCell>
-                      <TableCell>{classifier.version || "N/A"}</TableCell>
-                      <TableCell>
-                        {classifier.is_active ? (
-                          <Chip
-                            icon={<CheckCircle />}
-                            label="Active"
-                            color="success"
-                            size="small"
-                          />
-                        ) : (
-                          <Chip
-                            icon={<Cancel />}
-                            label="Inactive"
-                            color="default"
-                            size="small"
-                          />
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip title="Edit">
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              handleClassifierDialogOpen(classifier)
-                            }
-                          >
-                            <Edit />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Deactivate">
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              handleDeleteClassifier(classifier.id, false)
-                            }
-                          >
-                            <Cancel />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete Permanently">
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() =>
-                              handleDeleteClassifier(classifier.id, true)
-                            }
-                          >
-                            <Delete />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Disease</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Modality</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Model Type</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Accuracy</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </TabPanel>
-        </Card>
+                  </TableHead>
+                  <TableBody>
+                    {filteredClassifiers.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
+                          <Typography variant="body1" color="text.secondary">
+                            No classifiers found
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredClassifiers
+                        .slice(
+                          classifierPage * classifierRowsPerPage,
+                          classifierPage * classifierRowsPerPage +
+                            classifierRowsPerPage
+                        )
+                        .map((classifier) => (
+                          <TableRow
+                            key={classifier.id}
+                            sx={{ "&:hover": { backgroundColor: "#F8F9FA" } }}
+                          >
+                            <TableCell>
+                              <Typography variant="subtitle2">
+                                {classifier.name}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {classifier.version || "N/A"}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              {classifier.disease_name || "N/A"}
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={classifier.modality}
+                                size="small"
+                                sx={{
+                                  backgroundColor: "#ECFDF5",
+                                  color: "#10B981",
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              {classifier.model_type || "N/A"}
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={`${(classifier.accuracy * 100).toFixed(
+                                  1
+                                )}%`}
+                                size="small"
+                                color="success"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              {classifier.is_active ? (
+                                <Chip
+                                  icon={<CheckCircle />}
+                                  label="Active"
+                                  color="success"
+                                  size="small"
+                                />
+                              ) : (
+                                <Chip
+                                  icon={<Cancel />}
+                                  label="Inactive"
+                                  color="default"
+                                  size="small"
+                                />
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Tooltip title="Edit">
+                                <IconButton
+                                  size="small"
+                                  onClick={() =>
+                                    handleClassifierDialogOpen(classifier)
+                                  }
+                                  sx={{ color: "#10B981" }}
+                                >
+                                  <Edit fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Deactivate">
+                                <IconButton
+                                  size="small"
+                                  onClick={() =>
+                                    handleDeleteClassifier(classifier.id, false)
+                                  }
+                                >
+                                  <Cancel fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Delete">
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() =>
+                                    handleDeleteClassifier(classifier.id, true)
+                                  }
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={filteredClassifiers.length}
+                rowsPerPage={classifierRowsPerPage}
+                page={classifierPage}
+                onPageChange={(e, newPage) => setClassifierPage(newPage)}
+                onRowsPerPageChange={(e) => {
+                  setClassifierRowsPerPage(parseInt(e.target.value, 10));
+                  setClassifierPage(0);
+                }}
+                sx={{ borderTop: "1px solid #E8EAED" }}
+              />
+            </Paper>
+          </Box>
+        )}
 
         {/* Disease Dialog */}
         <Dialog
           open={diseaseDialogOpen}
           onClose={() => setDiseaseDialogOpen(false)}
-          maxWidth="md"
+          maxWidth="sm"
           fullWidth
         >
-          <DialogTitle>
+          <DialogTitle
+            sx={{
+              backgroundColor: "#ECFDF5",
+              color: "#10B981",
+              fontWeight: 600,
+            }}
+          >
             {editingDisease ? "Edit Disease" : "Add New Disease"}
           </DialogTitle>
-          <DialogContent>
-            <Box sx={{ mt: 2 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Disease Name"
-                    value={diseaseForm.name}
-                    onChange={(e) =>
-                      setDiseaseForm({ ...diseaseForm, name: e.target.value })
-                    }
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Description"
-                    value={diseaseForm.description}
-                    onChange={(e) =>
-                      setDiseaseForm({
-                        ...diseaseForm,
-                        description: e.target.value,
-                      })
-                    }
-                    multiline
-                    rows={3}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Category"
+          <DialogContent sx={{ mt: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Disease Name"
+                  value={diseaseForm.name}
+                  onChange={(e) =>
+                    setDiseaseForm({ ...diseaseForm, name: e.target.value })
+                  }
+                  required
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": { borderColor: "#10B981" },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#10B981" },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  value={diseaseForm.description}
+                  onChange={(e) =>
+                    setDiseaseForm({
+                      ...diseaseForm,
+                      description: e.target.value,
+                    })
+                  }
+                  multiline
+                  rows={3}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": { borderColor: "#10B981" },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#10B981" },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Category</InputLabel>
+                  <Select
                     value={diseaseForm.category}
                     onChange={(e) =>
                       setDiseaseForm({
@@ -625,45 +1083,79 @@ function AdminDiseaseUpload() {
                         category: e.target.value,
                       })
                     }
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Available Modalities
-                  </Typography>
-                  <Box display="flex" gap={1} flexWrap="wrap">
-                    {modalityOptions.map((modality) => (
-                      <Chip
-                        key={modality}
-                        label={modality}
-                        onClick={() => handleModalityToggle(modality)}
-                        color={
-                          (diseaseForm.available_modalities || []).includes(
-                            modality
-                          )
-                            ? "primary"
-                            : "default"
-                        }
-                        variant={
-                          (diseaseForm.available_modalities || []).includes(
-                            modality
-                          )
-                            ? "filled"
-                            : "outlined"
-                        }
-                      />
+                    label="Category"
+                    sx={{
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#10B981",
+                      },
+                    }}
+                  >
+                    {CATEGORY_OPTIONS.map((cat) => (
+                      <MenuItem key={cat} value={cat}>
+                        {cat}
+                      </MenuItem>
                     ))}
-                  </Box>
-                </Grid>
+                  </Select>
+                </FormControl>
               </Grid>
-            </Box>
+              <Grid item xs={12}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ mb: 1, color: "#2C3E50" }}
+                >
+                  Available Modalities
+                </Typography>
+                <Box display="flex" gap={1} flexWrap="wrap">
+                  {MODALITY_OPTIONS.map((modality) => (
+                    <Chip
+                      key={modality}
+                      label={modality}
+                      onClick={() => handleModalityToggle(modality)}
+                      color={
+                        (diseaseForm.available_modalities || []).includes(
+                          modality
+                        )
+                          ? "primary"
+                          : "default"
+                      }
+                      variant={
+                        (diseaseForm.available_modalities || []).includes(
+                          modality
+                        )
+                          ? "filled"
+                          : "outlined"
+                      }
+                      sx={{
+                        backgroundColor: (
+                          diseaseForm.available_modalities || []
+                        ).includes(modality)
+                          ? "#10B981"
+                          : "transparent",
+                        borderColor: "#10B981",
+                        "&:hover": {
+                          backgroundColor: (
+                            diseaseForm.available_modalities || []
+                          ).includes(modality)
+                            ? "#059669"
+                            : "#ECFDF5",
+                        },
+                      }}
+                    />
+                  ))}
+                </Box>
+              </Grid>
+            </Grid>
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ p: 2 }}>
             <Button onClick={() => setDiseaseDialogOpen(false)}>Cancel</Button>
             <Button
               onClick={handleDiseaseSubmit}
               variant="contained"
               disabled={!diseaseForm.name || loading}
+              sx={{
+                backgroundColor: "#10B981",
+                "&:hover": { backgroundColor: "#059669" },
+              }}
             >
               {loading ? <CircularProgress size={24} /> : "Save"}
             </Button>
@@ -674,254 +1166,237 @@ function AdminDiseaseUpload() {
         <Dialog
           open={classifierDialogOpen}
           onClose={() => setClassifierDialogOpen(false)}
-          maxWidth="md"
+          maxWidth="sm"
           fullWidth
         >
-          <DialogTitle>
+          <DialogTitle
+            sx={{
+              backgroundColor: "#ECFDF5",
+              color: "#10B981",
+              fontWeight: 600,
+            }}
+          >
             {editingClassifier ? "Edit Classifier" : "Upload New Classifier"}
           </DialogTitle>
-          <DialogContent>
-            <Box sx={{ mt: 2 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Classifier Name"
-                    value={classifierForm.name}
+          <DialogContent sx={{ mt: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Classifier Name"
+                  value={classifierForm.name}
+                  onChange={(e) =>
+                    setClassifierForm({
+                      ...classifierForm,
+                      name: e.target.value,
+                    })
+                  }
+                  required
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": { borderColor: "#10B981" },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#10B981" },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth required>
+                  <InputLabel>Disease</InputLabel>
+                  <Select
+                    value={classifierForm.disease_id}
                     onChange={(e) =>
                       setClassifierForm({
                         ...classifierForm,
-                        name: e.target.value,
+                        disease_id: e.target.value,
                       })
                     }
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth required>
-                    <InputLabel>Disease</InputLabel>
-                    <Select
-                      value={classifierForm.disease_id}
-                      onChange={(e) =>
-                        setClassifierForm({
-                          ...classifierForm,
-                          disease_id: e.target.value,
-                        })
-                      }
-                      label="Disease"
-                      disabled={diseases.length === 0}
-                    >
-                      {diseases.length === 0 ? (
-                        <MenuItem disabled>
-                          No diseases available. Please create a disease first.
-                        </MenuItem>
-                      ) : (
-                        diseases.map((disease) => (
-                          <MenuItem key={disease.id} value={disease.id}>
-                            {disease.name}
-                          </MenuItem>
-                        ))
-                      )}
-                    </Select>
-                  </FormControl>
-                  {diseases.length === 0 && (
-                    <Typography
-                      variant="caption"
-                      color="error"
-                      sx={{ mt: 0.5, display: "block" }}
-                    >
-                      Please create at least one disease before adding
-                      classifiers.
-                    </Typography>
-                  )}
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth required>
-                    <InputLabel>Modality</InputLabel>
-                    <Select
-                      value={classifierForm.modality}
-                      onChange={(e) =>
-                        setClassifierForm({
-                          ...classifierForm,
-                          modality: e.target.value,
-                        })
-                      }
-                      label="Modality"
-                    >
-                      {modalityOptions.map((mod) => (
-                        <MenuItem key={mod} value={mod}>
-                          {mod}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Model Type"
-                    value={classifierForm.model_type}
-                    onChange={(e) =>
-                      setClassifierForm({
-                        ...classifierForm,
-                        model_type: e.target.value,
-                      })
-                    }
-                    placeholder="e.g., RandomForest, CNN"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Description"
-                    value={classifierForm.description}
-                    onChange={(e) =>
-                      setClassifierForm({
-                        ...classifierForm,
-                        description: e.target.value,
-                      })
-                    }
-                    multiline
-                    rows={2}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    fullWidth
-                    label="Accuracy"
-                    type="number"
-                    inputProps={{ step: 0.01, min: 0, max: 1 }}
-                    value={classifierForm.accuracy}
-                    onChange={(e) =>
-                      setClassifierForm({
-                        ...classifierForm,
-                        accuracy: e.target.value,
-                      })
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    fullWidth
-                    label="Precision"
-                    type="number"
-                    inputProps={{ step: 0.01, min: 0, max: 1 }}
-                    value={classifierForm.precision}
-                    onChange={(e) =>
-                      setClassifierForm({
-                        ...classifierForm,
-                        precision: e.target.value,
-                      })
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    fullWidth
-                    label="Recall"
-                    type="number"
-                    inputProps={{ step: 0.01, min: 0, max: 1 }}
-                    value={classifierForm.recall}
-                    onChange={(e) =>
-                      setClassifierForm({
-                        ...classifierForm,
-                        recall: e.target.value,
-                      })
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    fullWidth
-                    label="F1 Score"
-                    type="number"
-                    inputProps={{ step: 0.01, min: 0, max: 1 }}
-                    value={classifierForm.f1_score}
-                    onChange={(e) =>
-                      setClassifierForm({
-                        ...classifierForm,
-                        f1_score: e.target.value,
-                      })
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Training Samples"
-                    type="number"
-                    value={classifierForm.training_samples}
-                    onChange={(e) =>
-                      setClassifierForm({
-                        ...classifierForm,
-                        training_samples: e.target.value,
-                      })
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Version"
-                    value={classifierForm.version}
-                    onChange={(e) =>
-                      setClassifierForm({
-                        ...classifierForm,
-                        version: e.target.value,
-                      })
-                    }
-                    placeholder="e.g., v1.0.0"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Box
+                    label="Disease"
+                    disabled={diseases.length === 0}
                     sx={{
-                      border: "2px dashed",
-                      borderColor: "divider",
-                      borderRadius: 2,
-                      p: 3,
-                      textAlign: "center",
-                      bgcolor: "background.default",
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#10B981",
+                      },
                     }}
                   >
-                    <input
-                      accept=".pkl"
-                      style={{ display: "none" }}
-                      id="model-file-upload"
-                      type="file"
-                      onChange={(e) => setModelFile(e.target.files[0])}
-                    />
-                    <label htmlFor="model-file-upload">
-                      <Button
-                        variant="outlined"
-                        component="span"
-                        startIcon={<CloudUpload />}
-                      >
-                        {editingClassifier
-                          ? "Upload New Model File (Optional)"
-                          : "Upload Model File (.pkl)"}
-                      </Button>
-                    </label>
-                    {modelFile && (
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        Selected: {modelFile.name}
-                      </Typography>
+                    {diseases.length === 0 ? (
+                      <MenuItem disabled>No diseases available</MenuItem>
+                    ) : (
+                      diseases.map((disease) => (
+                        <MenuItem key={disease.id} value={disease.id}>
+                          {disease.name}
+                        </MenuItem>
+                      ))
                     )}
-                    {editingClassifier && !modelFile && (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ mt: 1 }}
-                      >
-                        Leave empty to keep existing model file
-                      </Typography>
-                    )}
-                  </Box>
-                </Grid>
+                  </Select>
+                </FormControl>
               </Grid>
-            </Box>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth required>
+                  <InputLabel>Modality</InputLabel>
+                  <Select
+                    value={classifierForm.modality}
+                    onChange={(e) =>
+                      setClassifierForm({
+                        ...classifierForm,
+                        modality: e.target.value,
+                      })
+                    }
+                    label="Modality"
+                    sx={{
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#10B981",
+                      },
+                    }}
+                  >
+                    {MODALITY_OPTIONS.map((mod) => (
+                      <MenuItem key={mod} value={mod}>
+                        {mod}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Model Type"
+                  value={classifierForm.model_type}
+                  onChange={(e) =>
+                    setClassifierForm({
+                      ...classifierForm,
+                      model_type: e.target.value,
+                    })
+                  }
+                  placeholder="e.g., RandomForest"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": { borderColor: "#10B981" },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#10B981" },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  value={classifierForm.description}
+                  onChange={(e) =>
+                    setClassifierForm({
+                      ...classifierForm,
+                      description: e.target.value,
+                    })
+                  }
+                  multiline
+                  rows={2}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": { borderColor: "#10B981" },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#10B981" },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Accuracy (0-1)"
+                  type="number"
+                  inputProps={{ step: 0.01, min: 0, max: 1 }}
+                  value={classifierForm.accuracy}
+                  onChange={(e) =>
+                    setClassifierForm({
+                      ...classifierForm,
+                      accuracy: e.target.value,
+                    })
+                  }
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": { borderColor: "#10B981" },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#10B981" },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Version"
+                  value={classifierForm.version}
+                  onChange={(e) =>
+                    setClassifierForm({
+                      ...classifierForm,
+                      version: e.target.value,
+                    })
+                  }
+                  placeholder="e.g., v1.0.0"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": { borderColor: "#10B981" },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#10B981" },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Box
+                  sx={{
+                    border: "2px dashed #10B981",
+                    borderRadius: 2,
+                    p: 3,
+                    textAlign: "center",
+                    backgroundColor: "#ECFDF5",
+                  }}
+                >
+                  <input
+                    accept=".pkl"
+                    style={{ display: "none" }}
+                    id="model-file-upload"
+                    type="file"
+                    onChange={(e) => setModelFile(e.target.files[0])}
+                  />
+                  <label htmlFor="model-file-upload">
+                    <Button
+                      variant="outlined"
+                      component="span"
+                      startIcon={<CloudUpload />}
+                      sx={{
+                        borderColor: "#10B981",
+                        color: "#10B981",
+                        "&:hover": {
+                          borderColor: "#059669",
+                          backgroundColor: "white",
+                        },
+                      }}
+                    >
+                      {editingClassifier
+                        ? "Upload New Model (Optional)"
+                        : "Upload Model File (.pkl)"}
+                    </Button>
+                  </label>
+                  {modelFile && (
+                    <Typography
+                      variant="body2"
+                      sx={{ mt: 1, color: "#10B981" }}
+                    >
+                      Selected: {modelFile.name}
+                    </Typography>
+                  )}
+                  {editingClassifier && !modelFile && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ mt: 1, display: "block" }}
+                    >
+                      Leave empty to keep existing model
+                    </Typography>
+                  )}
+                </Box>
+              </Grid>
+            </Grid>
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ p: 2 }}>
             <Button onClick={() => setClassifierDialogOpen(false)}>
               Cancel
             </Button>
@@ -935,12 +1410,16 @@ function AdminDiseaseUpload() {
                 (!editingClassifier && !modelFile) ||
                 loading
               }
+              sx={{
+                backgroundColor: "#10B981",
+                "&:hover": { backgroundColor: "#059669" },
+              }}
             >
               {loading ? <CircularProgress size={24} /> : "Save"}
             </Button>
           </DialogActions>
         </Dialog>
-      </Box>
+      </Container>
     </Box>
   );
 }

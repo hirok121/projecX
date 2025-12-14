@@ -129,18 +129,10 @@ function App() {
               }
             />
             <Route
-              path="/admin/analytics"
+              path="/admin/under-construction"
               element={
                 <ProtectedRoute>
-                  <LazyComponents.AdminAnalytics />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/system"
-              element={
-                <ProtectedRoute>
-                  <LazyComponents.AdminSystem />
+                  <LazyComponents.UnderConstruction />
                 </ProtectedRoute>
               }
             />

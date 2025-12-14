@@ -24,11 +24,10 @@ export const LazyComponents = {
   // Admin Components
   AdminDashboard: lazy(() => import('../pages/admin/AdminDashboard')),
   AdminUserManagement: lazy(() => import('../pages/admin/UserManagement')),
-  AdminAnalytics: lazy(() => import('../pages/admin/AdminAnalytics')),
-  AdminSystem: lazy(() => import('../pages/admin/AdminSystem')),
   AdminDebugConsole: lazy(() => import('../pages/admin/AdminDebugConsole')),
   AdminDiagnosisManagement: lazy(() => import('../pages/admin/AdminDiagnosisManagement')),
   AdminDiseaseUpload: lazy(() => import('../pages/admin/AdminDiseaseUpload')),
+  UnderConstruction: lazy(() => import('../pages/admin/UnderConstruction')),
     // Main Application Components
   Home: lazy(() => import('../pages/Home')),
   Diagnosis: lazy(() => import('../pages/diagnosis/Diagnosis')),

@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -9,160 +8,118 @@ import {
   Button,
   Alert,
   CircularProgress,
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
   Paper,
   Chip,
-  Avatar,
-  Collapse,
-  Menu,
+  TextField,
+  InputAdornment,
   MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Grid,
 } from "@mui/material";
 import {
-  Person,
   Assessment,
   FileDownload,
-  AdminPanelSettings,
-  Timeline,
-  HealthAndSafety,
-  Group,
   Search,
-  TrendingUp,
-  History,
-  Insights,
-  ExpandMore,
-  ExpandLess,
-  Upload,
-  Settings,
+  Refresh,
+  LocalHospital,
+  Person,
 } from "@mui/icons-material";
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  Legend,
-  Cell,
-  LineChart,
-  Line,
-} from "recharts";
-import { useAdminAnalytics } from "../../hooks/useAnalytics";
-import { useAdminSearchDiagnoses } from "../../hooks/useDiagnosis";
 import AdminNavbar from "../../components/admin/AdminNavbar";
-import DiagnosisSearch from "../../components/diagnosis/DiagnosisSearch";
-import DiagnosisTable from "../../components/diagnosis/DiagnosisTable";
 import { diagnosisAPI } from "../../services/diagnosisAPI";
-
-const COLORS = {
-  primary: "#1976d2",
-  secondary: "#dc004e",
-  warning: "#ed6c02",
-  success: "#2e7d32",
-  info: "#0288d1",
-  error: "#d32f2f",
-};
 
 function AdminDiagnosisManagement() {
   const navigate = useNavigate();
-  const { data: analytics, isLoading, error } = useAdminAnalytics();
+  const [loading, setLoading] = useState(true);
+  const [diagnoses, setDiagnoses] = useState([]);
+  const [filteredDiagnoses, setFilteredDiagnoses] = useState([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    recent: 0,
+  });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterRisk, setFilterRisk] = useState("all");
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("info");
 
-  // Search functionality state
-  const [showSearch, setShowSearch] = useState(true);
-  const [searchFilters, setSearchFilters] = useState({});
-  const [showSearchResults, setShowSearchResults] = useState(false);
-  const [hasActiveFilters, setHasActiveFilters] = useState(false);
-  const [searchPage, setSearchPage] = useState(1);
-  const [searchPageSize, setSearchPageSize] = useState(25);
+  useEffect(() => {
+    fetchDiagnosisData();
+  }, []);
 
-  // Export menu state
-  const [exportAnchorEl, setExportAnchorEl] = useState(null);
-  const openExportMenu = Boolean(exportAnchorEl);
+  useEffect(() => {
+    // Apply filters
+    let filtered = [...diagnoses];
 
-  // Prepare search filters with pagination
-  const searchFiltersWithPagination = useMemo(() => {
-    if (Object.keys(searchFilters).length === 0) return {};
-    return {
-      ...searchFilters,
-      page: searchPage,
-      page_size: searchPageSize,
-    };
-  }, [searchFilters, searchPage, searchPageSize]);
-  // Search diagnoses hook
-  const { data: searchResults, isError: searchError } = useAdminSearchDiagnoses(
-    searchFiltersWithPagination
-  );
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (d) =>
+          d.user_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          d.disease_name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
-  const analyticsData = useMemo(() => analytics?.data || {}, [analytics?.data]);
+    // Risk filter
+    if (filterRisk !== "all") {
+      filtered = filtered.filter(
+        (d) => d.risk_level?.toLowerCase() === filterRisk
+      );
+    }
 
-  // Pagination handlers for search
-  const handleSearchPageChange = (event, newPage) => {
-    setSearchPage(newPage);
-  };
+    setFilteredDiagnoses(filtered);
+    setPage(0);
+  }, [searchQuery, filterRisk, diagnoses]);
 
-  const handleSearchPageSizeChange = (event) => {
-    setSearchPageSize(parseInt(event.target.value, 10));
-    setSearchPage(1); // Reset to first page when changing page size
-  };
-
-  const handleExportAll = async (format = "excel") => {
+  const fetchDiagnosisData = async () => {
+    setLoading(true);
     try {
-      let response;
-      let filename;
+      // Fetch analytics for basic stats
+      const analyticsResponse = await diagnosisAPI.getAdminAnalytics();
+      const analytics = analyticsResponse.data?.data || {};
 
-      if (format === "csv") {
-        response = await diagnosisAPI.exportCSV();
-        filename = `diagnosis_records_${
-          new Date().toISOString().split("T")[0]
-        }.csv`;
-      } else if (format === "excel") {
-        response = await diagnosisAPI.exportExcel();
-        filename = `diagnosis_records_${
-          new Date().toISOString().split("T")[0]
-        }.xlsx`;
-      } else if (format === "analytics") {
-        // Create comprehensive analytics export
-        const exportData = {
-          export_info: {
-            generated_at: new Date().toISOString(),
-            export_type: "Admin Analytics Export",
-            description: "Comprehensive system analytics and diagnosis data",
-          },
-          analytics_summary: analyticsData || {},
-          system_health: analyticsData.system_health || {},
-          model_performance: analyticsData.model_performance || {},
-          age_analysis: analyticsData.age_analysis || {},
-          top_users: analyticsData.top_users || [],
-          monthly_trends: analyticsData.monthly_trends || [],
-          weekly_trends: analyticsData.weekly_trends || [],
-          search_results: searchResults || {},
-          distribution_data: {
-            risk_distribution: analyticsData.risk_distribution || {},
-            hcv_status_distribution:
-              analyticsData.hcv_status_distribution || {},
-            stage_distribution: analyticsData.stage_distribution || {},
-            gender_distribution: analyticsData.gender_distribution || {},
-            age_distribution: analyticsData.age_distribution || {},
-          },
-        };
+      setStats({
+        total: analytics.total_diagnoses || 0,
+        recent: analytics.recent_diagnoses || 0,
+      });
 
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataBlob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `admin_analytics_export_${
-          new Date().toISOString().split("T")[0]
-        }.json`;
-        link.click();
-        URL.revokeObjectURL(url);
+      // Fetch diagnosis records with basic filters
+      const diagnosesResponse = await diagnosisAPI.searchDiagnoses({
+        page: 1,
+        page_size: 1000, // Get all for client-side filtering
+      });
 
-        setExportAnchorEl(null);
-        return;
-      }
+      const diagnosisData = diagnosesResponse.data?.items || [];
+      setDiagnoses(diagnosisData);
+      setFilteredDiagnoses(diagnosisData);
 
-      // Create download link for CSV/Excel
+      setMessage("");
+    } catch (error) {
+      console.error("Diagnosis data fetch error:", error);
+      setMessage("Error loading diagnosis data. Please try again.");
+      setMessageType("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const response = await diagnosisAPI.exportExcel();
+      const filename = `diagnosis_records_${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`;
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -171,1071 +128,354 @@ function AdminDiagnosisManagement() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+
+      setMessage("Export completed successfully");
+      setMessageType("success");
     } catch (error) {
-      // You could add a toast notification here
-    } finally {
-      setExportAnchorEl(null); // Close the menu
+      console.error("Export error:", error);
+      setMessage("Error exporting data");
+      setMessageType("error");
     }
   };
 
-  const handleExportMenuClick = (event) => {
-    setExportAnchorEl(event.currentTarget);
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
   };
 
-  const handleExportMenuClose = () => {
-    setExportAnchorEl(null);
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
-  // Prepare chart data
-  const riskDistributionData = [
-    {
-      name: "High Risk",
-      value: analyticsData.risk_distribution?.high_risk || 0,
-      color: COLORS.error,
-    },
-    {
-      name: "Medium Risk",
-      value: analyticsData.risk_distribution?.medium_risk || 0,
-      color: COLORS.warning,
-    },
-    {
-      name: "Low Risk",
-      value: analyticsData.risk_distribution?.low_risk || 0,
-      color: COLORS.success,
-    },
-  ];
-  const hcvStatusData = [
-    {
-      name: "Positive",
-      value: analyticsData.hcv_status_distribution?.positive || 0,
-      color: COLORS.error,
-    },
-    {
-      name: "Negative",
-      value: analyticsData.hcv_status_distribution?.negative || 0,
-      color: COLORS.success,
-    },
-  ];
-
-  const ageDistributionData = [
-    { name: "Young (<30)", value: analyticsData.age_distribution?.young || 0 },
-    {
-      name: "Middle (30-60)",
-      value: analyticsData.age_distribution?.middle || 0,
-    },
-    { name: "Elder (60+)", value: analyticsData.age_distribution?.elder || 0 },
-  ];
-
-  // Gender distribution data with robust handling
-  const genderDistributionData = [
-    {
-      name: "Male",
-      value:
-        analyticsData.gender_distribution?.male ||
-        analyticsData.gender_distribution?.Male ||
-        0,
-      color: COLORS.info,
-    },
-    {
-      name: "Female",
-      value:
-        analyticsData.gender_distribution?.female ||
-        analyticsData.gender_distribution?.Female ||
-        0,
-      color: COLORS.secondary,
-    },
-  ].filter((item) => item.value > 0);
-
-  const hasGenderData =
-    analyticsData.gender_distribution &&
-    Object.values(analyticsData.gender_distribution).some((value) => value > 0);
-
-  const monthlyTrendsData = analyticsData.monthly_trends || [];
-
-  const stageDistributionData = Object.entries(
-    analyticsData.stage_distribution || {}
-  ).map(([stage, count]) => ({
-    name: stage,
-    value: count,
-    color: stage.toLowerCase().includes("cirrhosis")
-      ? COLORS.error
-      : stage.toLowerCase().includes("fibrosis")
-      ? COLORS.warning
-      : stage.toLowerCase().includes("hepatitis")
-      ? COLORS.info
-      : stage.toLowerCase().includes("blood donors")
-      ? COLORS.success
-      : COLORS.primary, // fallback color
-  }));
-
-  // Component definitions
-  const AdminStatCard = ({
-    title,
-    value,
-    icon,
-    color = "primary",
-    subtitle,
-  }) => (
-    <Card sx={{ height: "100%", minHeight: "120px" }}>
-      <CardContent sx={{ p: 2 }}>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box>
-            <Typography variant="h5" color={color} fontWeight="bold">
-              {value}
-            </Typography>
-            <Typography
-              variant="body2"
-              color="text.primary"
-              fontWeight="medium"
-            >
-              {title}
-            </Typography>{" "}
-            {subtitle && (
-              <Typography variant="caption" color="text.secondary">
-                {subtitle}
-              </Typography>
-            )}
-          </Box>
-          <Avatar sx={{ bgcolor: `${color}.main`, width: 40, height: 40 }}>
-            {icon}
-          </Avatar>
-        </Box>
-      </CardContent>
-    </Card>
-  );
-
-  AdminStatCard.propTypes = {
-    title: PropTypes.string.isRequired,
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    icon: PropTypes.element.isRequired,
-    color: PropTypes.string,
-    subtitle: PropTypes.string,
+  const getRiskColor = (risk) => {
+    switch (risk?.toLowerCase()) {
+      case "high":
+        return "error";
+      case "medium":
+        return "warning";
+      case "low":
+        return "success";
+      default:
+        return "default";
+    }
   };
 
-  const ChartCard = ({ title, children, height = 300 }) => (
-    <Card sx={{ height: "100%" }}>
-      <CardContent sx={{ p: 3 }}>
-        <Typography variant="h6" component="h3" gutterBottom fontWeight="bold">
-          {title}
-        </Typography>
-        <Box height={height}>{children}</Box>
-      </CardContent>
-    </Card>
-  );
-
-  ChartCard.propTypes = {
-    title: PropTypes.string.isRequired,
-    children: PropTypes.node.isRequired,
-    height: PropTypes.number,
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <Box>
-        <AdminNavbar />
-        <Box sx={{ p: 3 }}>
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            minHeight="50vh"
-          >
-            <CircularProgress />
-          </Box>
-        </Box>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box>
-        <AdminNavbar />
-        <Box sx={{ p: 3 }}>
-          <Alert severity="error">
-            Error loading admin analytics: {error.message}
-          </Alert>
-        </Box>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundColor: "#F8F9FA",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress sx={{ color: "#10B981" }} />
       </Box>
     );
   }
 
   return (
-    <Box>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#F8F9FA" }}>
       <AdminNavbar />
-      <Box sx={{ p: 3 }}>
-        {/* Header Section */}
-        <Box mb={2}>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={2}
+
+      <Container maxWidth="xl" sx={{ py: 6 }}>
+        {/* Header */}
+        <Box sx={{ mb: 5 }}>
+          <Typography
+            variant="h3"
+            sx={{ fontWeight: 600, color: "#2C3E50", mb: 1 }}
           >
-            <Box>
-              <Typography variant="h4" component="h1" gutterBottom>
-                Admin Diagnosis Management
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Comprehensive diagnosis analytics and management for
-                administrators
-              </Typography>
-            </Box>
-            <Box display="flex" gap={2}>
-              <Button
-                variant="outlined"
-                startIcon={<Upload />}
-                onClick={() => navigate("/admin/disease-upload")}
-                sx={{ minWidth: 180 }}
-              >
-                Manage Diseases & Models
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<FileDownload />}
-                onClick={handleExportMenuClick}
-                sx={{ minWidth: 150 }}
-              >
-                Export Data
-              </Button>
-            </Box>
-            <Menu
-              anchorEl={exportAnchorEl}
-              open={openExportMenu}
-              onClose={handleExportMenuClose}
-              MenuListProps={{
-                "aria-labelledby": "export-button",
+            Disease & Classifier Management
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Manage diagnosis records and view system statistics
+          </Typography>
+
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+            <Button
+              variant="contained"
+              startIcon={<FileDownload />}
+              onClick={handleExport}
+              sx={{
+                backgroundColor: "#10B981",
+                "&:hover": {
+                  backgroundColor: "#059669",
+                },
               }}
             >
-              <MenuItem onClick={() => handleExportAll("excel")}>
-                Export Diagnosis Records as Excel (.xlsx)
-              </MenuItem>
-              <MenuItem onClick={() => handleExportAll("csv")}>
-                Export Diagnosis Records as CSV (.csv)
-              </MenuItem>
-              <MenuItem onClick={() => handleExportAll("analytics")}>
-                Export Analytics Data as JSON (.json)
-              </MenuItem>
-            </Menu>
+              Export Data
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={fetchDiagnosisData}
+              disabled={loading}
+              sx={{
+                borderColor: "#10B981",
+                color: "#10B981",
+                "&:hover": {
+                  borderColor: "#059669",
+                  backgroundColor: "#ECFDF5",
+                },
+              }}
+            >
+              Refresh
+            </Button>
           </Box>
         </Box>
 
-        {/* No data alert */}
-        {analyticsData.total_diagnoses === 0 && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            No diagnosis records found in the system. Analytics will be
-            available once diagnoses are created.
+        {/* Messages */}
+        {message && (
+          <Alert
+            severity={messageType}
+            sx={{ mb: 4, borderRadius: 2 }}
+            onClose={() => setMessage("")}
+          >
+            {message}
           </Alert>
         )}
 
-        {/* Main content when data exists */}
-        {analyticsData.total_diagnoses > 0 && (
-          <Box>
-            {/* Overview Section */}
-            <Box mb={4}>
-              <Paper sx={{ p: 1.5, mb: 2, bgcolor: "primary.main" }}>
-                <Typography
-                  variant="h6"
-                  color="white"
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                >
-                  <AdminPanelSettings fontSize="small" /> System Overview &
-                  Analytics{" "}
-                </Typography>
-              </Paper>
-
-              {/* Enhanced Admin Stats Flex Layout */}
-              <Box
-                display="flex"
-                flexWrap="wrap"
-                gap={2}
-                mb={3}
-                sx={{
-                  "& > *": {
-                    flex: {
-                      xs: "1 1 calc(50% - 8px)",
-                      sm: "1 1 calc(25% - 12px)",
-                    },
-                    minWidth: "200px",
-                  },
-                }}
-              >
-                <AdminStatCard
-                  title="Total Diagnoses"
-                  value={analyticsData.total_diagnoses || 0}
-                  icon={<Assessment />}
-                  color="primary"
-                />
-                <AdminStatCard
-                  title="Total Users"
-                  value={analyticsData.total_users || 0}
-                  icon={<Group />}
-                  color="info"
-                />
-                <AdminStatCard
-                  title="Recent Activity"
-                  value={analyticsData.recent_diagnoses || 0}
-                  icon={<Timeline />}
-                  color="warning"
-                  subtitle="Last 30 days"
-                />
-                <AdminStatCard
-                  title="System Confidence"
-                  value={`${analyticsData.average_confidence || 0}%`}
-                  icon={<HealthAndSafety />}
-                  color="success"
-                />
-              </Box>
-
-              {/* Additional System Health & Performance Stats */}
-              <Box
-                display="flex"
-                flexWrap="wrap"
-                gap={2}
-                mb={3}
-                sx={{
-                  "& > *": {
-                    flex: {
-                      xs: "1 1 calc(50% - 8px)",
-                      sm: "1 1 calc(25% - 12px)",
-                    },
-                    minWidth: "200px",
-                  },
-                }}
-              >
-                <AdminStatCard
-                  title="Average Age"
-                  value={`${
-                    analyticsData.age_analysis?.average_age || 0
-                  } years`}
-                  icon={<Person />}
-                  color="secondary"
-                />
-                <AdminStatCard
-                  title="Model Accuracy"
-                  value={analyticsData.model_performance?.accuracy || "N/A"}
-                  icon={<Insights />}
-                  color="success"
-                />
-                <AdminStatCard
-                  title="System Uptime"
-                  value={analyticsData.system_health?.system_uptime || "N/A"}
-                  icon={<TrendingUp />}
-                  color="info"
-                />
-                <AdminStatCard
-                  title="Avg Diagnosis Time"
-                  value={
-                    analyticsData.system_health?.average_diagnosis_time || "N/A"
-                  }
-                  icon={<History />}
-                  color="warning"
-                />
-              </Box>
-
-              {/* Enhanced Charts Flex Layout with All Chart Types */}
-              <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
-                {/* three binary distribution  */}
-                <Box display="flex " gap={2} width="100%">
-                  {/* Risk Level Distribution */}
+        {/* Statistics Cards */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6}>
+            <Card
+              sx={{
+                height: "100%",
+                borderRadius: 2,
+                border: "1px solid #E8EAED",
+                boxShadow: "none",
+                "&:hover": {
+                  boxShadow: "0 4px 12px rgba(44, 62, 80, 0.08)",
+                },
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                   <Box
                     sx={{
-                      flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
-                      minWidth: "300px",
+                      width: 48,
+                      height: 48,
+                      borderRadius: 2,
+                      backgroundColor: "#ECFDF5",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mr: 2,
                     }}
                   >
-                    <ChartCard title="Risk Level Distribution" height={200}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={riskDistributionData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={40}
-                            outerRadius={80}
-                            paddingAngle={5}
-                            dataKey="value"
-                            label={({ name, value }) =>
-                              value > 0 ? `${name}: ${value}` : ""
-                            }
-                          >
-                            {riskDistributionData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <RechartsTooltip />
-                          <Legend />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </ChartCard>
+                    <Assessment sx={{ color: "#10B981", fontSize: 24 }} />
                   </Box>
-
-                  {/* HCV Status Distribution */}
-                  <Box
-                    sx={{
-                      flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
-                      minWidth: "300px",
-                    }}
-                  >
-                    <ChartCard title="HCV Status Distribution" height={200}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={hcvStatusData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={40}
-                            outerRadius={80}
-                            paddingAngle={5}
-                            dataKey="value"
-                            label={({ name, value }) =>
-                              value > 0 ? `${name}: ${value}` : ""
-                            }
-                          >
-                            {hcvStatusData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <RechartsTooltip />
-                          <Legend />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </ChartCard>
-                  </Box>
-
-                  {/* Gender Distribution */}
-                  <Box
-                    sx={{
-                      flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
-                      minWidth: "300px",
-                    }}
-                  >
-                    <ChartCard title="Gender Distribution" height={200}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        {hasGenderData ? (
-                          <PieChart>
-                            <Pie
-                              data={genderDistributionData}
-                              cx="50%"
-                              cy="50%"
-                              outerRadius={60}
-                              innerRadius={30}
-                              dataKey="value"
-                              label={({ name, value }) => `${name}: ${value}`}
-                            >
-                              {genderDistributionData.map((entry, index) => (
-                                <Cell
-                                  key={`cell-${index}`}
-                                  fill={entry.color}
-                                />
-                              ))}
-                            </Pie>
-                            <RechartsTooltip />
-                            <Legend />
-                          </PieChart>
-                        ) : (
-                          <Box
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            height="100%"
-                          >
-                            <Typography variant="body2" color="text.secondary">
-                              No gender data available
-                            </Typography>
-                          </Box>
-                        )}
-                      </ResponsiveContainer>
-                    </ChartCard>
-                  </Box>
-                </Box>
-                <Box display="flex" gap={2} width="100%">
-                  {/* Age Distribution */}
-                  <Box
-                    sx={{
-                      flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
-                      minWidth: "300px",
-                    }}
-                  >
-                    <ChartCard title="Age Distribution" height={200}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={ageDistributionData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                          <YAxis tick={{ fontSize: 10 }} />
-                          <RechartsTooltip />
-                          <Bar dataKey="value" fill={COLORS.primary} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </ChartCard>
-                  </Box>
-
-                  {/* Stage Distribution - Full Width */}
-                  <Box sx={{ flex: "1 1 100%", minWidth: "300px" }}>
-                    <ChartCard title="HCV Stage Distribution" height={250}>
-                      {stageDistributionData ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={stageDistributionData}
-                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <RechartsTooltip />
-                            <Legend />
-                            <Bar
-                              dataKey="value"
-                              name="Count"
-                              isAnimationActive
-                              label={{ position: "top" }}
-                            >
-                              {stageDistributionData.map((entry, index) => (
-                                <Cell
-                                  key={`cell-${index}`}
-                                  fill={entry.color}
-                                />
-                              ))}
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <Box
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
-                          height="100%"
-                          flexDirection="column"
-                          gap={2}
-                        >
-                          <Alert severity="info" sx={{ width: "80%" }}>
-                            No stage distribution data available or all values
-                            are zero.
-                          </Alert>
-                        </Box>
-                      )}
-                    </ChartCard>
-                  </Box>
-                </Box>{" "}
-                {/* Top Users List */}
-                {analyticsData.top_users &&
-                  analyticsData.top_users.length > 0 && (
-                    <Box sx={{ flex: "1 1 100%", minWidth: "300px" }}>
-                      <Card
-                        sx={{
-                          backgroundColor: "white",
-                          border: "1px solid #e0e0e0",
-                          borderRadius: 2,
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                        }}
-                      >
-                        <CardContent sx={{ p: 3 }}>
-                          <Box
-                            display="flex"
-                            alignItems="center"
-                            gap={1.5}
-                            mb={2.5}
-                            sx={{
-                              borderBottom: "1px solid #e0e0e0",
-                              pb: 2,
-                            }}
-                          >
-                            <Avatar
-                              sx={{
-                                bgcolor: "primary.main",
-                                width: 32,
-                                height: 32,
-                                color: "white",
-                              }}
-                            >
-                              <Person fontSize="small" />
-                            </Avatar>
-                            <Typography
-                              variant="h6"
-                              fontWeight="bold"
-                              color="text.primary"
-                              sx={{ flex: 1 }}
-                            >
-                              Top Active Users ({analyticsData.top_users.length}
-                              )
-                            </Typography>
-                            <Chip
-                              label="USER RANKING"
-                              size="small"
-                              color="primary"
-                              variant="outlined"
-                            />
-                          </Box>
-
-                          <Box display="flex" flexDirection="column" gap={2}>
-                            {analyticsData.top_users.map((user, index) => (
-                              <Box
-                                key={index}
-                                sx={{
-                                  p: 2,
-                                  border: "1px solid #f0f0f0",
-                                  borderRadius: 1,
-                                  backgroundColor:
-                                    index === 0 ? "#f8f9fa" : "white",
-                                  "&:hover": {
-                                    backgroundColor: "#f5f5f5",
-                                    transform: "translateY(-1px)",
-                                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                                  },
-                                  transition: "all 0.2s ease-in-out",
-                                }}
-                              >
-                                <Box
-                                  display="flex"
-                                  justifyContent="space-between"
-                                  alignItems="center"
-                                  mb={1}
-                                >
-                                  <Box
-                                    display="flex"
-                                    alignItems="center"
-                                    gap={1}
-                                  >
-                                    <Chip
-                                      label={`#${index + 1}`}
-                                      size="small"
-                                      color={
-                                        index === 0 ? "warning" : "default"
-                                      }
-                                      sx={{ minWidth: "40px" }}
-                                    />
-                                    <Typography
-                                      variant="subtitle2"
-                                      fontWeight="bold"
-                                      color="text.primary"
-                                    >
-                                      {`${
-                                        user.created_by__first_name || "User"
-                                      } ${user.created_by__last_name || ""}`}
-                                    </Typography>
-                                  </Box>
-                                  <Chip
-                                    label={`${user.diagnosis_count} diagnoses`}
-                                    size="small"
-                                    color="success"
-                                    variant="filled"
-                                  />
-                                </Box>
-
-                                <Box
-                                  display="flex"
-                                  gap={1}
-                                  flexWrap="wrap"
-                                  alignItems="center"
-                                >
-                                  <Chip
-                                    icon={<Person />}
-                                    label={user.created_by__email}
-                                    size="small"
-                                    variant="outlined"
-                                    color="info"
-                                    sx={{
-                                      maxWidth: "250px",
-                                      "& .MuiChip-label": {
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                      },
-                                    }}
-                                  />
-                                  {index === 0 && (
-                                    <Chip
-                                      icon={<TrendingUp />}
-                                      label="Top Contributor"
-                                      size="small"
-                                      color="warning"
-                                      variant="filled"
-                                    />
-                                  )}
-                                </Box>
-                              </Box>
-                            ))}
-                          </Box>
-
-                          <Box
-                            mt={2}
-                            pt={2}
-                            sx={{
-                              borderTop: "1px solid #e0e0e0",
-                              textAlign: "center",
-                            }}
-                          >
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              Users ranked by total diagnosis contributions to
-                              the system
-                            </Typography>
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    </Box>
-                  )}
-              </Box>
-            </Box>
-
-            {/* Search Section */}
-            <Paper sx={{ mb: 3 }}>
-              <Box
-                sx={{
-                  p: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  cursor: "pointer",
-                  "&:hover": { bgcolor: "grey.50" },
-                }}
-                onClick={() => setShowSearch(!showSearch)}
-              >
-                {" "}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Search color="primary" />
-                  <Typography variant="h6">
-                    Search System Diagnosis Records
+                  <Typography variant="h6" color="text.secondary">
+                    Total Diagnoses
                   </Typography>
-                  {hasActiveFilters && (
-                    <Chip
-                      label="Active Filters"
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                    />
-                  )}
                 </Box>
-                {showSearch ? <ExpandLess /> : <ExpandMore />}
-              </Box>
+                <Typography variant="h3" sx={{ fontWeight: 600 }}>
+                  {stats.total}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
 
-              <Collapse in={showSearch}>
-                <Box sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
-                  {" "}
-                  <DiagnosisSearch
-                    onFiltersChange={(filters) => {
-                      setSearchFilters(filters);
-                      setSearchPage(1); // Reset to first page when filters change
-                      const hasFilters = Object.keys(filters).some(
-                        (key) =>
-                          filters[key] &&
-                          filters[key] !== "" &&
-                          filters[key] !== false &&
-                          !(key === "min_confidence" && filters[key] === 0) &&
-                          !(key === "max_confidence" && filters[key] === 1)
-                      );
-                      setHasActiveFilters(hasFilters);
-                      setShowSearchResults(hasFilters);
+          <Grid item xs={12} sm={6}>
+            <Card
+              sx={{
+                height: "100%",
+                borderRadius: 2,
+                border: "1px solid #E8EAED",
+                boxShadow: "none",
+                "&:hover": {
+                  boxShadow: "0 4px 12px rgba(44, 62, 80, 0.08)",
+                },
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Box
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 2,
+                      backgroundColor: "#ECFDF5",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mr: 2,
                     }}
-                    initialFilters={searchFilters}
-                  />
-                  {searchError && (
-                    <Alert severity="error" sx={{ mt: 2 }}>
-                      Error searching diagnoses. Please try again.
-                    </Alert>
-                  )}{" "}
-                  {searchResults &&
-                    (showSearchResults ||
-                      searchResults.data?.results?.length > 0) && (
-                      <Box sx={{ mt: 3 }}>
-                        <Typography variant="h6" gutterBottom>
-                          Search Results (
-                          {searchResults.data?.pagination?.count ||
-                            searchResults.data?.results?.length ||
-                            0}
-                          )
-                        </Typography>{" "}
-                        {searchResults.data?.results?.length > 0 ? (
-                          <DiagnosisTable
-                            diagnoses={searchResults.data.results}
-                            allowSelection={false}
-                            pagination={searchResults.data?.pagination}
-                            onPageChange={handleSearchPageChange}
-                            onPageSizeChange={handleSearchPageSizeChange}
-                            currentPage={searchPage}
-                            pageSize={searchPageSize}
-                          />
-                        ) : (
-                          <Alert severity="info">
-                            No results found for the current search criteria.
-                          </Alert>
-                        )}
-                      </Box>
-                    )}
+                  >
+                    <LocalHospital sx={{ color: "#10B981", fontSize: 24 }} />
+                  </Box>
+                  <Typography variant="h6" color="text.secondary">
+                    Recent Activity
+                  </Typography>
                 </Box>
-              </Collapse>
-            </Paper>
+                <Typography variant="h3" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  {stats.recent}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Last 30 days
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-            {/* Enhanced Statistics & Trends Section */}
-            <Box display="flex" flexWrap="wrap" gap={3} mb={3}>
-              {/* Trends Card */}
-              <Box
-                sx={{
-                  flex: { xs: "1 1 100%", lg: "1 1 calc(70% - 12px)" },
-                  minWidth: "400px",
+        {/* Search and Filters */}
+        <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                placeholder="Search by email or disease name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search sx={{ color: "#10B981" }} />
+                    </InputAdornment>
+                  ),
                 }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "&:hover fieldset": {
+                      borderColor: "#10B981",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#10B981",
+                    },
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <FormControl fullWidth>
+                <InputLabel>Risk Level</InputLabel>
+                <Select
+                  value={filterRisk}
+                  onChange={(e) => setFilterRisk(e.target.value)}
+                  label="Risk Level"
+                  sx={{
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#10B981",
+                    },
+                  }}
+                >
+                  <MenuItem value="all">All Levels</MenuItem>
+                  <MenuItem value="high">High Risk</MenuItem>
+                  <MenuItem value="medium">Medium Risk</MenuItem>
+                  <MenuItem value="low">Low Risk</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", height: "100%" }}
               >
-                <Card sx={{ height: "100%" }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      gap={1}
-                      mb={2}
-                      sx={{
-                        borderBottom: 1,
-                        borderColor: "divider",
-                        pb: 2,
-                      }}
-                    >
-                      <Avatar
-                        sx={{ bgcolor: "success.main", width: 40, height: 40 }}
-                      >
-                        <TrendingUp />
-                      </Avatar>
-                      <Typography variant="h6" fontWeight="bold">
-                        System-wide Diagnosis Trends
-                      </Typography>
-                    </Box>
-
-                    <Box height={280}>
-                      {monthlyTrendsData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={monthlyTrendsData.slice().reverse()}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                            <YAxis tick={{ fontSize: 11 }} />
-                            <RechartsTooltip />
-                            <Line
-                              type="monotone"
-                              dataKey="count"
-                              stroke={COLORS.primary}
-                              strokeWidth={3}
-                              dot={{ fill: COLORS.primary, r: 5 }}
-                              activeDot={{ r: 7 }}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <Box
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
-                          height="100%"
-                        >
-                          <Alert severity="info" sx={{ width: "80%" }}>
-                            No monthly trends data available.
-                          </Alert>
-                        </Box>
-                      )}
-                    </Box>
-
-                    <Box
-                      mt={2}
-                      pt={2}
-                      sx={{ borderTop: 1, borderColor: "divider" }}
-                    >
-                      <Typography
-                        variant="subtitle2"
-                        gutterBottom
-                        fontWeight="bold"
-                      >
-                        System-wide Insights
-                      </Typography>
-                      <Box display="flex" flexWrap="wrap" gap={2}>
-                        <Box
-                          sx={{
-                            flex: "1 1 calc(50% - 8px)",
-                            minWidth: "120px",
-                          }}
-                        >
-                          <Typography variant="body2">
-                            <strong>Total:</strong>{" "}
-                            {analyticsData.total_diagnoses || 0} diagnoses
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            flex: "1 1 calc(50% - 8px)",
-                            minWidth: "120px",
-                          }}
-                        >
-                          <Typography variant="body2">
-                            <strong>Recent:</strong>{" "}
-                            {analyticsData.recent_diagnoses || 0} (30 days)
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            flex: "1 1 calc(50% - 8px)",
-                            minWidth: "120px",
-                          }}
-                        >
-                          <Typography variant="body2">
-                            <strong>Avg Confidence:</strong>{" "}
-                            {analyticsData.average_confidence || 0}%
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            flex: "1 1 calc(50% - 8px)",
-                            minWidth: "120px",
-                          }}
-                        >
-                          <Typography variant="body2">
-                            <strong>Active Users:</strong>{" "}
-                            {analyticsData.total_users || "N/A"}
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            flex: "1 1 calc(50% - 8px)",
-                            minWidth: "120px",
-                          }}
-                        >
-                          <Typography variant="body2">
-                            <strong>Age Range:</strong>{" "}
-                            {analyticsData.age_analysis?.min_age || 0}-
-                            {analyticsData.age_analysis?.max_age || 0} years
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            flex: "1 1 calc(50% - 8px)",
-                            minWidth: "120px",
-                          }}
-                        >
-                          <Typography variant="body2">
-                            <strong>Model Accuracy:</strong>{" "}
-                            {analyticsData.model_performance?.accuracy || "N/A"}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
+                <Typography variant="body2" color="text.secondary">
+                  Showing {filteredDiagnoses.length} of {diagnoses.length}{" "}
+                  records
+                </Typography>
               </Box>
+            </Grid>
+          </Grid>
+        </Paper>
 
-              {/* Admin Summary Card */}
-              <Box
-                sx={{
-                  flex: { xs: "1 1 100%", lg: "1 1 calc(30% - 12px)" },
-                  minWidth: "300px",
-                }}
-              >
-                <Card sx={{ height: "100%" }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      gap={1}
-                      mb={2}
-                      sx={{
-                        borderBottom: 1,
-                        borderColor: "divider",
-                        pb: 2,
-                      }}
-                    >
-                      <Avatar
+        {/* Diagnosis Table */}
+        <Paper sx={{ borderRadius: 2 }}>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "#ECFDF5" }}>
+                  <TableCell sx={{ fontWeight: 600 }}>User Email</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Disease</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Risk Level</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>HCV Status</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredDiagnoses.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
+                      <Typography variant="body1" color="text.secondary">
+                        No diagnosis records found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredDiagnoses
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((diagnosis, index) => (
+                      <TableRow
+                        key={diagnosis.id || index}
                         sx={{
-                          bgcolor: "secondary.main",
-                          width: 40,
-                          height: 40,
+                          "&:hover": {
+                            backgroundColor: "#F8F9FA",
+                          },
                         }}
                       >
-                        <History />
-                      </Avatar>
-                      <Typography variant="h6" fontWeight="bold">
-                        Admin Overview
-                      </Typography>
-                    </Box>
-                    <Typography
-                      variant="body2"
-                      paragraph
-                      color="text.secondary"
-                    >
-                      Comprehensive system overview with administrative insights
-                      and analytics.
-                    </Typography>
-                    <Box mb={3}>
-                      <Typography
-                        variant="subtitle2"
-                        gutterBottom
-                        fontWeight="bold"
-                      >
-                        System Statistics
-                      </Typography>
-                      <Box display="flex" flexDirection="column" gap={2}>
-                        <Box
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <Typography variant="body2">
-                            Total Diagnoses
-                          </Typography>
+                        <TableCell>
+                          <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Person
+                              sx={{ mr: 1, color: "#10B981", fontSize: 20 }}
+                            />
+                            {diagnosis.user_email || "N/A"}
+                          </Box>
+                        </TableCell>
+                        <TableCell>{diagnosis.disease_name || "N/A"}</TableCell>
+                        <TableCell>
                           <Chip
-                            label={analyticsData.total_diagnoses || 0}
-                            color="primary"
+                            label={diagnosis.risk_level || "Unknown"}
+                            color={getRiskColor(diagnosis.risk_level)}
                             size="small"
                           />
-                        </Box>
-                        <Box
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <Typography variant="body2">
-                            Recent Activity
-                          </Typography>
+                        </TableCell>
+                        <TableCell>
                           <Chip
-                            label={`${
-                              analyticsData.recent_diagnoses || 0
-                            } (30d)`}
-                            color="info"
+                            label={diagnosis.hcv_status || "N/A"}
+                            color={
+                              diagnosis.hcv_status?.toLowerCase() === "positive"
+                                ? "error"
+                                : "success"
+                            }
                             size="small"
+                            variant="outlined"
                           />
-                        </Box>
-                        <Box
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <Typography variant="body2">
-                            System Confidence
-                          </Typography>
-                          <Chip
-                            label={`${analyticsData.average_confidence || 0}%`}
-                            color="success"
-                            size="small"
-                          />
-                        </Box>
-                        <Box
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <Typography variant="body2">Active Users</Typography>
-                          <Chip
-                            label={analyticsData.total_users || "N/A"}
-                            color="warning"
-                            size="small"
-                          />
-                        </Box>
-                      </Box>
-                    </Box>
-                    <Alert severity="info" sx={{ fontSize: "0.85rem" }}>
-                      Use the search functionality above to filter and analyze
-                      specific diagnosis records.
-                    </Alert>{" "}
-                  </CardContent>
-                </Card>
-              </Box>
-            </Box>
-          </Box>
-        )}
-      </Box>
+                        </TableCell>
+                        <TableCell>
+                          {formatDate(diagnosis.created_at)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            component="div"
+            count={filteredDiagnoses.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            sx={{
+              borderTop: "1px solid #E8EAED",
+            }}
+          />
+        </Paper>
+      </Container>
     </Box>
   );
 }

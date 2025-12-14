@@ -78,8 +78,18 @@ function AdminNavbar() {
       icon: Upload,
     },
     { label: "Debug Console", path: "/admin/debug", icon: BugReport },
-    { label: "Analytics", path: "/admin/analytics", icon: Analytics },
-    { label: "System", path: "/admin/system", icon: Settings },
+    {
+      label: "Analytics",
+      path: "/admin/under-construction",
+      state: { pageName: "Analytics" },
+      icon: Analytics,
+    },
+    {
+      label: "System",
+      path: "/admin/under-construction",
+      state: { pageName: "System" },
+      icon: Settings,
+    },
   ];
 
   const isActive = (path) => {
@@ -99,17 +109,24 @@ function AdminNavbar() {
     {
       label: "Security",
       icon: <Security />,
-      action: () => {},
+      action: () =>
+        navigate("/admin/under-construction", {
+          state: { pageName: "Security" },
+        }),
     },
     {
       label: "Help",
       icon: <Help />,
-      action: () => {},
+      action: () =>
+        navigate("/admin/under-construction", { state: { pageName: "Help" } }),
     },
     {
       label: "Report Issue",
       icon: <BugReport />,
-      action: () => {},
+      action: () =>
+        navigate("/admin/under-construction", {
+          state: { pageName: "Report Issue" },
+        }),
     },
     { label: "Logout", icon: <Logout />, action: handleLogout },
   ];
@@ -161,7 +178,7 @@ function AdminNavbar() {
               key={item.path}
               disablePadding
               onClick={() => {
-                navigate(item.path);
+                navigate(item.path, item.state ? { state: item.state } : {});
                 handleLeftDrawerToggle();
               }}
             >
@@ -170,16 +187,16 @@ function AdminNavbar() {
                   py: 1.2,
                   px: 3,
                   backgroundColor: isActive(item.path)
-                    ? "rgba(37, 99, 235, 0.12)"
+                    ? "rgba(16, 185, 129, 0.12)"
                     : "transparent",
                   "&:hover": {
-                    backgroundColor: "rgba(37, 99, 235, 0.08)",
+                    backgroundColor: "rgba(16, 185, 129, 0.08)",
                   },
                 }}
               >
                 <ListItemIcon
                   sx={{
-                    color: isActive(item.path) ? "#2563EB" : "#000000",
+                    color: isActive(item.path) ? "#10B981" : "#000000",
                     minWidth: "40px",
                     "& .MuiSvgIcon-root": {
                       fontSize: "1.2rem",
@@ -193,7 +210,7 @@ function AdminNavbar() {
                   primaryTypographyProps={{
                     fontWeight: 700,
                     fontSize: "0.95rem",
-                    color: isActive(item.path) ? "#2563EB" : "#000000",
+                    color: isActive(item.path) ? "#10B981" : "#000000",
                   }}
                 />
               </ListItemButton>
@@ -226,7 +243,7 @@ function AdminNavbar() {
             right: 16,
             color: "#000000",
             "&:hover": {
-              backgroundColor: "rgba(37, 99, 235, 0.08)",
+              backgroundColor: "rgba(16, 185, 129, 0.08)",
             },
           }}
         >
@@ -257,9 +274,9 @@ function AdminNavbar() {
             textAlign: "center",
           }}
         >
-          {user?.first_name && user?.last_name
-            ? `${user.first_name} ${user.last_name}`
-            : user?.email || "Admin User"}
+          {user?.first_name || user?.last_name
+            ? [user?.first_name, user?.last_name].filter(Boolean).join(" ")
+            : "Admin User"}
         </Typography>
         <Typography
           variant="body2"
@@ -290,7 +307,7 @@ function AdminNavbar() {
             size="small"
             sx={{
               mt: 1,
-              backgroundColor: "#2563EB",
+              backgroundColor: "#10B981",
               color: "white",
               fontWeight: 600,
               fontSize: "0.7rem",
@@ -318,7 +335,7 @@ function AdminNavbar() {
                   backgroundColor:
                     item.label === "Logout"
                       ? "rgba(239, 68, 68, 0.08)"
-                      : "rgba(37, 99, 235, 0.08)",
+                      : "rgba(16, 185, 129, 0.08)",
                 },
               }}
             >
@@ -374,7 +391,7 @@ function AdminNavbar() {
                 color: "#000000",
                 borderRadius: "12px",
                 "&:hover": {
-                  backgroundColor: "rgba(37, 99, 235, 0.08)",
+                  backgroundColor: "rgba(16, 185, 129, 0.08)",
                   transform: "scale(1.05)",
                 },
                 transition: "all 0.2s ease",
@@ -396,7 +413,7 @@ function AdminNavbar() {
                 minWidth: "auto",
                 borderRadius: "16px",
                 "&:hover": {
-                  backgroundColor: "rgba(37, 99, 235, 0.08)",
+                  backgroundColor: "rgba(16, 185, 129, 0.08)",
                   transform: "scale(1.02)",
                 },
                 transition: "all 0.3s ease",
@@ -411,7 +428,7 @@ function AdminNavbar() {
                 ml: 1,
                 height: 20,
                 fontSize: "0.7rem",
-                backgroundColor: "#2563EB",
+                backgroundColor: "#10B981",
                 color: "white",
                 fontWeight: 700,
               }}
@@ -425,13 +442,18 @@ function AdminNavbar() {
                 ml: 2,
               }}
             >
-              {navigationItems.slice(0, 5).map((item) => {
+              {navigationItems.slice(0, 4).map((item) => {
                 const Icon = item.icon;
                 return (
                   <Box key={item.path} sx={{ position: "relative" }}>
                     <Button
                       startIcon={<Icon />}
-                      onClick={() => navigate(item.path)}
+                      onClick={() =>
+                        navigate(
+                          item.path,
+                          item.state ? { state: item.state } : {}
+                        )
+                      }
                       sx={{
                         color: "#000000",
                         textTransform: "none",
@@ -441,10 +463,10 @@ function AdminNavbar() {
                         fontWeight: 700,
                         fontSize: "0.9rem",
                         backgroundColor: isActive(item.path)
-                          ? "rgba(37, 99, 235, 0.12)"
+                          ? "rgba(16, 185, 129, 0.12)"
                           : "transparent",
                         "&:hover": {
-                          backgroundColor: "rgba(37, 99, 235, 0.08)",
+                          backgroundColor: "rgba(16, 185, 129, 0.08)",
                           transform: "translateY(-2px)",
                           "& .nav-underline": {
                             width: "100%",
@@ -464,7 +486,7 @@ function AdminNavbar() {
                           transform: "translateX(-50%)",
                           width: isActive(item.path) ? "100%" : 0,
                           height: 2,
-                          backgroundColor: "#2563EB",
+                          backgroundColor: "#10B981",
                           borderRadius: 1,
                           transition: "width 0.3s ease",
                         }}
@@ -485,7 +507,7 @@ function AdminNavbar() {
                   color: "#000000",
                   borderRadius: "12px",
                   "&:hover": {
-                    backgroundColor: "rgba(37, 99, 235, 0.08)",
+                    backgroundColor: "rgba(16, 185, 129, 0.08)",
                     transform: "scale(1.05)",
                   },
                   transition: "all 0.2s ease",
@@ -512,9 +534,11 @@ function AdminNavbar() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {user?.first_name && user?.last_name
-                      ? `${user.first_name} ${user.last_name}`
-                      : user?.email || "Admin"}
+                    {user?.first_name || user?.last_name
+                      ? [user?.first_name, user?.last_name]
+                          .filter(Boolean)
+                          .join(" ")
+                      : "Admin"}
                   </Typography>
                   <Typography
                     variant="caption"
@@ -554,7 +578,7 @@ function AdminNavbar() {
                         color: "white",
                         fontWeight: 700,
                         fontSize: "1.2rem",
-                        boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+                        boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)",
                       }}
                     >
                       {!user?.profile_picture &&
@@ -577,7 +601,7 @@ function AdminNavbar() {
             width: "100%",
             top: 0,
             zIndex: 1200,
-            background: "rgba(37, 99, 235, 0.1)",
+            background: "rgba(16, 185, 129, 0.1)",
             "& .MuiLinearProgress-bar": {
               background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
             },
