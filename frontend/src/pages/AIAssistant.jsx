@@ -222,6 +222,106 @@ function AIAssistant() {
     }
   };
 
+  const handleFileUpload = async (files, prompt = "") => {
+    let chatId = currentChatId;
+    setmessageLoading(true);
+    setIsLoading(true);
+
+    // Auto-create chat if none selected
+    if (!chatId) {
+      try {
+        const response = await aiAssistantService.createChat();
+        if (response.success && response.data) {
+          chatId = response.data.id;
+          setCurrentChatId(chatId);
+          setChats((prev) => [response.data, ...prev]);
+        } else {
+          setError("Failed to create new chat");
+          setmessageLoading(false);
+          setIsLoading(false);
+          return;
+        }
+      } catch (error) {
+        setError("Failed to create new chat");
+        setmessageLoading(false);
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Process each file sequentially
+    const fileArray = Array.isArray(files) ? files : [files];
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
+      const filePrompt = i === 0 ? prompt : ""; // Only use prompt for first file
+
+      try {
+        const response = await aiAssistantService.uploadImage(
+          chatId,
+          file,
+          filePrompt
+        );
+        console.log(
+          `API response uploadImage (${i + 1}/${fileArray.length}):`,
+          response
+        );
+
+        if (response.success && response.data) {
+          const { user_message, assistant_message, file_info } = response.data;
+
+          // Add both messages to the chat
+          setMessages((prev) => {
+            const newMessages = [...prev];
+
+            if (user_message) {
+              newMessages.push({
+                ...user_message,
+                id: user_message.id || generateUniqueId("server_user_"),
+                is_from_user: user_message.role === "user",
+              });
+            }
+
+            if (assistant_message) {
+              newMessages.push({
+                ...assistant_message,
+                id: assistant_message.id || generateUniqueId("server_ai_"),
+                is_from_user: assistant_message.role === "user",
+              });
+            }
+
+            return newMessages;
+          });
+
+          successCount++;
+        } else {
+          console.warn(`File upload failed for ${file.name}:`, response.error);
+          errorCount++;
+        }
+      } catch (error) {
+        console.error(`Error uploading file ${file.name}:`, error);
+        errorCount++;
+      }
+    }
+
+    // Show summary message
+    if (errorCount > 0) {
+      setError(
+        `Uploaded ${successCount} of ${fileArray.length} files. ${errorCount} failed.`
+      );
+    }
+
+    // Reload chats to update last_message_at
+    if (successCount > 0) {
+      loadChats();
+    }
+
+    setmessageLoading(false);
+    setIsLoading(false);
+  };
+
   const handleDeleteChat = async (chatIdToDelete) => {
     setIsLoading(true);
     setSidebarLoading(true);
@@ -322,7 +422,8 @@ function AIAssistant() {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
+        background:
+          "linear-gradient(135deg, #f0f9ff 0%, #e8f4f8 50%, #e1f0f7 100%)",
         position: "relative",
       }}
     >
@@ -413,6 +514,7 @@ function AIAssistant() {
               />
               <ChatInput
                 onSendMessage={handleSendMessage}
+                onFileUpload={handleFileUpload}
                 isLoading={isLoading}
                 showQuickQuestions={messages.length === 0}
               />
@@ -460,7 +562,7 @@ function AIAssistant() {
                       ml: 2,
                     }}
                   >
-                    Health AI Assistant
+                    MedAI Assistant
                   </Typography>
                 </Box>
               )}
@@ -479,24 +581,69 @@ function AIAssistant() {
                 }}
               >
                 {/* Medical Icon */}
-                <MedicalServicesIcon
+                <Box
                   sx={{
-                    fontSize: "5rem",
-                    color: "#0ea5e9",
+                    position: "relative",
                     mb: 3,
                   }}
-                />
+                >
+                  <MedicalServicesIcon
+                    sx={{
+                      fontSize: "6rem",
+                      color: "#0ea5e9",
+                      filter: "drop-shadow(0 4px 12px rgba(14, 165, 233, 0.3))",
+                      animation: "pulse 2s ease-in-out infinite",
+                      "@keyframes pulse": {
+                        "0%, 100%": { transform: "scale(1)" },
+                        "50%": { transform: "scale(1.05)" },
+                      },
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: -10,
+                      right: -10,
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      background: "#10b981",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "14px",
+                    }}
+                  >
+                    ✓
+                  </Box>
+                </Box>
 
                 <Typography
-                  variant="h3"
+                  variant="h2"
                   sx={{
-                    fontWeight: 700,
-                    color: "#0f172a",
-                    mb: 2,
-                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    fontWeight: 800,
+                    background:
+                      "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    mb: 1,
+                    fontSize: { xs: "2rem", md: "2.75rem" },
                   }}
                 >
-                  Health AI Assistant
+                  MedAI Assistant
+                </Typography>
+
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    color: "#0ea5e9",
+                    fontWeight: 600,
+                    mb: 2,
+                    fontSize: "1rem",
+                  }}
+                >
+                  🩺 Your Personal Hepatitis C Health Companion
                 </Typography>
 
                 <Typography
@@ -504,13 +651,15 @@ function AIAssistant() {
                   sx={{
                     color: "#64748b",
                     mb: 5,
-                    maxWidth: 600,
-                    fontSize: "1.1rem",
+                    maxWidth: 650,
+                    fontSize: "1.05rem",
+                    lineHeight: 1.7,
                   }}
                 >
-                  Your personalized AI companion for Hepatitis C information,
-                  lab result analysis, treatment guidance, and health
-                  monitoring.
+                  Get intelligent answers about diseases, upload medical images
+                  or lab results for analysis guidance, and access information
+                  across 15+ disease categories including HCV, Diabetes, Heart
+                  Disease, Cancer, and more.
                 </Typography>
 
                 {/* Feature Cards */}
@@ -531,61 +680,127 @@ function AIAssistant() {
                   {[
                     {
                       icon: "🔬",
-                      title: "Lab Analysis",
-                      desc: "Understand your test results",
+                      title: "Medical Image Analysis",
+                      desc: "Get guidance on X-rays, CT scans, and MRI",
+                      color: "#0ea5e9",
                     },
                     {
                       icon: "💊",
-                      title: "Treatment Info",
-                      desc: "Learn about treatment options",
+                      title: "Multi-Disease Info",
+                      desc: "Learn about 15+ disease categories",
+                      color: "#8b5cf6",
                     },
                     {
                       icon: "📊",
-                      title: "Health Tracking",
-                      desc: "Monitor your progress",
+                      title: "Lab Results Help",
+                      desc: "Understand blood work and test results",
+                      color: "#10b981",
                     },
                     {
-                      icon: "🎯",
-                      title: "Personalized Care",
-                      desc: "Get tailored health advice",
+                      icon: "🩺",
+                      title: "Health Education",
+                      desc: "Evidence-based medical information",
+                      color: "#f59e0b",
                     },
                   ].map((feature, index) => (
                     <Box
                       key={index}
                       sx={{
                         p: 3,
-                        background: "#f8fafc",
-                        borderRadius: "12px",
-                        border: "1px solid #e2e8f0",
-                        transition: "all 0.2s ease",
+                        background: "#ffffff",
+                        borderRadius: "16px",
+                        border: "2px solid",
+                        borderColor: `${feature.color}20`,
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        position: "relative",
+                        overflow: "hidden",
                         "&:hover": {
-                          transform: "translateY(-4px)",
-                          boxShadow: "0 8px 20px rgba(0, 0, 0, 0.1)",
-                          borderColor: "#0ea5e9",
+                          transform: "translateY(-8px)",
+                          boxShadow: `0 12px 24px ${feature.color}25`,
+                          borderColor: feature.color,
+                          "& .feature-icon": {
+                            transform: "scale(1.2) rotate(5deg)",
+                          },
+                        },
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: "4px",
+                          background: feature.color,
+                          opacity: 0,
+                          transition: "opacity 0.3s",
+                        },
+                        "&:hover::before": {
+                          opacity: 1,
                         },
                       }}
                     >
-                      <Typography sx={{ fontSize: "2rem", mb: 1 }}>
+                      <Typography
+                        className="feature-icon"
+                        sx={{
+                          fontSize: "2.5rem",
+                          mb: 1.5,
+                          transition: "transform 0.3s",
+                          display: "block",
+                        }}
+                      >
                         {feature.icon}
                       </Typography>
                       <Typography
-                        variant="subtitle2"
-                        sx={{ fontWeight: 600, color: "#0f172a", mb: 0.5 }}
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 700,
+                          color: "#0f172a",
+                          mb: 0.5,
+                          fontSize: "1rem",
+                        }}
                       >
                         {feature.title}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: "#64748b" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "#64748b",
+                          fontSize: "0.875rem",
+                          lineHeight: 1.5,
+                        }}
+                      >
                         {feature.desc}
                       </Typography>
                     </Box>
                   ))}
                 </Box>
 
+                <Alert
+                  severity="info"
+                  sx={{
+                    mt: 4,
+                    maxWidth: 700,
+                    borderRadius: "12px",
+                    background: "#f0f9ff",
+                    border: "1px solid #bae6fd",
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "#0c4a6e", fontWeight: 500 }}
+                  >
+                    <strong>Medical Disclaimer:</strong> MedAI provides
+                    educational information and analysis guidance only. Always
+                    consult qualified healthcare professionals for medical
+                    diagnosis, advice, or treatment decisions.
+                  </Typography>
+                </Alert>
+
                 <Typography
                   variant="body2"
                   sx={{
                     color: "#94a3b8",
                     fontSize: "0.9rem",
+                    mt: 3,
                   }}
                 >
                   Start a new chat to begin your health journey

@@ -22,17 +22,22 @@ const MessageBubble = ({ message, isLoading = false }) => {
   );
 
   const AIAvatar = () => (
-    <Avatar
+    <Box
       sx={{
         width: 32,
         height: 32,
-        background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-        fontSize: "1rem",
-        boxShadow: "0 2px 8px rgba(16, 185, 129, 0.25)",
+        borderRadius: "50%",
+        background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "16px",
+        flexShrink: 0,
+        boxShadow: "0 2px 8px rgba(14, 165, 233, 0.3)",
       }}
     >
-      🤖
-    </Avatar>
+      🩺
+    </Box>
   );
 
   // Bouncing dots component for loading

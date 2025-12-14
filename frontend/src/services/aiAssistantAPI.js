@@ -150,7 +150,7 @@ export const aiAssistantService = {
       formData.append('file', file);
       formData.append('prompt', prompt);
       
-      const response = await api.post(`/aiassistant/chats/${chatId}/files/`, formData, {
+      const response = await api.post(`/aiassistant/chats/${chatId}/files`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -163,7 +163,7 @@ export const aiAssistantService = {
       console.error('Error uploading image:', error);
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to upload image'
+        error: error.response?.data?.detail || error.response?.data?.error || 'Failed to upload image'
       };
     }
   }

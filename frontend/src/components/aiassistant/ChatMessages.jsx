@@ -120,17 +120,18 @@ const ChatMessages = ({
               maxWidth: 500,
             }}
           >
-            Ask me anything about Hepatitis C, lab results, treatment options,
-            or general health guidance.
+            Ask me about various diseases, medical imaging analysis, lab results
+            interpretation, or general health guidance across our 15+ disease
+            categories.
           </Typography>
 
           {/* Quick question suggestions */}
           <Box sx={{ display: "grid", gap: 1.5, maxWidth: 600 }}>
             {[
-              "What is Hepatitis C?",
-              "How do I interpret my liver function test?",
-              "What treatment options are available?",
-              "How can I manage my symptoms?",
+              "🔬 What diseases can this platform diagnose?",
+              "📊 How do I upload and analyze my medical images?",
+              "💊 Can you explain different lab test parameters?",
+              "🩺 What should I know about preventive health screening?",
             ].map((question, index) => (
               <Box
                 key={index}
@@ -144,7 +145,7 @@ const ChatMessages = ({
                   color: "#475569",
                 }}
               >
-                💬 {question}
+                {question}
               </Box>
             ))}
           </Box>

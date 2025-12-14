@@ -51,6 +51,7 @@ class FileProcessor:
         except Exception as e:
             app_logger.error(f"Error validating file: {str(e)}")
             return False
+
     @staticmethod
     def encode_image_to_base64(image_file) -> str:
         """Convert uploaded image to base64 string"""
@@ -83,15 +84,24 @@ class FileProcessor:
             message_content = [
                 {
                     "type": "text",
-                    "text": """Analyze this image and provide a detailed description. Include:
-1. Main subjects or objects in the image
-2. Visual composition and layout
-3. Colors, lighting, and visual style
-4. Any text or written content visible
-5. Overall mood or atmosphere
-6. Notable details or interesting elements
+                    "text": """You are a medical assistant analyzing a health-related document or image. Please provide:
 
-Provide a comprehensive but concise description that would help someone understand the image without seeing it.""",
+🔍 MEDICAL IMAGE ANALYSIS:
+1. **Document Type**: Identify if this is a lab report, test result, medical scan, prescription, or other health document
+2. **Key Medical Information**: Extract and list all visible medical data (lab values, dates, patient info if visible)
+3. **Visual Assessment**: Describe any charts, graphs, or visual elements
+4. **Important Findings**: Highlight any values marked as abnormal, critical, or noteworthy
+5. **Context & Terminology**: Explain any medical terms or abbreviations present
+
+📋 ORGANIZATION:
+- Use clear headers and bullet points
+- Highlight critical information
+- Note any illegible or unclear sections
+- If it's NOT a medical document, describe what you see
+
+⚠️ REMINDER: This analysis is for informational purposes. Always consult healthcare providers for medical interpretation.
+
+Provide a thorough, medically-focused description:""",
                 },
                 {
                     "type": "image_url",
@@ -127,7 +137,6 @@ Provide a comprehensive but concise description that would help someone understa
             app_logger.info(
                 f"Processed image: {metadata['format']} {metadata['size']} pixels"
             )
-
 
             return {
                 "content": response.content,
@@ -165,8 +174,12 @@ Provide a comprehensive but concise description that would help someone understa
                     # Convert datetime objects to strings for JSON serialization
                     creation_date = getattr(pdf_info, "creation_date", None)
                     if creation_date:
-                        creation_date = creation_date.isoformat() if hasattr(creation_date, 'isoformat') else str(creation_date)
-                    
+                        creation_date = (
+                            creation_date.isoformat()
+                            if hasattr(creation_date, "isoformat")
+                            else str(creation_date)
+                        )
+
                     metadata.update(
                         {
                             "title": getattr(pdf_info, "title", None),
@@ -202,20 +215,27 @@ Provide a comprehensive but concise description that would help someone understa
                 f"Processed PDF: {metadata['num_pages']} pages, {len(extracted_text)} characters extracted"
             )
 
-            message_content = [{
-                "type": "text",
-                "text": """Analyze this document text and provide a detailed summary. Include:
-1. Main topics and themes
-2. Key points and findings
-3. Any notable quotes or sections
-4. Overall summary in as descriptive detail as possible
-Provide a detailed analysis that captures the essence of the document.""",
-            }
-            ,
-            {
-                "type": "text",
-                "text": extracted_text
-            }]
+            message_content = [
+                {
+                    "type": "text",
+                    "text": """You are a medical assistant analyzing a health document. Please provide:
+
+📄 MEDICAL DOCUMENT ANALYSIS:
+1. **Document Type & Purpose**: (Lab report, medical study, treatment guideline, etc.)
+2. **Key Medical Findings**: Main test results, diagnoses, or medical information
+3. **Important Values & Metrics**: Extract and list specific numbers, dates, reference ranges
+4. **Medical Terminology**: Explain any technical terms or abbreviations
+5. **Clinical Significance**: Note anything marked as abnormal, urgent, or requiring attention
+6. **Summary**: Brief overview of the document's main points
+
+🎯 Focus on hepatitis C, liver health, and related medical information when present.
+
+⚠️ This is an informational analysis only. Clinical decisions require healthcare provider consultation.
+
+Provide a comprehensive medical summary:""",
+                },
+                {"type": "text", "text": extracted_text},
+            ]
 
             processed_text = text_llm.invoke(
                 [HumanMessage(content=message_content)]
@@ -263,10 +283,14 @@ Provide a detailed analysis that captures the essence of the document.""",
 
             # Add common metadata
             result["metadata"]["filename"] = filename
-            result["metadata"]["processed_at"] = f"{datetime.datetime.utcnow().isoformat()}Z"
-            
+            result["metadata"][
+                "processed_at"
+            ] = f"{datetime.datetime.utcnow().isoformat()}Z"
+
             # Sanitize metadata for JSON serialization
-            result["metadata"] = FileProcessor._sanitize_metadata_for_json(result["metadata"])
+            result["metadata"] = FileProcessor._sanitize_metadata_for_json(
+                result["metadata"]
+            )
 
             return result
 
