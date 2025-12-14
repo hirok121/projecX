@@ -55,26 +55,23 @@ const ChatMessages = ({
         overflow: "auto",
         py: 2,
         px: 2,
-        background: "rgba(249, 250, 251, 0.95)",
+        background: "#fafafa",
         minHeight: 0,
-        position: "relative",
         "&::-webkit-scrollbar": {
           width: "4px",
         },
         "&::-webkit-scrollbar-track": {
-          background: "rgba(243, 244, 246, 0.5)",
-          borderRadius: "2px",
+          background: "transparent",
         },
         "&::-webkit-scrollbar-thumb": {
-          background: "rgba(156, 163, 175, 0.5)",
+          background: "#cbd5e1",
           borderRadius: "2px",
           "&:hover": {
-            background: "rgba(107, 114, 128, 0.7)",
+            background: "#94a3b8",
           },
         },
       }}
     >
-      {" "}
       {messages.length === 0 && !isLoading ? (
         <Box
           sx={{
@@ -83,208 +80,74 @@ const ChatMessages = ({
             alignItems: "center",
             justifyContent: "center",
             height: "100%",
-            px: 4,
+            px: 3,
             textAlign: "center",
-            position: "relative",
-            zIndex: 1,
           }}
         >
-          {/* Enhanced AI Avatar */}
+          {/* Medical Icon */}
           <Box
             sx={{
-              width: 120,
-              height: 120,
-              borderRadius: "30px",
-              background:
-                "linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%)",
+              width: 80,
+              height: 80,
+              borderRadius: "16px",
+              background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              mb: 6,
-              position: "relative",
-              boxShadow: "0 25px 50px rgba(79, 70, 229, 0.25)",
-              transform: "translateY(0px)",
-              transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                transform: "translateY(-8px) scale(1.05)",
-                boxShadow: "0 35px 70px rgba(79, 70, 229, 0.35)",
-              },
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: "-6px",
-                left: "-6px",
-                right: "-6px",
-                bottom: "-6px",
-                background:
-                  "linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%)",
-                borderRadius: "36px",
-                opacity: 0.15,
-                animation: "pulse 3s ease-in-out infinite",
-                filter: "blur(8px)",
-              },
-              "&::after": {
-                content: '""',
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "140px",
-                height: "140px",
-                border: "1px solid rgba(79, 70, 229, 0.2)",
-                borderRadius: "50%",
-                animation: "ripple 2s linear infinite",
-              },
-              "@keyframes pulse": {
-                "0%, 100%": { opacity: 0.15 },
-                "50%": { opacity: 0.3 },
-              },
-              "@keyframes ripple": {
-                "0%": {
-                  transform: "translate(-50%, -50%) scale(1)",
-                  opacity: 1,
-                },
-                "100%": {
-                  transform: "translate(-50%, -50%) scale(1.5)",
-                  opacity: 0,
-                },
-              },
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: "3.5rem",
-                filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.15))",
-                position: "relative",
-                zIndex: 2,
-              }}
-            >
-              🩺
-            </Typography>
-          </Box>
-          {/* Enhanced Welcome Text */}
-          <Typography
-            variant="h2"
-            sx={{
-              fontWeight: 800,
-              background:
-                "linear-gradient(135deg, #1E293B 0%, #475569 50%, #64748B 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
               mb: 3,
-              fontSize: { xs: "2.2rem", md: "3rem" },
-              letterSpacing: "-0.02em",
-              lineHeight: 1.1,
+              boxShadow: "0 8px 24px rgba(14, 165, 233, 0.25)",
             }}
           >
-            HepatoC AI Assistant
-          </Typography>
+            <Typography sx={{ fontSize: "2.5rem" }}>🩺</Typography>
+          </Box>
+
           <Typography
             variant="h5"
             sx={{
-              fontWeight: 500,
-              color: "#64748B",
-              mb: 6,
-              fontSize: { xs: "1.1rem", md: "1.4rem" },
-              maxWidth: 600,
-              lineHeight: 1.5,
+              fontWeight: 700,
+              color: "#0f172a",
+              mb: 2,
             }}
           >
-            Your specialized AI companion for Hepatitis C education, treatment
-            guidance, and personalized health support
+            Health AI Assistant
           </Typography>
-          {/* Enhanced Feature Cards */}
-          <Box
+
+          <Typography
+            variant="body1"
             sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                md: "repeat(4, 1fr)",
-              },
-              gap: 3,
-              maxWidth: 900,
-              mb: 6,
+              color: "#64748b",
+              mb: 4,
+              maxWidth: 500,
             }}
           >
+            Ask me anything about Hepatitis C, lab results, treatment options,
+            or general health guidance.
+          </Typography>
+
+          {/* Quick question suggestions */}
+          <Box sx={{ display: "grid", gap: 1.5, maxWidth: 600 }}>
             {[
-              {
-                icon: "🔬",
-                title: "Lab Analysis",
-                desc: "Interpret test results",
-                color: "#10B981",
-              },
-              {
-                icon: "💊",
-                title: "Treatment Guide",
-                desc: "Explore options",
-                color: "#3B82F6",
-              },
-              {
-                icon: "📊",
-                title: "Progress Track",
-                desc: "Monitor health",
-                color: "#8B5CF6",
-              },
-              {
-                icon: "🎯",
-                title: "Care Plans",
-                desc: "Personalized advice",
-                color: "#F59E0B",
-              },
-            ].map((feature, index) => (
+              "What is Hepatitis C?",
+              "How do I interpret my liver function test?",
+              "What treatment options are available?",
+              "How can I manage my symptoms?",
+            ].map((question, index) => (
               <Box
                 key={index}
                 sx={{
-                  p: 3,
-                  background: "rgba(255, 255, 255, 0.8)",
-                  borderRadius: "20px",
-                  border: "1px solid rgba(226, 232, 240, 0.8)",
-                  backdropFilter: "blur(20px)",
-                  textAlign: "center",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  cursor: "pointer",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: `0 20px 40px rgba(0, 0, 0, 0.1)`,
-                    border: `1px solid ${feature.color}40`,
-                    background: "rgba(255, 255, 255, 0.95)",
-                  },
+                  p: 2,
+                  background: "#ffffff",
+                  borderRadius: "8px",
+                  border: "1px solid #e2e8f0",
+                  textAlign: "left",
+                  fontSize: "0.9rem",
+                  color: "#475569",
                 }}
               >
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: "12px",
-                    background: `${feature.color}15`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    mx: "auto",
-                    mb: 2,
-                  }}
-                >
-                  <Typography sx={{ fontSize: "1.5rem" }}>
-                    {feature.icon}
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: 700, color: "#1E293B", mb: 1 }}
-                >
-                  {feature.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ color: "#64748B", fontSize: "0.9rem" }}
-                >
-                  {feature.desc}
-                </Typography>
+                💬 {question}
               </Box>
             ))}
-          </Box>{" "}
+          </Box>
         </Box>
       ) : (
         <>

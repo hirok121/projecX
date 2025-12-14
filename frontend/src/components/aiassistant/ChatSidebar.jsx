@@ -6,7 +6,6 @@ import {
   ListItem,
   ListItemButton,
   Typography,
-  Divider,
   Button,
   Chip,
   IconButton,
@@ -22,7 +21,6 @@ import {
   MoreVert as MoreVertIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Archive as ArchiveIcon,
 } from "@mui/icons-material";
 
 const ChatSidebar = ({
@@ -32,38 +30,10 @@ const ChatSidebar = ({
   onNewChat,
   onDeleteChat,
   onEditChat,
-  onArchiveChat,
   isLoading = false,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [selectedChatId, setSelectedChatId] = React.useState(null);
-
-  // Modern theme configuration
-  const theme = {
-    colors: {
-      primary: {
-        50: "#eff6ff",
-        100: "#dbeafe",
-        500: "#3b82f6",
-        600: "#2563eb",
-        700: "#1d4ed8",
-        900: "#1e3a8a",
-      },
-      neutral: {
-        50: "#f8fafc",
-        100: "#f1f5f9",
-        200: "#e2e8f0",
-        600: "#475569",
-        700: "#334155",
-        900: "#0f172a",
-      },
-    },
-    glassmorphism: {
-      light: "rgba(255, 255, 255, 0.25)",
-      medium: "rgba(255, 255, 255, 0.18)",
-      backdrop: "blur(16px)",
-    },
-  };
 
   const handleMenuOpen = (event, chatId) => {
     event.stopPropagation();
@@ -90,12 +60,6 @@ const ChatSidebar = ({
     handleMenuClose();
   };
 
-  const handleArchive = () => {
-    if (onArchiveChat && selectedChatId) {
-      onArchiveChat(selectedChatId);
-    }
-    handleMenuClose();
-  };
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -126,35 +90,17 @@ const ChatSidebar = ({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: `linear-gradient(145deg, ${theme.glassmorphism.light} 0%, ${theme.colors.neutral[50]} 100%)`,
-        backdropFilter: theme.glassmorphism.backdrop,
-        borderRight: `1px solid ${theme.glassmorphism.medium}`,
-        boxShadow: `inset 1px 0 0 ${theme.glassmorphism.light}`,
-        position: "relative",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "1px",
-          background:
-            "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent)",
-        },
+        background: "#f8fafc",
       }}
     >
       {" "}
       {/* Header */}
       <Box
         sx={{
-          p: 3,
-          borderBottom: `1px solid ${theme.glassmorphism.medium}`,
-          background: `linear-gradient(135deg, ${theme.glassmorphism.light} 0%, ${theme.colors.neutral[100]} 100%)`,
-          backdropFilter: "blur(20px)",
-          position: "relative",
+          p: 2,
+          borderBottom: "1px solid #e2e8f0",
         }}
       >
-        {" "}
         <Button
           fullWidth
           variant="contained"
@@ -162,75 +108,30 @@ const ChatSidebar = ({
             isLoading ? (
               <CircularProgress size={18} color="inherit" />
             ) : (
-              <AddIcon sx={{ fontSize: 20 }} />
+              <AddIcon />
             )
           }
           onClick={onNewChat}
           disabled={isLoading}
           sx={{
-            background: `linear-gradient(135deg, ${theme.colors.primary[600]} 0%, ${theme.colors.primary[700]} 50%, #8b5cf6 100%)`,
+            background: "#0ea5e9",
             color: "white",
-            borderRadius: "24px",
             textTransform: "none",
-            fontWeight: 700,
-            fontSize: "1rem",
-            letterSpacing: "0.02em",
-            py: 3,
-            px: 4,
-            boxShadow: `0 12px 40px ${theme.colors.primary[600]}40`,
-            border: `2px solid ${theme.glassmorphism.light}`,
-            position: "relative",
-            overflow: "hidden",
+            fontWeight: 600,
+            py: 1.5,
+            borderRadius: "8px",
             "&:hover": {
-              background: `linear-gradient(135deg, ${theme.colors.primary[700]} 0%, ${theme.colors.primary[900]} 50%, #7c3aed 100%)`,
-              transform: "translateY(-3px) scale(1.02)",
-              boxShadow: `0 20px 60px ${theme.colors.primary[600]}50`,
-              "&::after": {
-                opacity: 1,
-              },
-            },
-            "&:active": {
-              transform: "translateY(-1px) scale(1.01)",
+              background: "#0284c7",
             },
             "&:disabled": {
-              background: `linear-gradient(135deg, ${theme.colors.neutral[200]} 0%, ${theme.colors.neutral[300]} 100%)`,
-              color: theme.colors.neutral[500],
-              transform: "none",
-              boxShadow: "none",
-            },
-            transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: "-100%",
-              width: "100%",
-              height: "100%",
-              background:
-                "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)",
-              transition: "left 0.8s ease",
-            },
-            "&:hover::before": {
-              left: "100%",
-            },
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              borderRadius: "24px",
-              padding: "2px",
-              background:
-                "linear-gradient(135deg, rgba(255, 255, 255, 0.4), transparent, rgba(255, 255, 255, 0.4))",
-              mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-              maskComposite: "xor",
-              opacity: 0,
-              transition: "opacity 0.3s ease",
+              background: "#e2e8f0",
+              color: "#94a3b8",
             },
           }}
         >
-          {isLoading ? "Creating New Chat..." : "🚀 Start New Chat"}
+          {isLoading ? "Creating..." : "New Chat"}
         </Button>
-      </Box>{" "}
+      </Box>
       {/* Chat List */}
       <Box
         sx={{
@@ -238,17 +139,16 @@ const ChatSidebar = ({
           overflow: "auto",
           py: 1,
           "&::-webkit-scrollbar": {
-            width: "6px",
+            width: "4px",
           },
           "&::-webkit-scrollbar-track": {
-            background: "rgba(255, 255, 255, 0.1)",
-            borderRadius: "10px",
+            background: "transparent",
           },
           "&::-webkit-scrollbar-thumb": {
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            borderRadius: "10px",
+            background: "#cbd5e1",
+            borderRadius: "2px",
             "&:hover": {
-              background: "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+              background: "#94a3b8",
             },
           },
         }}
@@ -292,60 +192,16 @@ const ChatSidebar = ({
               alignItems: "center",
               justifyContent: "center",
               height: "300px",
-              color: "text.secondary",
+              color: "#64748b",
               px: 3,
-              background:
-                "linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)",
-              borderRadius: "24px",
-              mx: 2,
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              position: "relative",
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: "-1px",
-                left: "-1px",
-                right: "-1px",
-                bottom: "-1px",
-                background: "linear-gradient(135deg, #667eea, #764ba2)",
-                borderRadius: "24px",
-                zIndex: -1,
-                opacity: 0.1,
-              },
             }}
           >
-            <Box
-              sx={{
-                animation: "float 3s ease-in-out infinite",
-                "@keyframes float": {
-                  "0%, 100%": { transform: "translateY(0px)" },
-                  "50%": { transform: "translateY(-10px)" },
-                },
-              }}
-            >
-              <ChatIcon
-                sx={{ fontSize: 64, mb: 2, opacity: 0.6, color: "#667eea" }}
-              />
-            </Box>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 600,
-                mb: 1,
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Welcome to AI Chat
+            <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+              No chats yet
             </Typography>
-            <Typography
-              variant="body2"
-              textAlign="center"
-              sx={{ opacity: 0.7 }}
-            >
-              Start your first conversation and explore the possibilities
+            <Typography variant="caption" textAlign="center">
+              Start a new conversation
             </Typography>
           </Box>
         ) : (
@@ -367,72 +223,36 @@ const ChatSidebar = ({
                     selected={currentChatId === chat.id}
                     onClick={() => onChatSelect(chat.id)}
                     sx={{
-                      borderRadius: "16px",
+                      borderRadius: "8px",
                       mx: 1,
                       my: 0.5,
                       background:
-                        currentChatId === chat.id
-                          ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                          : `rgba(255, 255, 255, 0.6)`,
-                      backdropFilter: "blur(12px)",
-                      border:
-                        currentChatId === chat.id
-                          ? `1px solid ${theme.glassmorphism.light}`
-                          : `1px solid ${theme.glassmorphism.medium}`,
+                        currentChatId === chat.id ? "#0ea5e9" : "transparent",
+                      color: currentChatId === chat.id ? "#ffffff" : "#0f172a",
                       "&.Mui-selected": {
-                        color: "white",
-                        boxShadow: "0 8px 32px rgba(102, 126, 234, 0.25)",
                         "&:hover": {
-                          background:
-                            "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                          background: "#0284c7",
                         },
                       },
                       "&:hover": {
                         backgroundColor:
-                          currentChatId === chat.id
-                            ? undefined
-                            : "rgba(102, 126, 234, 0.08)",
-                        transform: "translateX(4px)",
-                        boxShadow:
-                          currentChatId === chat.id
-                            ? "0 12px 40px rgba(102, 126, 234, 0.35)"
-                            : "0 4px 20px rgba(0, 0, 0, 0.08)",
-                        "&::after": {
-                          opacity: 1,
-                          transform: "scale(1)",
-                        },
+                          currentChatId === chat.id ? undefined : "#f1f5f9",
                       },
-                      px: 3,
-                      py: 2.5,
-                      transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                      position: "relative",
-                      overflow: "hidden",
-                      "&::after": {
-                        content: '""',
-                        position: "absolute",
-                        top: "50%",
-                        right: 0,
-                        width: "3px",
-                        height: "60%",
-                        background:
-                          "linear-gradient(to bottom, transparent, #667eea, transparent)",
-                        transform: "translateY(-50%) scale(0)",
-                        opacity: 0,
-                        transition: "all 0.3s ease",
-                        borderRadius: "2px",
-                      },
+                      px: 2,
+                      py: 1.5,
+                      transition: "all 0.2s ease",
                     }}
                   >
                     {" "}
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography
                         variant="body2"
-                        fontWeight={600}
+                        fontWeight={500}
                         component="div"
                         noWrap
                         sx={{
                           color:
-                            currentChatId === chat.id ? "white" : "inherit",
+                            currentChatId === chat.id ? "white" : "#0f172a",
                         }}
                       >
                         {truncateTitle(chat.title)}
@@ -451,8 +271,8 @@ const ChatSidebar = ({
                           sx={{
                             color:
                               currentChatId === chat.id
-                                ? "rgba(255, 255, 255, 0.7)"
-                                : "text.secondary",
+                                ? "rgba(255, 255, 255, 0.8)"
+                                : "#64748b",
                           }}
                         >
                           {formatDate(chat.updated_at)}
@@ -462,14 +282,14 @@ const ChatSidebar = ({
                             size="small"
                             label={chat.message_count}
                             sx={{
-                              height: 16,
-                              fontSize: "0.6rem",
+                              height: 18,
+                              fontSize: "0.7rem",
                               backgroundColor:
                                 currentChatId === chat.id
                                   ? "rgba(255, 255, 255, 0.2)"
-                                  : "rgba(37, 99, 235, 0.1)",
+                                  : "#e2e8f0",
                               color:
-                                currentChatId === chat.id ? "white" : "#2563EB",
+                                currentChatId === chat.id ? "white" : "#64748b",
                             }}
                           />
                         )}
@@ -479,17 +299,12 @@ const ChatSidebar = ({
                       size="small"
                       onClick={(e) => handleMenuOpen(e, chat.id)}
                       sx={{
-                        color:
-                          currentChatId === chat.id
-                            ? "white"
-                            : "text.secondary",
-                        opacity: 0.7,
+                        color: currentChatId === chat.id ? "white" : "#64748b",
                         "&:hover": {
-                          opacity: 1,
                           backgroundColor:
                             currentChatId === chat.id
                               ? "rgba(255, 255, 255, 0.1)"
-                              : "rgba(0, 0, 0, 0.04)",
+                              : "#f1f5f9",
                         },
                       }}
                     >
@@ -510,38 +325,14 @@ const ChatSidebar = ({
             elevation: 0,
             sx: {
               overflow: "visible",
-              filter: "drop-shadow(0px 8px 32px rgba(0,0,0,0.15))",
-              background:
-                "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)",
-              backdropFilter: "blur(20px)",
-              border: `1px solid ${theme.glassmorphism.light}`,
-              borderRadius: "16px",
+              filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.12))",
+              background: "#ffffff",
+              borderRadius: "8px",
               mt: 1.5,
               "& .MuiMenuItem-root": {
-                borderRadius: "12px",
-                mx: 1,
-                my: 0.5,
-                transition: "all 0.2s ease",
-                "&:hover": {
-                  background:
-                    "linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)",
-                },
-              },
-              "&:before": {
-                content: '""',
-                display: "block",
-                position: "absolute",
-                top: 0,
-                right: 14,
-                width: 10,
-                height: 10,
-                background:
-                  "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)",
-                transform: "translateY(-50%) rotate(45deg)",
-                zIndex: 0,
-                border: "1px solid rgba(255, 255, 255, 0.3)",
-                borderBottom: "none",
-                borderRight: "none",
+                borderRadius: "4px",
+                mx: 0.5,
+                my: 0.25,
               },
             },
           }}
@@ -552,13 +343,7 @@ const ChatSidebar = ({
             <ListItemIcon>
               <EditIcon fontSize="small" />
             </ListItemIcon>
-            Edit Title
-          </MenuItem>
-          <MenuItem onClick={handleArchive}>
-            <ListItemIcon>
-              <ArchiveIcon fontSize="small" />
-            </ListItemIcon>
-            Archive
+            Rename
           </MenuItem>
           <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
             <ListItemIcon>
@@ -569,51 +354,26 @@ const ChatSidebar = ({
         </Menu>
       </Box>{" "}
       {/* Footer */}
-      <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.3)" }} />
       <Box
         sx={{
-          p: 3,
-          background: `linear-gradient(135deg, ${theme.glassmorphism.light} 0%, ${theme.colors.neutral[100]} 100%)`,
-          backdropFilter: "blur(20px)",
-          borderTop: `1px solid ${theme.glassmorphism.medium}`,
-          position: "relative",
+          p: 2,
+          borderTop: "1px solid #e2e8f0",
+          background: "#f8fafc",
         }}
       >
-        <Box
+        <Typography
+          variant="caption"
           sx={{
+            color: "#64748b",
+            fontWeight: 500,
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "center",
+            gap: 1,
           }}
         >
-          {" "}
-          <Typography
-            variant="caption"
-            sx={{
-              color: theme.colors.neutral[600],
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            💬 {chats.length} conversation{chats.length !== 1 ? "s" : ""}
-          </Typography>
-          <Box
-            sx={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-              boxShadow: "0 0 12px rgba(16, 185, 129, 0.4)",
-              animation: "pulse 2s infinite",
-              "@keyframes pulse": {
-                "0%, 100%": { opacity: 1 },
-                "50%": { opacity: 0.5 },
-              },
-            }}
-          />
-        </Box>
+          💬 {chats.length} {chats.length !== 1 ? "chats" : "chat"}
+        </Typography>
       </Box>
     </Box>
   );
@@ -633,7 +393,6 @@ ChatSidebar.propTypes = {
   onNewChat: PropTypes.func.isRequired,
   onDeleteChat: PropTypes.func,
   onEditChat: PropTypes.func,
-  onArchiveChat: PropTypes.func,
   isLoading: PropTypes.bool,
 };
 
@@ -641,7 +400,6 @@ ChatSidebar.defaultProps = {
   currentChatId: null,
   onDeleteChat: () => {},
   onEditChat: () => {},
-  onArchiveChat: () => {},
   isLoading: false,
 };
 

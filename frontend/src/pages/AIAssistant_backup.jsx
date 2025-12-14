@@ -10,8 +10,8 @@ import {
   Snackbar,
   IconButton,
 } from "@mui/material";
+import PsychologyIcon from "@mui/icons-material/Psychology";
 import MenuIcon from "@mui/icons-material/Menu";
-import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import NavBar from "../components/layout/NavBar";
 import ChatSidebar from "../components/aiassistant/ChatSidebar";
 import ChatMessages from "../components/aiassistant/ChatMessages";
@@ -193,7 +193,6 @@ function AIAssistant() {
             newMessages.push({
               ...user_message,
               id: user_message.id || generateUniqueId("server_user_"),
-              is_from_user: user_message.role === "user",
             });
           }
 
@@ -201,7 +200,6 @@ function AIAssistant() {
             newMessages.push({
               ...assistant_message,
               id: assistant_message.id || generateUniqueId("server_ai_"),
-              is_from_user: assistant_message.role === "user",
             });
           }
 
@@ -322,8 +320,41 @@ function AIAssistant() {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        minHeight: "100vh",
         position: "relative",
+        // Add subtle pattern overlay
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                       radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%)`,
+          pointerEvents: "none",
+        },
+        // Enhanced pulse animation
+        "@keyframes pulse": {
+          "0%": {
+            transform: "translate(-50%, -50%) scale(1)",
+            opacity: 0.7,
+          },
+          "50%": {
+            transform: "translate(-50%, -50%) scale(1.1)",
+            opacity: 0.4,
+          },
+          "100%": {
+            transform: "translate(-50%, -50%) scale(1)",
+            opacity: 0.7,
+          },
+        },
+        // Add floating animation for background elements
+        "@keyframes float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
       }}
     >
       <NavBar />
@@ -334,10 +365,14 @@ function AIAssistant() {
           flex: 1,
           display: "flex",
           overflow: "hidden",
-          background: "#ffffff",
-          margin: { xs: 0, md: 2 },
-          borderRadius: { xs: 0, md: "12px" },
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(10px)",
+          margin: { xs: 0, md: 1 },
+          borderRadius: { xs: 0, md: "16px 16px 0 0" },
+          boxShadow: {
+            xs: "none",
+            md: "0 -10px 25px rgba(0, 0, 0, 0.1)",
+          },
         }}
       >
         {/* Sidebar */}
@@ -349,7 +384,9 @@ function AIAssistant() {
             PaperProps={{
               sx: {
                 width: 280,
-                background: "#f8fafc",
+                background: "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
+                backdropFilter: "blur(20px)",
+                borderRight: "1px solid rgba(255, 255, 255, 0.2)",
               },
             }}
           >
@@ -367,10 +404,18 @@ function AIAssistant() {
           <Box
             sx={{
               width: sidebarOpen ? 280 : 0,
-              transition: "width 0.3s ease",
+              transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               overflow: "hidden",
-              background: "#f8fafc",
-              borderRight: sidebarOpen ? "1px solid #e2e8f0" : "none",
+              background:
+                "linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(226, 232, 240, 0.95) 100%)",
+              borderRight: sidebarOpen
+                ? "1px solid rgba(255, 255, 255, 0.3)"
+                : "none",
+              backdropFilter: "blur(20px) saturate(180%)",
+              // Add subtle inner shadow
+              boxShadow: sidebarOpen
+                ? "inset -1px 0 0 rgba(255, 255, 255, 0.1)"
+                : "none",
             }}
           >
             <ChatSidebar
@@ -401,8 +446,12 @@ function AIAssistant() {
                 height: "100%",
                 display: "flex",
                 flexDirection: "column",
-                backgroundColor: "#ffffff",
-                borderRadius: { xs: 0, md: "8px" },
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(226, 232, 240, 0.5)",
+                borderRadius: { xs: 0, md: "16px" },
+                margin: { xs: 0, md: 2 },
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
                 overflow: "hidden",
               }}
             >
@@ -424,11 +473,26 @@ function AIAssistant() {
                 flex: 1,
                 display: "flex",
                 flexDirection: "column",
-                background: "#ffffff",
+                background:
+                  "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%)",
+                backdropFilter: "blur(20px)",
                 position: "relative",
                 margin: { xs: 0, md: 2 },
-                borderRadius: { xs: 0, md: "8px" },
+                borderRadius: { xs: 0, md: "16px" },
                 overflow: "hidden",
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background:
+                    'url(\'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23e2e8f0" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>\')',
+                  opacity: 0.3,
+                  zIndex: 0,
+                },
               }}
             >
               {/* Mobile Header with Hamburger Menu */}
@@ -437,17 +501,37 @@ function AIAssistant() {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    px: 2,
-                    py: 2,
-                    background: "#ffffff",
-                    borderBottom: "1px solid #e2e8f0",
+                    px: 3,
+                    py: 3,
+                    background: "rgba(255, 255, 255, 0.95)",
+                    backdropFilter: "blur(20px) saturate(180%)",
+                    borderBottom: "1px solid rgba(226, 232, 240, 0.8)",
+                    position: "relative",
+                    zIndex: 1,
+                    // Add subtle top border glow
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: "1px",
+                      background:
+                        "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent)",
+                    },
                   }}
                 >
                   <IconButton
                     onClick={handleToggleSidebar}
                     sx={{
-                      color: "#0ea5e9",
-                      "&:hover": { backgroundColor: "rgba(14, 165, 233, 0.1)" },
+                      color: "#2563EB",
+                      background: "rgba(37, 99, 235, 0.1)",
+                      borderRadius: "12px",
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                      "&:hover": {
+                        backgroundColor: "rgba(37, 99, 235, 0.15)",
+                        transform: "scale(1.05)",
+                      },
                     }}
                   >
                     <MenuIcon />
@@ -455,12 +539,17 @@ function AIAssistant() {
                   <Typography
                     variant="h6"
                     sx={{
-                      fontWeight: 600,
-                      color: "#0f172a",
-                      ml: 2,
+                      fontWeight: 700,
+                      color: "#1e293b",
+                      ml: 3,
+                      background:
+                        "linear-gradient(135deg, #2563EB 0%, #7c3aed 100%)",
+                      backgroundClip: "text",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
                     }}
                   >
-                    Health AI Assistant
+                    HepatoCAI Assistant
                   </Typography>
                 </Box>
               )}
@@ -473,123 +562,209 @@ function AIAssistant() {
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  px: 3,
-                  py: 4,
+                  px: 4,
+                  py: 6,
                   textAlign: "center",
+                  position: "relative",
+                  zIndex: 1,
                 }}
               >
-                {/* Medical Icon */}
-                <MedicalServicesIcon
+                {/* Animated Icon */}
+                <Box
                   sx={{
-                    fontSize: "5rem",
-                    color: "#0ea5e9",
-                    mb: 3,
-                  }}
-                />
-
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: 700,
-                    color: "#0f172a",
-                    mb: 2,
-                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    position: "relative",
+                    mb: 4,
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: "120px",
+                      height: "120px",
+                      background:
+                        "linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%)",
+                      borderRadius: "50%",
+                      animation: "pulse 2s ease-in-out infinite",
+                    },
                   }}
                 >
-                  Health AI Assistant
+                  <PsychologyIcon
+                    sx={{
+                      fontSize: "5rem",
+                      background:
+                        "linear-gradient(135deg, #2563EB 0%, #7c3aed 100%)",
+                      backgroundClip: "text",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      position: "relative",
+                      zIndex: 1,
+                      filter: "drop-shadow(0 4px 8px rgba(37, 99, 235, 0.3))",
+                    }}
+                  />
+                </Box>
+
+                <Typography
+                  variant="h2"
+                  sx={{
+                    fontWeight: 800,
+                    mb: 3,
+                    background:
+                      "linear-gradient(135deg, #1e293b 0%, #2563EB 50%, #7c3aed 100%)",
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    fontSize: { xs: "2.5rem", md: "3.5rem" },
+                    letterSpacing: "-0.02em",
+                    // Add this for better text rendering
+                    textShadow: "none",
+                    WebkitFontSmoothing: "antialiased",
+                    MozOsxFontSmoothing: "grayscale",
+                  }}
+                >
+                  HepatoCAI Assistant
                 </Typography>
 
                 <Typography
-                  variant="body1"
+                  variant="h6"
                   sx={{
                     color: "#64748b",
-                    mb: 5,
-                    maxWidth: 600,
-                    fontSize: "1.1rem",
+                    mb: 4,
+                    maxWidth: 700,
+                    lineHeight: 1.7,
+                    fontWeight: 400,
+                    fontSize: { xs: "1.1rem", md: "1.25rem" },
                   }}
                 >
-                  Your personalized AI companion for Hepatitis C information,
-                  lab result analysis, treatment guidance, and health
-                  monitoring.
+                  Your specialized AI companion for Hepatitis C education and
+                  support. Ask me anything about HCV stages, liver health, lab
+                  results, and treatment options to get evidence-based
+                  information.
                 </Typography>
 
                 {/* Feature Cards */}
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: {
-                      xs: "1fr",
-                      sm: "repeat(2, 1fr)",
-                      md: "repeat(4, 1fr)",
-                    },
-                    gap: 2,
+                    gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+                    gap: 3,
+                    mt: 4,
+                    mb: 4,
                     width: "100%",
                     maxWidth: 900,
-                    mb: 4,
                   }}
                 >
                   {[
                     {
-                      icon: "🔬",
-                      title: "Lab Analysis",
-                      desc: "Understand your test results",
-                    },
-                    {
-                      icon: "💊",
-                      title: "Treatment Info",
-                      desc: "Learn about treatment options",
+                      icon: "🩺",
+                      title: "Medical Insights",
+                      desc: "Get expert information about Hepatitis C",
+                      gradient:
+                        "linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)",
                     },
                     {
                       icon: "📊",
-                      title: "Health Tracking",
-                      desc: "Monitor your progress",
+                      title: "Lab Results",
+                      desc: "Understand your test results and values",
+                      gradient:
+                        "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                     },
                     {
-                      icon: "🎯",
-                      title: "Personalized Care",
-                      desc: "Get tailored health advice",
+                      icon: "💊",
+                      title: "Treatment Options",
+                      desc: "Learn about available therapies",
+                      gradient:
+                        "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
                     },
                   ].map((feature, index) => (
                     <Box
                       key={index}
                       sx={{
                         p: 3,
-                        background: "#f8fafc",
-                        borderRadius: "12px",
-                        border: "1px solid #e2e8f0",
-                        transition: "all 0.2s ease",
+                        background: "rgba(255, 255, 255, 0.7)",
+                        backdropFilter: "blur(10px)",
+                        borderRadius: "20px", // Slightly more rounded
+                        border: "1px solid rgba(255, 255, 255, 0.3)",
+                        textAlign: "center",
+                        position: "relative",
+                        overflow: "hidden",
+                        transition:
+                          "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)", // Smoother bounce
+                        cursor: "pointer",
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: feature.gradient,
+                          opacity: 0,
+                          transition: "opacity 0.3s ease",
+                          borderRadius: "20px",
+                        },
                         "&:hover": {
-                          transform: "translateY(-4px)",
-                          boxShadow: "0 8px 20px rgba(0, 0, 0, 0.1)",
-                          borderColor: "#0ea5e9",
+                          transform: "translateY(-8px) scale(1.02)", // Enhanced lift effect
+                          boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)",
+                          background: "rgba(255, 255, 255, 0.95)",
+                          "&::before": {
+                            opacity: 0.05,
+                          },
+                          "& .feature-icon": {
+                            transform: "scale(1.2) rotate(5deg)",
+                            filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))",
+                          },
                         },
                       }}
                     >
-                      <Typography sx={{ fontSize: "2rem", mb: 1 }}>
+                      <Typography
+                        variant="h4"
+                        className="feature-icon"
+                        sx={{
+                          mb: 2,
+                          transition:
+                            "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                          display: "block",
+                        }}
+                      >
                         {feature.icon}
                       </Typography>
                       <Typography
-                        variant="subtitle2"
-                        sx={{ fontWeight: 600, color: "#0f172a", mb: 0.5 }}
+                        variant="h6"
+                        sx={{
+                          fontWeight: 600,
+                          color: "#1e293b",
+                          mb: 1,
+                        }}
                       >
                         {feature.title}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: "#64748b" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "#64748b",
+                          lineHeight: 1.5,
+                        }}
+                      >
                         {feature.desc}
                       </Typography>
                     </Box>
                   ))}
                 </Box>
 
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "#94a3b8",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  Start a new chat to begin your health journey
-                </Typography>
+                {!isMobile && (
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: "#94a3b8",
+                      opacity: 0.8,
+                      fontStyle: "italic",
+                      fontSize: "0.95rem",
+                    }}
+                  >
+                    ✨ Start a new conversation or select from your chat history
+                  </Typography>
+                )}
               </Box>
             </Box>
           )}
@@ -602,13 +777,28 @@ function AIAssistant() {
         autoHideDuration={6000}
         onClose={() => setError(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{
+          "& .MuiSnackbarContent-root": {
+            minWidth: "300px",
+          },
+        }}
       >
         <Alert
           onClose={() => setError(null)}
           severity="error"
           sx={{
             width: "100%",
-            borderRadius: "8px",
+            borderRadius: "12px",
+            backgroundColor: "#fee2e2",
+            color: "#dc2626",
+            border: "1px solid #fecaca",
+            "& .MuiAlert-icon": {
+              color: "#dc2626",
+            },
+            "& .MuiAlert-action": {
+              color: "#dc2626",
+            },
+            boxShadow: "0 8px 25px rgba(220, 38, 38, 0.15)",
           }}
         >
           {error}

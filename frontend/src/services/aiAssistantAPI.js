@@ -6,10 +6,12 @@ export const aiAssistantService = {
   async getChats() {
     try {
       const response = await api.get('/aiassistant/chats/');
+      // Backend returns array directly, not wrapped in {chats: [...]}
+      const chatsArray = Array.isArray(response.data) ? response.data : [];
       return {
         success: true,
-        data: response.data.chats || [],
-        total: response.data.total || 0
+        data: chatsArray,
+        total: chatsArray.length
       };
     } catch (error) {
       console.error('Error fetching chats:', error);
@@ -42,8 +44,9 @@ export const aiAssistantService = {
   async getChatDetails(chatId) {
     try {
       const response = await api.get(`/aiassistant/chats/${chatId}/`);
+      // Backend returns chat object directly
       return {
-        success: response.data.success,
+        success: true,
         data: response.data
       };
     } catch (error) {
@@ -90,7 +93,8 @@ export const aiAssistantService = {
   async sendMessage(chatId, content) {
     try {
       const response = await api.post(`/aiassistant/chats/${chatId}/messages/`, {
-        message : content.trim()
+        content: content.trim(),
+        message_type: "text"
       });
       return {
         success: true,
@@ -136,8 +140,33 @@ export const aiAssistantService = {
         success: false,
         error: error.response?.data?.error || 'Failed to update profile'
       };
-    }  
+    }
   },
+
+  // Image/file upload
+  async uploadImage(chatId, file, prompt = '') {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('prompt', prompt);
+      
+      const response = await api.post(`/aiassistant/chats/${chatId}/files/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Failed to upload image'
+      };
+    }
+  }
 };
 
 export default aiAssistantService;

@@ -3,18 +3,18 @@ import PropTypes from "prop-types";
 import ReactMarkdown from "react-markdown";
 
 const MessageBubble = ({ message, isLoading = false }) => {
-  const isUser = message.is_from_user;
+  // Backend sends 'role' field: 'user' or 'assistant'
+  const isUser = message.role === "user" || message.is_from_user === true;
 
   // Enhanced User and AI avatars
   const UserAvatar = () => (
     <Avatar
       sx={{
-        width: 36,
-        height: 36,
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        fontSize: "1.1rem",
-        boxShadow: "0 3px 10px rgba(102, 126, 234, 0.3)",
-        border: "2px solid rgba(255, 255, 255, 0.9)",
+        width: 32,
+        height: 32,
+        background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+        fontSize: "1rem",
+        boxShadow: "0 2px 8px rgba(14, 165, 233, 0.25)",
       }}
     >
       👤
@@ -24,12 +24,11 @@ const MessageBubble = ({ message, isLoading = false }) => {
   const AIAvatar = () => (
     <Avatar
       sx={{
-        width: 36,
-        height: 36,
-        background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
-        fontSize: "1.1rem",
-        boxShadow: "0 3px 10px rgba(79, 70, 229, 0.3)",
-        border: "2px solid rgba(255, 255, 255, 0.9)",
+        width: 32,
+        height: 32,
+        background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+        fontSize: "1rem",
+        boxShadow: "0 2px 8px rgba(16, 185, 129, 0.25)",
       }}
     >
       🤖
@@ -76,7 +75,7 @@ const MessageBubble = ({ message, isLoading = false }) => {
       sx={{
         display: "flex",
         justifyContent: isUser ? "flex-end" : "flex-start",
-        mb: 3,
+        mb: 2,
         px: 2,
       }}
     >
@@ -84,51 +83,38 @@ const MessageBubble = ({ message, isLoading = false }) => {
         sx={{
           display: "flex",
           flexDirection: isUser ? "row-reverse" : "row",
-          gap: 2,
-          maxWidth: "70%",
+          gap: 1.5,
+          maxWidth: "75%",
           alignItems: "flex-start",
         }}
       >
         {isUser ? <UserAvatar /> : <AIAvatar />}
 
-        <Box
-          sx={{
-            minWidth: "150px",
-          }}
-        >
+        <Box sx={{ minWidth: "100px" }}>
           <Box
             sx={{
-              p: 3,
+              p: 2,
               borderRadius: isUser
-                ? "20px 20px 4px 20px"
-                : "20px 20px 20px 4px",
+                ? "12px 12px 2px 12px"
+                : "12px 12px 12px 2px",
               background: isUser
-                ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                : "rgba(255, 255, 255, 0.95)",
-              color: isUser ? "#ffffff" : "#2d3748",
+                ? "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)"
+                : "#ffffff",
+              color: isUser ? "#ffffff" : "#1e293b",
               boxShadow: isUser
-                ? "0 4px 15px rgba(102, 126, 234, 0.25)"
-                : "0 4px 15px rgba(0, 0, 0, 0.08)",
-              border: isUser ? "none" : "1px solid rgba(226, 232, 240, 0.8)",
-              backdropFilter: "blur(10px)",
-              position: "relative",
-              transition: "all 0.2s ease",
-              "&:hover": {
-                transform: "translateY(-1px)",
-                boxShadow: isUser
-                  ? "0 6px 20px rgba(102, 126, 234, 0.35)"
-                  : "0 6px 20px rgba(0, 0, 0, 0.12)",
-              },
+                ? "0 2px 8px rgba(14, 165, 233, 0.2)"
+                : "0 2px 8px rgba(0, 0, 0, 0.08)",
+              border: isUser ? "none" : "1px solid #e2e8f0",
             }}
           >
             {isLoading ? (
               <BouncingDots />
             ) : isUser ? (
               <Typography
-                variant="body1"
+                variant="body2"
                 sx={{
                   lineHeight: 1.6,
-                  fontSize: "0.95rem",
+                  fontSize: "0.9rem",
                   wordBreak: "break-word",
                   whiteSpace: "pre-wrap",
                 }}
@@ -140,10 +126,10 @@ const MessageBubble = ({ message, isLoading = false }) => {
                 components={{
                   p: ({ children }) => (
                     <Typography
-                      variant="body1"
+                      variant="body2"
                       sx={{
                         lineHeight: 1.6,
-                        fontSize: "0.95rem",
+                        fontSize: "0.9rem",
                         mb: 1,
                         "&:last-child": { mb: 0 },
                       }}
@@ -159,8 +145,8 @@ const MessageBubble = ({ message, isLoading = false }) => {
                   li: ({ children }) => (
                     <Typography
                       component="li"
-                      variant="body1"
-                      sx={{ fontSize: "0.95rem", mb: 0.5 }}
+                      variant="body2"
+                      sx={{ fontSize: "0.9rem", mb: 0.5 }}
                     >
                       {children}
                     </Typography>
@@ -177,7 +163,7 @@ const MessageBubble = ({ message, isLoading = false }) => {
                   display: "block",
                   mt: 1,
                   opacity: 0.7,
-                  fontSize: "0.75rem",
+                  fontSize: "0.7rem",
                   textAlign: isUser ? "right" : "left",
                 }}
               >

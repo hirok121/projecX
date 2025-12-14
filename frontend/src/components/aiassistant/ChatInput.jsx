@@ -18,17 +18,16 @@ import {
 const ChatInput = ({
   onSendMessage,
   isLoading = false,
-  placeholder = "Ask me about hepatitis...",
+  placeholder = "Ask about your health...",
   showQuickQuestions = true,
 }) => {
   const [input, setInput] = useState("");
 
   const quickQuestions = [
-    "What are the HCV stages?",
-    "How do I interpret my liver function test results?",
-    "What are the latest DAA treatment options?",
-    "How can I prevent hepatitis transmission?",
-    "What lifestyle changes support liver health?",
+    "What is Hepatitis C?",
+    "How to read my liver test results?",
+    "Treatment options available",
+    "Managing symptoms",
   ];
 
   const handleSend = () => {
@@ -52,56 +51,37 @@ const ChatInput = ({
   return (
     <Box
       sx={{
-        background:
-          "linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)",
-        backdropFilter: "blur(20px)",
-        borderTop: "1px solid rgba(226, 232, 240, 0.5)",
-        position: "relative",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "1px",
-          background:
-            "linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.3) 50%, transparent 100%)",
-        },
+        background: "#ffffff",
+        borderTop: "1px solid #e2e8f0",
       }}
     >
-      {" "}
       {/* Quick Questions */}
       {showQuickQuestions && (
         <Box
           sx={{
-            px: { xs: 3, md: 4 },
-            py: 3,
-            borderBottom: "1px solid rgba(226, 232, 240, 0.3)",
-            background: "rgba(255, 255, 255, 0.7)",
-            backdropFilter: "blur(10px)",
+            px: { xs: 2, md: 3 },
+            py: 2,
+            borderBottom: "1px solid #e2e8f0",
+            background: "#fafafa",
           }}
         >
           <Typography
-            variant="body2"
+            variant="caption"
             sx={{
-              mb: 2,
+              mb: 1.5,
               color: "#64748b",
               fontWeight: 600,
-              fontSize: "0.85rem",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
+              fontSize: "0.75rem",
+              display: "block",
             }}
           >
-            ✨ Quick questions to get started:
+            Suggested questions:
           </Typography>
           <Box
             sx={{
               display: "flex",
               flexWrap: "wrap",
-              gap: 1.5,
-              maxHeight: "80px",
-              overflowY: "auto",
+              gap: 1,
             }}
           >
             {quickQuestions.map((question, index) => (
@@ -113,35 +93,17 @@ const ChatInput = ({
                 disabled={isLoading}
                 sx={{
                   cursor: "pointer",
-                  fontSize: "0.8rem",
+                  fontSize: "0.75rem",
                   fontWeight: 500,
-                  background: "rgba(255, 255, 255, 0.9)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(37, 99, 235, 0.2)",
+                  background: "#ffffff",
+                  border: "1px solid #e2e8f0",
                   color: "#475569",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
-                  "@keyframes fadeInUp": {
-                    "0%": {
-                      opacity: 0,
-                      transform: "translateY(20px)",
-                    },
-                    "100%": {
-                      opacity: 1,
-                      transform: "translateY(0)",
-                    },
-                  },
                   "&:hover": {
-                    background:
-                      "linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%)",
-                    borderColor: "#2563EB",
-                    transform: "translateY(-1px)",
-                    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.15)",
-                    color: "#2563EB",
+                    background: "#f1f5f9",
+                    borderColor: "#0ea5e9",
                   },
                   "&:disabled": {
-                    opacity: 0.6,
-                    cursor: "not-allowed",
+                    opacity: 0.5,
                   },
                 }}
               />
@@ -150,12 +112,7 @@ const ChatInput = ({
         </Box>
       )}
       {/* Input Area */}
-      <Box
-        sx={{
-          px: { xs: 2, md: 3 },
-          py: 2,
-        }}
-      >
+      <Box sx={{ px: { xs: 2, md: 3 }, py: 2 }}>
         <Paper
           elevation={0}
           sx={{
@@ -163,14 +120,13 @@ const ChatInput = ({
             alignItems: "flex-end",
             gap: 1,
             p: 1,
-            border: "2px solid #E2E8F0",
-            borderRadius: "16px",
-            backgroundColor: "#F0F4F8",
+            border: "2px solid #e2e8f0",
+            borderRadius: "8px",
+            backgroundColor: "#ffffff",
             "&:focus-within": {
-              borderColor: "#2563EB",
-              backgroundColor: "#FFFFFF",
+              borderColor: "#0ea5e9",
             },
-            transition: "all 0.2s ease",
+            transition: "border-color 0.2s ease",
           }}
         >
           {/* Text Input */}
@@ -240,24 +196,22 @@ const ChatInput = ({
               disabled={!input.trim() || isLoading}
               sx={{
                 backgroundColor:
-                  input.trim() && !isLoading ? "#2563EB" : "#E2E8F0",
-                color: input.trim() && !isLoading ? "white" : "#94A3B8",
+                  input.trim() && !isLoading ? "#0ea5e9" : "#e2e8f0",
+                color: input.trim() && !isLoading ? "white" : "#94a3b8",
                 width: 36,
                 height: 36,
                 "&:hover": {
                   backgroundColor:
-                    input.trim() && !isLoading ? "#1D4ED8" : "#E2E8F0",
+                    input.trim() && !isLoading ? "#0284c7" : "#e2e8f0",
                 },
                 "&:disabled": {
-                  backgroundColor: "#E2E8F0",
-                  color: "#94A3B8",
+                  backgroundColor: "#e2e8f0",
+                  color: "#94a3b8",
                 },
-                transition: "all 0.2s ease",
               }}
             >
-              {" "}
               {isLoading ? (
-                <CircularProgress size={16} sx={{ color: "#94A3B8" }} />
+                <CircularProgress size={16} sx={{ color: "#94a3b8" }} />
               ) : (
                 <SendIcon fontSize="small" />
               )}
