@@ -14,10 +14,15 @@ import { useNavigate } from "react-router-dom";
 function DiseaseCard({ disease }) {
   const navigate = useNavigate();
 
-  // Parse modalities from input_type
+  // Parse modalities from available_modalities
   const getModalities = () => {
-    if (!disease.input_type) return [];
-    return disease.input_type.split(",").map((m) => m.trim());
+    if (!disease.available_modalities) return [];
+    // available_modalities is an array from the backend
+    if (Array.isArray(disease.available_modalities)) {
+      return disease.available_modalities;
+    }
+    // Fallback if it's a string
+    return disease.available_modalities.split(",").map((m) => m.trim());
   };
 
   const modalities = getModalities();
@@ -37,29 +42,34 @@ function DiseaseCard({ disease }) {
     <Card
       sx={{
         cursor: "pointer",
-        height: "100%",
+        height: "280px",
         display: "flex",
         flexDirection: "column",
-        transition: "all 0.3s",
+        transition: "all 0.2s",
+        backgroundColor: "white",
+        border: "1px solid #E8EAED",
+        borderRadius: 2,
+        boxShadow: "none",
         "&:hover": {
-          transform: "translateY(-8px)",
-          boxShadow: 6,
+          transform: "translateY(-2px)",
+          boxShadow: "0 4px 12px rgba(44, 62, 80, 0.08)",
+          borderColor: "#10B981",
         },
-        borderRadius: 3,
       }}
       onClick={handleClick}
     >
-      <CardContent sx={{ flexGrow: 1 }}>
+      <CardContent sx={{ flexGrow: 1, p: 2 }}>
         {/* Disease Icon */}
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 1.5 }}>
           <Avatar
             sx={{
-              width: 60,
-              height: 60,
-              bgcolor: "primary.main",
+              width: 48,
+              height: 48,
+              bgcolor: "#ECFDF5",
+              color: "#10B981",
             }}
           >
-            <LocalHospitalIcon fontSize="large" />
+            <LocalHospitalIcon fontSize="medium" />
           </Avatar>
         </Box>
 
@@ -68,18 +78,29 @@ function DiseaseCard({ disease }) {
           variant="h6"
           align="center"
           gutterBottom
-          sx={{ fontWeight: 600, minHeight: 48 }}
+          sx={{
+            fontWeight: 600,
+            minHeight: 40,
+            fontSize: "1rem",
+            color: "#2C3E50",
+            mb: 1,
+          }}
         >
           {disease.name}
         </Typography>
 
         {/* Category Badge */}
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
           <Chip
             label={disease.category}
             size="small"
-            color="secondary"
-            sx={{ fontWeight: 500 }}
+            sx={{
+              fontWeight: 500,
+              backgroundColor: "#F0F4F8",
+              color: "#5D6D7E",
+              fontSize: "0.7rem",
+              height: 20,
+            }}
           />
         </Box>
 
@@ -87,47 +108,51 @@ function DiseaseCard({ disease }) {
         <Typography
           variant="body2"
           color="text.secondary"
+          align="center"
           sx={{
-            mb: 2,
-            minHeight: 60,
+            mb: 1,
+            minHeight: 32,
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "-webkit-box",
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
+            fontSize: "0.8rem",
           }}
         >
           {disease.description || "AI-powered diagnosis available"}
         </Typography>
 
-        {/* Available Modalities */}
+        {/* Modalities */}
         {modalities.length > 0 && (
-          <Box>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: "block", mb: 1 }}
-            >
-              Available Modalities:
-            </Typography>
-            <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-              {modalities.map((modality) => {
-                const config = modalityConfig[modality.toLowerCase()];
-                return config ? (
-                  <Chip
-                    key={modality}
-                    label={config.label}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      borderColor: config.color,
-                      color: config.color,
-                      fontSize: "0.75rem",
-                    }}
-                  />
-                ) : null;
-              })}
-            </Box>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 0.5,
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            {modalities.map((modality) => {
+              const config =
+                modalityConfig[modality.toLowerCase()] ||
+                modalityConfig.tabular;
+              return (
+                <Chip
+                  key={modality}
+                  label={config.label}
+                  size="small"
+                  sx={{
+                    fontSize: "0.7rem",
+                    height: 22,
+                    backgroundColor: "#ECFDF5",
+                    color: "#10B981",
+                    fontWeight: 500,
+                    border: "1px solid #10B981",
+                  }}
+                />
+              );
+            })}
           </Box>
         )}
       </CardContent>
@@ -140,9 +165,18 @@ function DiseaseCard({ disease }) {
           sx={{
             textTransform: "none",
             fontWeight: 600,
+            backgroundColor: "#10B981",
+            borderRadius: 1,
+            boxShadow: "none",
+            fontSize: "0.85rem",
+            py: 0.75,
+            "&:hover": {
+              backgroundColor: "#059669",
+              boxShadow: "none",
+            },
           }}
         >
-          Select Disease →
+          Select Disease
         </Button>
       </CardActions>
     </Card>

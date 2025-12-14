@@ -8,11 +8,13 @@ import {
   Chip,
   InputAdornment,
   CircularProgress,
+  Pagination,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { diagnosisAPI } from "../../services/diagnosisAPI";
 import DiseaseCard from "../../components/diagnosis/DiseaseCard";
 import NavBar from "../../components/layout/NavBar";
+import Footer from "../../components/landingPageComponents/Footer";
 
 function DiagnosisMain() {
   const [diseases, setDiseases] = useState([]);
@@ -20,6 +22,8 @@ function DiagnosisMain() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 8;
 
   const categories = [
     "All",
@@ -37,6 +41,7 @@ function DiagnosisMain() {
 
   useEffect(() => {
     filterDiseases();
+    setPage(1); // Reset to first page when filters change
   }, [search, category, diseases]);
 
   const fetchDiseases = async () => {
@@ -79,21 +84,33 @@ function DiagnosisMain() {
     setCategory(selectedCategory);
   };
 
+  const handlePageChange = (event, value) => {
+    setPage(value);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Paginate filtered diseases
+  const totalPages = Math.ceil(filteredDiseases.length / itemsPerPage);
+  const paginatedDiseases = filteredDiseases.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
   return (
-    <Box sx={{ backgroundColor: "#F0F4F8", minHeight: "100vh" }}>
+    <Box sx={{ backgroundColor: "#F8F9FA", minHeight: "100vh" }}>
       <NavBar />
 
-      <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Container maxWidth="xl" sx={{ py: 6 }}>
         {/* Header Section */}
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 5 }}>
           <Typography
             variant="h3"
             gutterBottom
-            sx={{ fontWeight: 700, color: "#1976d2" }}
+            sx={{ fontWeight: 600, color: "#2C3E50", mb: 1 }}
           >
             Disease Diagnosis Platform
           </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ mb: 3 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
             Select a disease to begin diagnosis with AI-powered models
           </Typography>
 
@@ -113,15 +130,15 @@ function DiagnosisMain() {
             sx={{
               mb: 3,
               backgroundColor: "white",
-              borderRadius: 2,
+              borderRadius: 1,
               "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
+                borderRadius: 1,
               },
             }}
           />
 
           {/* Category Filter Chips */}
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
             {categories.map((cat) => (
               <Chip
                 key={cat}
@@ -136,10 +153,22 @@ function DiagnosisMain() {
                 }
                 sx={{
                   cursor: "pointer",
-                  fontSize: "0.9rem",
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                  borderRadius: 1,
+                  backgroundColor:
+                    category === cat || (category === "all" && cat === "All")
+                      ? "#10B981"
+                      : "white",
+                  color:
+                    category === cat || (category === "all" && cat === "All")
+                      ? "white"
+                      : "#5D6D7E",
                   "&:hover": {
                     backgroundColor:
-                      category === cat ? undefined : "action.hover",
+                      category === cat || (category === "all" && cat === "All")
+                        ? "#059669"
+                        : "#ECFDF5",
                   },
                 }}
               />
@@ -165,15 +194,147 @@ function DiagnosisMain() {
 
         {/* Disease Grid */}
         {!loading && filteredDiseases.length > 0 && (
-          <Grid container spacing={3}>
-            {filteredDiseases.map((disease) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={disease.id}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+            {paginatedDiseases.map((disease) => (
+              <Box
+                key={disease.id}
+                sx={{
+                  flex: {
+                    xs: "0 0 100%",
+                    sm: "0 0 calc(50% - 12px)",
+                    md: "0 0 calc(33.333% - 16px)",
+                    lg: "0 0 calc(25% - 18px)",
+                  },
+                  minWidth: 0,
+                }}
+              >
                 <DiseaseCard disease={disease} />
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         )}
+
+        {/* Pagination */}
+        {!loading && filteredDiseases.length > 0 && totalPages > 1 && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              mt: 6,
+              mb: 4,
+            }}
+          >
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  color: "#5D6D7E",
+                  "&.Mui-selected": {
+                    backgroundColor: "#10B981",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#059669",
+                    },
+                  },
+                  "&:hover": {
+                    backgroundColor: "#ECFDF5",
+                  },
+                },
+              }}
+            />
+          </Box>
+        )}
+
+        {/* About Section */}
+        <Box
+          sx={{
+            mt: 8,
+            mb: 6,
+            py: 6,
+            px: 4,
+            backgroundColor: "white",
+            borderRadius: 3,
+            border: "1px solid #E8EAED",
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 600,
+              color: "#2C3E50",
+              mb: 3,
+            }}
+          >
+            Why Choose DeepMed?
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: "#5D6D7E",
+              mb: 4,
+              maxWidth: 800,
+              mx: "auto",
+              lineHeight: 1.8,
+            }}
+          >
+            DeepMed is an advanced AI-powered diagnostic platform that combines
+            cutting-edge machine learning models with medical expertise to
+            provide accurate disease predictions. Our platform supports multiple
+            diagnostic modalities including MRI, CT scans, X-rays, and
+            laboratory data analysis.
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 6,
+              flexWrap: "wrap",
+              mt: 4,
+            }}
+          >
+            <Box sx={{ textAlign: "center" }}>
+              <Typography
+                variant="h3"
+                sx={{ fontWeight: 700, color: "#10B981", mb: 1 }}
+              >
+                15+
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Disease Categories
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: "center" }}>
+              <Typography
+                variant="h3"
+                sx={{ fontWeight: 700, color: "#10B981", mb: 1 }}
+              >
+                50+
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                AI Models
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: "center" }}>
+              <Typography
+                variant="h3"
+                sx={{ fontWeight: 700, color: "#10B981", mb: 1 }}
+              >
+                95%+
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Accuracy Rate
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
       </Container>
+
+      <Footer />
     </Box>
   );
 }
