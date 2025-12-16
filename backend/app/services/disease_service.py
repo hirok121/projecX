@@ -45,13 +45,7 @@ class DiseaseService:
             name=disease_data.name,
             description=disease_data.description,
             category=disease_data.category,
-            severity=disease_data.severity,
-            symptoms=disease_data.symptoms,
-            risk_factors=disease_data.risk_factors,
-            prevention=disease_data.prevention,
-            treatment=disease_data.treatment,
             available_modalities=disease_data.available_modalities,
-            icd_code=disease_data.icd_code,
         )
 
         try:
@@ -111,7 +105,7 @@ class DiseaseService:
         """Update a disease."""
         disease = DiseaseService.get_disease(db, disease_id)
 
-        if disease_data.disease_data.name is not None:
+        if disease_data.name is not None:
             # Check if new name conflicts
             existing = (
                 db.query(Disease)
@@ -130,26 +124,8 @@ class DiseaseService:
         if disease_data.category is not None:
             disease.category = disease_data.category
 
-        if disease_data.severity is not None:
-            disease.severity = disease_data.severity
-
-        if disease_data.symptoms is not None:
-            disease.symptoms = disease_data.symptoms
-
-        if disease_data.risk_factors is not None:
-            disease.risk_factors = disease_data.risk_factors
-
-        if disease_data.prevention is not None:
-            disease.prevention = disease_data.prevention
-
-        if disease_data.treatment is not None:
-            disease.treatment = disease_data.treatment
-
         if disease_data.available_modalities is not None:
             disease.available_modalities = disease_data.available_modalities
-
-        if disease_data.icd_code is not None:
-            disease.icd_code = disease_data.icd_code
 
         if disease_data.is_active is not None:
             disease.is_active = disease_data.is_active

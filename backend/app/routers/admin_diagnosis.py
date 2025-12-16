@@ -12,15 +12,13 @@ from app.models.disease import Disease
 from app.models.classifier import Classifier, ModalityType
 from app.routers.auth import get_current_user
 from app.core.logging import track_endpoint_performance, log_endpoint_activity
-from app.schemas.diagnosis import (
-    DiseaseCreate,
-    DiseaseUpdate,
-    DiseaseResponse,
+from app.schemas.disease import DiseaseCreate, DiseaseUpdate, DiseaseResponse
+from app.schemas.classifier import (
     ClassifierCreate,
     ClassifierUpdate,
     ClassifierResponse,
 )
-from app.services.model_service import model_service
+
 
 router = APIRouter(prefix="/admin/diagnosis", tags=["admin-diagnosis"])
 logger = logging.getLogger(__name__)

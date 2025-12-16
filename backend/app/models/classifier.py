@@ -75,12 +75,6 @@ class Classifier(Base):
 
     # Relationships
     disease = relationship("Disease", back_populates="classifiers", lazy="select")
-    predictions = relationship(
-        "PredictionResult",
-        back_populates="classifier",
-        cascade="all, delete-orphan",
-        lazy="select",
-    )
 
     def to_dict(self):
         """Convert model to dictionary."""

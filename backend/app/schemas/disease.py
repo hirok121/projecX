@@ -26,6 +26,9 @@ class DiseaseUpdate(BaseModel):
     """Schema for updating a disease. All fields optional."""
 
     name: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = None
+    category: Optional[str] = None
+    available_modalities: Optional[List[str]] = None
     is_active: Optional[bool] = None
 
 

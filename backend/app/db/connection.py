@@ -30,7 +30,6 @@ def init_db():
     from app.models import user  # noqa: F401
     from app.models import disease  # noqa: F401
     from app.models import classifier  # noqa: F401
-    from app.models import prediction  # noqa: F401
 
     # Create all tables
     Base.metadata.create_all(bind=engine)

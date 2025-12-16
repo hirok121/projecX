@@ -62,12 +62,6 @@ class Disease(Base):
         cascade="all, delete-orphan",
         lazy="select",
     )
-    predictions = relationship(
-        "PredictionResult",
-        back_populates="disease",
-        cascade="all, delete-orphan",
-        lazy="select",
-    )
 
     @validates("available_modalities")
     def validate_modalities(self, key, value):
