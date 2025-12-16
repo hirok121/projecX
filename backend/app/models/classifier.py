@@ -7,12 +7,14 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
     Boolean,
+    JSON,
     Enum as SQLEnum,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.connection import Base
 import enum
+import uuid
 
 
 class ModalityType(str, enum.Enum):
@@ -35,11 +37,25 @@ class Classifier(Base):
     # Modality type
     modality = Column(SQLEnum(ModalityType), nullable=False, index=True)
 
-    # Model file info
-    model_file = Column(String(500), nullable=False)  # Path to pickle file
+    # Model file info - unique identifier for model storage path
+    model_path = Column(
+        String(500),
+        nullable=False,
+        unique=True,
+        index=True,
+        default=lambda: str(uuid.uuid4()),
+    )  # Unique path identifier (UUID-based)
+    model_link = Column(
+        String(1000), nullable=True
+    )  # Optional URL to where the model is stored, e.g., S3 link, CDN, etc.
     model_type = Column(
         String(100), nullable=True
     )  # e.g., "RandomForest", "CNN", "LogisticRegression"
+
+    # Required features for this classifier (especially for tabular data)
+    required_features = Column(
+        JSON, nullable=True
+    )  # ["age", "glucose", "bmi", ...] - list of feature names
 
     # Performance metrics
     accuracy = Column(Float, nullable=True)
@@ -75,8 +91,10 @@ class Classifier(Base):
             "disease_id": self.disease_id,
             "disease_name": self.disease.name if self.disease else None,
             "modality": self.modality.value if self.modality else None,
-            "model_file": self.model_file,
+            "model_path": self.model_path,
+            "model_link": self.model_link,
             "model_type": self.model_type,
+            "required_features": self.required_features or [],
             "accuracy": self.accuracy,
             "precision": self.precision,
             "recall": self.recall,

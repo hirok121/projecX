@@ -1,10 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, users, aiassistant, diagnosis, admin_diagnosis
+from app.routers import (
+    auth,
+    users,
+    aiassistant,
+    diagnosis,
+    admin_diagnosis,
+    disease,
+    classifier,
+    notification,
+)
 from app.core.config import settings
 from app.core.logging import app_logger
 from app.middleware.logging import LoggingMiddleware
 from app.db.connection import init_db
+from backend.app.routers import diagnosis
 
 # Initialize database
 init_db()
@@ -31,6 +41,10 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(aiassistant.router)
+app.include_router(disease.router)
+app.include_router(classifier.router)
+app.include_router(diagnosis.router)
+app.include_router(notification.router)
 app.include_router(diagnosis.router)
 app.include_router(admin_diagnosis.router)
 
