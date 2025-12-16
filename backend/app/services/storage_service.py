@@ -7,13 +7,16 @@ import shutil
 from pathlib import Path
 from typing import Optional
 from app.core.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class StorageService:
     """Service for managing disease and classifier storage directories."""
 
-    # Base directory for all model storage
-    BASE_DIR = Path(settings.ml_models_path)
+    # Base directory for all model storage (convert to absolute path)
+    BASE_DIR = Path(settings.ml_models_path).resolve()
 
     @classmethod
     def create_disease_directory(cls, disease_storage_path: str) -> Path:
@@ -32,7 +35,7 @@ class StorageService:
         disease_dir = cls.BASE_DIR / disease_storage_path
         disease_dir.mkdir(parents=True, exist_ok=True)
 
-        print(f"Created disease directory: {disease_dir}")
+        logger.info(f"✅ Created disease directory: {disease_dir}")
         return disease_dir
 
     @classmethod
@@ -55,7 +58,7 @@ class StorageService:
         classifier_dir = cls.BASE_DIR / disease_storage_path / classifier_model_path
         classifier_dir.mkdir(parents=True, exist_ok=True)
 
-        print(f"Created classifier directory: {classifier_dir}")
+        logger.info(f"✅ Created classifier directory: {classifier_dir}")
         return classifier_dir
 
     @classmethod
@@ -156,7 +159,7 @@ class StorageService:
                     f.write(content)
 
             saved_paths[filename] = str(file_path)
-            print(f"Saved {filename} to {file_path}")
+            logger.info(f"✅ Saved {filename} to {file_path}")
 
         return saved_paths
 

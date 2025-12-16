@@ -1,104 +1,45 @@
+/**
+ * Diagnosis API Service
+ * Handles diagnosis/prediction-related API calls
+ * Note: For disease/classifier management, use diseaseAPI.js and classifierAPI.js directly
+ */
 import api from "./api";
 
 const API_BASE = "/diagnosis";
 
 export const diagnosisAPI = {
-  // Get all diseases
-  getDiseases: () => api.get(`${API_BASE}/diseases`),
+  // ============ Prediction ============
 
-  // Get single disease by ID
-  getDisease: (diseaseId) => api.get(`${API_BASE}/diseases/${diseaseId}`),
-
-  // Get classifiers for a disease
-  getDiseaseClassifiers: (diseaseId) =>
-    api.get(`${API_BASE}/diseases/${diseaseId}/classifiers`),
-
-  // Get classifiers filtered by modality
-  getClassifiersByModality: (diseaseId, modality) =>
-    api.get(`${API_BASE}/diseases/${diseaseId}/classifiers`, {
-      params: { modality },
-    }),
-
-  // Submit prediction
-  predict: (formData) =>
-    api.post(`${API_BASE}/predict`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }),
-
-  // Get prediction result by ID
-  getPredictionResult: (predictionId) =>
-    api.get(`${API_BASE}/predictions/${predictionId}`),
-
-  // Get user's prediction history
-  getUserPredictions: (userId) =>
-    api.get(`${API_BASE}/predictions/user/${userId}`),
-
-  // Get all predictions (admin only)
-  getAllPredictions: () => api.get(`${API_BASE}/predictions`),
-
-  // Legacy HCV-specific endpoints (keep for backward compatibility)
-  // Create new diagnosis
-  createDiagnosis: async (patientData) => {
+  // Create prediction/diagnosis
+  predict: async (diagnosisData) => {
     try {
-      const response = await api.post("/diagnosis/analyze-hcv/", patientData);
+      const response = await api.post("/diagnosis/", diagnosisData);
       return response.data;
     } catch (error) {
-      console.error("Error creating diagnosis:", error);
+      console.error("Error creating prediction:", error);
       throw error;
     }
   },
 
-  // Get user's diagnoses
-  getUserDiagnoses: async () => {
+  // Get diagnosis by ID
+  getDiagnosis: async (diagnosisId) => {
     try {
-      const response = await api.get("/diagnosis/analyze-hcv/");
+      const response = await api.get(`/diagnosis/${diagnosisId}`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching user diagnoses:", error);
+      console.error(`Error fetching diagnosis ${diagnosisId}:`, error);
       throw error;
     }
   },
 
-  // Get specific diagnosis
-  getDiagnosis: async (id) => {
-    try {
-      const response = await api.get(`/diagnosis/analyze-hcv/${id}/`);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching diagnosis:", error);
-      throw error;
-    }
-  },
+  // ============ Search & Query ============
 
-  // Update diagnosis metadata
-  updateDiagnosis: async (id, data) => {
-    try {
-      const response = await api.put(`/diagnosis/analyze-hcv/${id}/`, data);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating diagnosis:", error);
-      throw error;
-    }
-  },
-
-  // Delete diagnosis
-  deleteDiagnosis: async (id) => {
-    try {
-      const response = await api.delete(`/diagnosis/analyze-hcv/${id}/`);
-      return response.data;
-    } catch (error) {
-      console.error("Error deleting diagnosis:", error);
-      throw error;
-    }
-  },
   // Search diagnoses
   searchDiagnoses: async (filters) => {
     try {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
+        if (value !== null && value !== undefined && value !== "") {
           params.append(key, value);
         }
       });
@@ -115,7 +56,7 @@ export const diagnosisAPI = {
     try {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
+        if (value !== null && value !== undefined && value !== "") {
           params.append(key, value);
         }
       });
@@ -126,6 +67,8 @@ export const diagnosisAPI = {
       throw error;
     }
   },
+
+  // ============ Statistics & Analytics ============
 
   // Get quick stats
   getQuickStats: async () => {
@@ -149,11 +92,13 @@ export const diagnosisAPI = {
     }
   },
 
-  // Export functions
+  // ============ Export Functions ============
+
+  // Export to CSV
   exportCSV: async () => {
     try {
       const response = await api.get("/diagnosis/export/csv/", {
-        responseType: 'blob',
+        responseType: "blob",
       });
       return response;
     } catch (error) {
@@ -162,100 +107,15 @@ export const diagnosisAPI = {
     }
   },
 
+  // Export to Excel
   exportExcel: async () => {
     try {
       const response = await api.get("/diagnosis/export/excel/", {
-        responseType: 'blob',
+        responseType: "blob",
       });
       return response;
     } catch (error) {
       console.error("Error exporting Excel:", error);
-      throw error;
-    }
-  },
-
-  // Admin Disease Management
-  adminCreateDisease: async (diseaseData) => {
-    try {
-      const response = await api.post("/admin/diagnosis/diseases", diseaseData);
-      return response.data;
-    } catch (error) {
-      console.error("Error creating disease:", error);
-      throw error;
-    }
-  },
-
-  adminUpdateDisease: async (diseaseId, diseaseData) => {
-    try {
-      const response = await api.put(`/admin/diagnosis/diseases/${diseaseId}`, diseaseData);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating disease:", error);
-      throw error;
-    }
-  },
-
-  adminDeleteDisease: async (diseaseId, hardDelete = false) => {
-    try {
-      const response = await api.delete(`/admin/diagnosis/diseases/${diseaseId}`, {
-        params: { hard_delete: hardDelete }
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error deleting disease:", error);
-      throw error;
-    }
-  },
-
-  // Admin Classifier Management
-  adminCreateClassifier: async (formData) => {
-    try {
-      const response = await api.post("/admin/diagnosis/classifiers", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error creating classifier:", error);
-      throw error;
-    }
-  },
-
-  adminUpdateClassifier: async (classifierId, formData) => {
-    try {
-      const response = await api.put(`/admin/diagnosis/classifiers/${classifierId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error updating classifier:", error);
-      throw error;
-    }
-  },
-
-  adminDeleteClassifier: async (classifierId, hardDelete = false) => {
-    try {
-      const response = await api.delete(`/admin/diagnosis/classifiers/${classifierId}`, {
-        params: { hard_delete: hardDelete }
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error deleting classifier:", error);
-      throw error;
-    }
-  },
-
-  adminListClassifiers: async (filters = {}) => {
-    try {
-      const response = await api.get("/admin/diagnosis/classifiers", {
-        params: filters
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error listing classifiers:", error);
       throw error;
     }
   },

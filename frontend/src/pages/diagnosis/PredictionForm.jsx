@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -8,12 +8,13 @@ import {
   Button,
   CircularProgress,
   Alert,
+  TextField,
 } from "@mui/material";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { diagnosisAPI } from "../../services/diagnosisAPI";
+import { classifierAPI } from "../../services/classifierAPI";
 import NavBar from "../../components/layout/NavBar";
 import ImageUploadForm from "../../components/diagnosis/ImageUploadForm";
-import TabularInputForm from "../../components/diagnosis/TabularInputForm";
 import PredictionSummary from "../../components/diagnosis/PredictionSummary";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
@@ -27,36 +28,75 @@ function PredictionForm() {
   const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [requiredFeatures, setRequiredFeatures] = useState([]);
+  const [fetchingFeatures, setFetchingFeatures] = useState(true);
+
+  // Fetch required features from selected classifiers
+  useEffect(() => {
+    const fetchRequiredFeatures = async () => {
+      if (!selectedModels || selectedModels.length === 0) {
+        setFetchingFeatures(false);
+        return;
+      }
+
+      try {
+        setFetchingFeatures(true);
+        const allFeatures = new Set();
+
+        // Fetch each classifier and collect their required_features
+        for (const modelId of selectedModels) {
+          const classifier = await classifierAPI.getClassifier(modelId);
+          if (
+            classifier.required_features &&
+            Array.isArray(classifier.required_features)
+          ) {
+            classifier.required_features.forEach((feature) =>
+              allFeatures.add(feature)
+            );
+          }
+        }
+
+        setRequiredFeatures(Array.from(allFeatures));
+      } catch (err) {
+        console.error("Failed to fetch required features:", err);
+        setError("Failed to load input fields. Please try again.");
+      } finally {
+        setFetchingFeatures(false);
+      }
+    };
+
+    fetchRequiredFeatures();
+  }, [selectedModels]);
 
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append("disease_id", diseaseId);
-      formData.append("classifier_ids", JSON.stringify(selectedModels));
+      // The backend currently only supports one classifier at a time
+      // Use the first selected classifier
+      const classifierId = selectedModels[0];
 
       if (modality === "tabular") {
-        formData.append("input_data", JSON.stringify(inputData));
-      } else {
-        // For image modalities (mri, ct, xray)
-        if (!imageFile) {
-          setError("Please upload an image file");
-          setLoading(false);
-          return;
+        // For tabular data, send as JSON
+        const diagnosisData = {
+          classifier_id: classifierId,
+          input_data: inputData,
+        };
+
+        const response = await diagnosisAPI.predict(diagnosisData);
+
+        // Navigate to results page
+        if (response && response.id) {
+          navigate(`/diagnosis/${response.id}`, {
+            state: { diagnosis: response, disease, modality },
+          });
         }
-        formData.append("image", imageFile);
-        formData.append("modality", modality);
-      }
-
-      const response = await diagnosisAPI.predict(formData);
-
-      // Navigate to results page
-      if (response.data && response.data.length > 0) {
-        navigate(`/diagnosis/results/${response.data[0].id}`, {
-          state: { results: response.data, disease, modality },
-        });
+      } else {
+        // For image modalities - not yet implemented
+        setError("Image-based diagnosis is not yet implemented");
+        setLoading(false);
+        return;
       }
     } catch (err) {
       console.error("Prediction failed:", err);
@@ -86,12 +126,15 @@ function PredictionForm() {
   const isFormValid = () => {
     if (modality === "tabular") {
       // Check if all required fields are filled
-      const requiredFeatures = disease?.required_features || [];
       return requiredFeatures.every((field) => inputData[field]);
     } else {
       // Check if image is uploaded
       return imageFile !== null;
     }
+  };
+
+  const handleFieldChange = (field, value) => {
+    setInputData({ ...inputData, [field]: value });
   };
 
   if (!disease || !selectedModels) {
@@ -132,7 +175,7 @@ function PredictionForm() {
         <Typography
           variant="h4"
           gutterBottom
-          sx={{ fontWeight: 700, color: "#1976d2" }}
+          sx={{ fontWeight: 700, color: "#10B981" }}
         >
           Enter {getModalityLabel()} Data
         </Typography>
@@ -151,12 +194,66 @@ function PredictionForm() {
           {/* Main Form Area */}
           <Grid item xs={12} md={8}>
             <Paper sx={{ p: 3, borderRadius: 2 }}>
-              {modality === "tabular" ? (
-                <TabularInputForm
-                  requiredFeatures={disease.required_features || []}
-                  inputData={inputData}
-                  onChange={setInputData}
-                />
+              {fetchingFeatures ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: 200,
+                  }}
+                >
+                  <CircularProgress />
+                </Box>
+              ) : modality === "tabular" ? (
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                    Enter Clinical Data
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 3 }}
+                  >
+                    Please fill in all laboratory test results. All fields are
+                    required for accurate prediction.
+                  </Typography>
+
+                  <Grid container spacing={3}>
+                    {requiredFeatures.map((feature) => (
+                      <Grid item xs={12} sm={6} key={feature}>
+                        <TextField
+                          fullWidth
+                          label={feature}
+                          type="number"
+                          value={inputData[feature] || ""}
+                          onChange={(e) =>
+                            handleFieldChange(feature, e.target.value)
+                          }
+                          required
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              "&.Mui-focused fieldset": {
+                                borderColor: "#10B981",
+                              },
+                            },
+                            "& .MuiInputLabel-root.Mui-focused": {
+                              color: "#10B981",
+                            },
+                          }}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+
+                  {requiredFeatures.length === 0 && (
+                    <Box sx={{ textAlign: "center", py: 4 }}>
+                      <Typography variant="body1" color="text.secondary">
+                        No input fields configured for this disease
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
               ) : (
                 <ImageUploadForm
                   modality={modality}
@@ -177,9 +274,13 @@ function PredictionForm() {
                 <Button
                   variant="contained"
                   onClick={handleSubmit}
-                  disabled={loading || !isFormValid()}
+                  disabled={loading || !isFormValid() || fetchingFeatures}
                   size="large"
                   fullWidth
+                  sx={{
+                    backgroundColor: "#10B981",
+                    "&:hover": { backgroundColor: "#059669" },
+                  }}
                 >
                   {loading ? (
                     <>

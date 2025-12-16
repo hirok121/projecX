@@ -49,6 +49,7 @@ class ClassifierResponse(ClassifierBase):
 
     id: int
     model_path: str
+    disease_name: Optional[str] = None
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None

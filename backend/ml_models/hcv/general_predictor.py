@@ -84,9 +84,9 @@ class GeneralPredictor:
             # Load class mapping
             self.class_mapping = joblib.load(class_path)
 
-            # print(f"{self.model_name} loaded successfully")
-            # print(f"Features: {self.features}")
-            # print(f"Classes: {list(self.class_mapping.values())}")
+            print(f"{self.model_name} loaded successfully")
+            print(f"Features: {self.features}")
+            print(f"Classes: {list(self.class_mapping.values())}")
 
         except Exception as e:
             raise Exception(f"Error loading model files: {str(e)}")

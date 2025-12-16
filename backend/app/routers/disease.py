@@ -19,16 +19,10 @@ router = APIRouter(prefix="/diseases", tags=["diseases"])
 def create_disease(disease_data: DiseaseCreate, db: Session = Depends(get_db)):
     """Create a new disease with automatic storage directory creation."""
     log_endpoint_activity(
-        "disease", "create_disease", extra={"disease_name": disease_data.name}
+        "disease", "create_disease", additional_info={"disease_name": disease_data.name}
     )
 
-    return DiseaseService.create_disease(
-        db=db,
-        name=disease_data.name,
-        description=disease_data.description,
-        category=disease_data.category,
-        available_modalities=disease_data.available_modalities,
-    )
+    return DiseaseService.create_disease(db=db, disease_data=disease_data)
 
 
 @router.get("/", response_model=List[DiseaseResponse])
@@ -42,7 +36,9 @@ def list_diseases(
 ):
     """Get list of diseases with optional filters."""
     log_endpoint_activity(
-        "disease", "list_diseases", extra={"category": category, "is_active": is_active}
+        "disease",
+        "list_diseases",
+        additional_info={"category": category, "is_active": is_active},
     )
 
     return DiseaseService.get_diseases(
@@ -54,7 +50,9 @@ def list_diseases(
 @track_endpoint_performance("disease", "get")
 def get_disease(disease_id: int, db: Session = Depends(get_db)):
     """Get a specific disease by ID."""
-    log_endpoint_activity("disease", "get_disease", extra={"disease_id": disease_id})
+    log_endpoint_activity(
+        "disease", "get_disease", additional_info={"disease_id": disease_id}
+    )
 
     return DiseaseService.get_disease(db=db, disease_id=disease_id)
 
@@ -65,7 +63,9 @@ def update_disease(
     disease_id: int, disease_data: DiseaseUpdate, db: Session = Depends(get_db)
 ):
     """Update a disease."""
-    log_endpoint_activity("disease", "update_disease", extra={"disease_id": disease_id})
+    log_endpoint_activity(
+        "disease", "update_disease", additional_info={"disease_id": disease_id}
+    )
 
     return DiseaseService.update_disease(
         db=db, disease_id=disease_id, disease_data=disease_data
@@ -76,7 +76,9 @@ def update_disease(
 @track_endpoint_performance("disease", "delete")
 def delete_disease(disease_id: int, db: Session = Depends(get_db)):
     """Delete a disease and its storage directory."""
-    log_endpoint_activity("disease", "delete_disease", extra={"disease_id": disease_id})
+    log_endpoint_activity(
+        "disease", "delete_disease", additional_info={"disease_id": disease_id}
+    )
 
     DiseaseService.delete_disease(db=db, disease_id=disease_id)
     return {"message": "Disease deleted successfully"}

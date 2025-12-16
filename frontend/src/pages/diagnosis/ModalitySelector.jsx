@@ -10,7 +10,7 @@ import {
   Button,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { diagnosisAPI } from "../../services/diagnosisAPI";
+import { diseaseAPI } from "../../services/diseaseAPI";
 import NavBar from "../../components/layout/NavBar";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
@@ -26,32 +26,32 @@ function ModalitySelector() {
       name: "MRI Scan",
       icon: "🧲",
       description: "Magnetic Resonance Imaging",
-      color: "#1976d2",
-      bgGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      color: "#10B981",
+      bgGradient: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
     },
     {
       id: "ct",
       name: "CT Scan",
       icon: "🔬",
       description: "Computed Tomography",
-      color: "#2e7d32",
-      bgGradient: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
+      color: "#10B981",
+      bgGradient: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
     },
     {
       id: "xray",
       name: "X-Ray",
       icon: "📡",
       description: "X-Ray Imaging",
-      color: "#ed6c02",
-      bgGradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+      color: "#10B981",
+      bgGradient: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
     },
     {
       id: "tabular",
       name: "Lab Data",
       icon: "📊",
       description: "Clinical & Laboratory Data",
-      color: "#9c27b0",
-      bgGradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+      color: "#10B981",
+      bgGradient: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
     },
   ];
 
@@ -62,8 +62,8 @@ function ModalitySelector() {
   const fetchDisease = async () => {
     try {
       setLoading(true);
-      const response = await diagnosisAPI.getDisease(diseaseId);
-      setDisease(response.data);
+      const response = await diseaseAPI.getDisease(diseaseId);
+      setDisease(response);
     } catch (error) {
       console.error("Error fetching disease:", error);
     } finally {
@@ -72,8 +72,9 @@ function ModalitySelector() {
   };
 
   const getAvailableModalities = () => {
-    if (!disease || !disease.input_type) return [];
-    return disease.input_type.split(",").map((m) => m.trim().toLowerCase());
+    if (!disease || !disease.available_modalities) return [];
+    // available_modalities is already an array from the backend
+    return disease.available_modalities.map((m) => m.toLowerCase());
   };
 
   const availableModalities = getAvailableModalities();
@@ -122,7 +123,7 @@ function ModalitySelector() {
         <Typography
           variant="h4"
           gutterBottom
-          sx={{ fontWeight: 700, color: "#1976d2" }}
+          sx={{ fontWeight: 700, color: "#10B981" }}
         >
           {disease?.name}
         </Typography>

@@ -56,7 +56,9 @@ class Settings(BaseSettings):
     max_tokens: int = 4000
 
     # ML Models storage settings
-    ml_models_path: str = "backend/ml_models"  # Base directory for ML model storage
+    ml_models_path: str = (
+        "./ml_models"  # Base directory for ML model storage (relative to backend directory)
+    )
 
     class Config:
         env_file = ".env"

@@ -11,7 +11,7 @@ import {
   Pagination,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { diagnosisAPI } from "../../services/diagnosisAPI";
+import { diseaseAPI } from "../../services/diseaseAPI";
 import DiseaseCard from "../../components/diagnosis/DiseaseCard";
 import NavBar from "../../components/layout/NavBar";
 import Footer from "../../components/landingPageComponents/Footer";
@@ -40,9 +40,9 @@ function DiagnosisMain() {
   const fetchDiseases = async () => {
     try {
       setLoading(true);
-      const response = await diagnosisAPI.getDiseases();
-      setDiseases(response.data);
-      setFilteredDiseases(response.data);
+      const response = await diseaseAPI.getDiseases();
+      setDiseases(response.data || response);
+      setFilteredDiseases(response.data || response);
     } catch (error) {
       console.error("Error fetching diseases:", error);
     } finally {

@@ -25,7 +25,10 @@ def create_classifier(classifier_data: ClassifierCreate, db: Session = Depends(g
     log_endpoint_activity(
         "classifier",
         "create_classifier",
-        extra={"name": classifier_data.name, "disease_id": classifier_data.disease_id},
+        additional_info={
+            "name": classifier_data.name,
+            "disease_id": classifier_data.disease_id,
+        },
     )
 
     return ClassifierService.create_classifier(db=db, classifier_data=classifier_data)
@@ -53,7 +56,9 @@ def upload_model_files(
     - class.pkl: Class name mapping
     """
     log_endpoint_activity(
-        "classifier", "upload_model_files", extra={"classifier_id": classifier_id}
+        "classifier",
+        "upload_model_files",
+        additional_info={"classifier_id": classifier_id},
     )
 
     # Validate file extensions
@@ -98,7 +103,7 @@ def list_classifiers(
     log_endpoint_activity(
         "classifier",
         "list_classifiers",
-        extra={"disease_id": disease_id, "modality": modality},
+        additional_info={"disease_id": disease_id, "modality": modality},
     )
 
     return ClassifierService.get_classifiers(
@@ -116,7 +121,7 @@ def list_classifiers(
 def get_classifier(classifier_id: int, db: Session = Depends(get_db)):
     """Get a specific classifier by ID."""
     log_endpoint_activity(
-        "classifier", "get_classifier", extra={"classifier_id": classifier_id}
+        "classifier", "get_classifier", additional_info={"classifier_id": classifier_id}
     )
 
     return ClassifierService.get_classifier(db=db, classifier_id=classifier_id)
@@ -129,7 +134,9 @@ def get_classifiers_by_disease(
 ):
     """Get all classifiers for a specific disease."""
     log_endpoint_activity(
-        "classifier", "get_classifiers_by_disease", extra={"disease_id": disease_id}
+        "classifier",
+        "get_classifiers_by_disease",
+        additional_info={"disease_id": disease_id},
     )
 
     return ClassifierService.get_classifiers(
@@ -144,7 +151,9 @@ def update_classifier(
 ):
     """Update a classifier."""
     log_endpoint_activity(
-        "classifier", "update_classifier", extra={"classifier_id": classifier_id}
+        "classifier",
+        "update_classifier",
+        additional_info={"classifier_id": classifier_id},
     )
 
     return ClassifierService.update_classifier(
@@ -157,7 +166,9 @@ def update_classifier(
 def delete_classifier(classifier_id: int, db: Session = Depends(get_db)):
     """Delete a classifier and its storage directory."""
     log_endpoint_activity(
-        "classifier", "delete_classifier", extra={"classifier_id": classifier_id}
+        "classifier",
+        "delete_classifier",
+        additional_info={"classifier_id": classifier_id},
     )
 
     ClassifierService.delete_classifier(db=db, classifier_id=classifier_id)

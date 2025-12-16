@@ -38,7 +38,7 @@ def create_diagnosis(
     log_endpoint_activity(
         "diagnosis",
         "create_diagnosis",
-        extra={
+        additional_info={
             "user_id": current_user.id,
             "classifier_id": diagnosis_data.classifier_id,
         },
@@ -86,7 +86,7 @@ def get_diagnosis(
     log_endpoint_activity(
         "diagnosis",
         "get_diagnosis",
-        extra={"diagnosis_id": diagnosis_id, "user_id": current_user.id},
+        additional_info={"diagnosis_id": diagnosis_id, "user_id": current_user.id},
     )
 
     try:
@@ -111,7 +111,7 @@ def get_my_diagnoses(
     log_endpoint_activity(
         "diagnosis",
         "list_my_diagnoses",
-        extra={"user_id": current_user.id, "disease_id": disease_id},
+        additional_info={"user_id": current_user.id, "disease_id": disease_id},
     )
 
     return DiagnosisService.get_user_diagnoses(

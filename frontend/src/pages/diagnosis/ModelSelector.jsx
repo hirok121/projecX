@@ -13,7 +13,8 @@ import {
   Alert,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { diagnosisAPI } from "../../services/diagnosisAPI";
+import { diseaseAPI } from "../../services/diseaseAPI";
+import { classifierAPI } from "../../services/classifierAPI";
 import NavBar from "../../components/layout/NavBar";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -35,22 +36,17 @@ function ModelSelector() {
       setLoading(true);
 
       // Fetch disease details
-      const diseaseResponse = await diagnosisAPI.getDisease(diseaseId);
-      setDisease(diseaseResponse.data);
+      const diseaseData = await diseaseAPI.getDisease(diseaseId);
+      setDisease(diseaseData);
 
-      // Fetch classifiers for this disease
-      const modelsResponse = await diagnosisAPI.getDiseaseClassifiers(
-        diseaseId
-      );
+      // Fetch classifiers for this disease and modality
+      const classifiersData = await classifierAPI.getClassifiers({
+        disease_id: diseaseId,
+        modality: modality.toUpperCase(),
+        is_active: true,
+      });
 
-      // Filter by modality if needed
-      const filteredModels = modelsResponse.data.filter(
-        (model) =>
-          !model.modality ||
-          model.modality.toLowerCase() === modality.toLowerCase()
-      );
-
-      setModels(filteredModels);
+      setModels(classifiersData);
     } catch (error) {
       console.error("Error fetching models:", error);
     } finally {
@@ -122,7 +118,7 @@ function ModelSelector() {
         <Typography
           variant="h4"
           gutterBottom
-          sx={{ fontWeight: 700, color: "#1976d2" }}
+          sx={{ fontWeight: 700, color: "#10B981" }}
         >
           Select AI Models
         </Typography>
@@ -153,7 +149,7 @@ function ModelSelector() {
                   onClick={() => toggleModel(model.id)}
                   sx={{
                     border: isSelected ? 3 : 1,
-                    borderColor: isSelected ? "primary.main" : "divider",
+                    borderColor: isSelected ? "#10B981" : "divider",
                     cursor: "pointer",
                     position: "relative",
                     transition: "all 0.3s",
@@ -161,7 +157,7 @@ function ModelSelector() {
                       boxShadow: 4,
                       transform: "translateY(-4px)",
                     },
-                    backgroundColor: isSelected ? "primary.50" : "white",
+                    backgroundColor: isSelected ? "#ECFDF5" : "white",
                   }}
                 >
                   {isSelected && (
@@ -170,7 +166,7 @@ function ModelSelector() {
                         position: "absolute",
                         top: 12,
                         right: 12,
-                        color: "primary.main",
+                        color: "#10B981",
                       }}
                     >
                       <CheckCircleIcon fontSize="large" />
@@ -258,6 +254,10 @@ function ModelSelector() {
               onClick={handleContinue}
               disabled={selectedModels.length === 0}
               size="large"
+              sx={{
+                backgroundColor: "#10B981",
+                "&:hover": { backgroundColor: "#059669" },
+              }}
             >
               Continue ({selectedModels.length} selected)
             </Button>

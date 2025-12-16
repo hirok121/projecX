@@ -44,7 +44,8 @@ import {
   FilterList,
 } from "@mui/icons-material";
 import AdminNavbar from "../../components/admin/AdminNavbar";
-import { diagnosisAPI } from "../../services/diagnosisAPI";
+import { diseaseAPI } from "../../services/diseaseAPI";
+import { classifierAPI } from "../../services/classifierAPI";
 import { MODALITY_OPTIONS, CATEGORY_OPTIONS } from "../../const/disease";
 
 function AdminDiseaseUpload() {
@@ -89,8 +90,15 @@ function AdminDiseaseUpload() {
     model_type: "",
     accuracy: "",
     version: "",
+    required_features: [],
   });
-  const [modelFile, setModelFile] = useState(null);
+  const [modelFiles, setModelFiles] = useState({
+    features_file: null,
+    scaler_file: null,
+    imputer_file: null,
+    model_file: null,
+    class_file: null,
+  });
 
   // Load data
   useEffect(() => {
@@ -101,17 +109,9 @@ function AdminDiseaseUpload() {
   const loadDiseases = async () => {
     try {
       setLoading(true);
-      const response = await diagnosisAPI.getDiseases();
-      let diseasesData = [];
-      if (response.data?.data) {
-        diseasesData = response.data.data;
-      } else if (response.data) {
-        diseasesData = Array.isArray(response.data)
-          ? response.data
-          : [response.data];
-      } else if (Array.isArray(response)) {
-        diseasesData = response;
-      }
+      const data = await diseaseAPI.getDiseases();
+      // diseaseAPI.getDiseases() already returns response.data
+      const diseasesData = Array.isArray(data) ? data : [];
       setDiseases(diseasesData);
       setMessage("");
     } catch (err) {
@@ -125,10 +125,10 @@ function AdminDiseaseUpload() {
 
   const loadClassifiers = async () => {
     try {
-      const response = await diagnosisAPI.adminListClassifiers({
-        include_inactive: true,
-      });
-      setClassifiers(Array.isArray(response) ? response : []);
+      const data = await classifierAPI.getClassifiers();
+      // classifierAPI.getClassifiers() already returns response.data with disease_name
+      const classifiersData = Array.isArray(data) ? data : [];
+      setClassifiers(classifiersData);
     } catch (err) {
       console.error("Failed to load classifiers:", err);
     }
@@ -183,10 +183,10 @@ function AdminDiseaseUpload() {
     try {
       setLoading(true);
       if (editingDisease) {
-        await diagnosisAPI.adminUpdateDisease(editingDisease.id, diseaseForm);
+        await diseaseAPI.updateDisease(editingDisease.id, diseaseForm);
         setMessage("Disease updated successfully");
       } else {
-        await diagnosisAPI.adminCreateDisease(diseaseForm);
+        await diseaseAPI.createDisease(diseaseForm);
         setMessage("Disease created successfully");
       }
       setMessageType("success");
@@ -200,21 +200,17 @@ function AdminDiseaseUpload() {
     }
   };
 
-  const handleDeleteDisease = async (diseaseId, hardDelete = false) => {
+  const handleDeleteDisease = async (diseaseId) => {
     if (
       !window.confirm(
-        `Are you sure you want to ${
-          hardDelete ? "permanently delete" : "deactivate"
-        } this disease?`
+        "Are you sure you want to delete this disease? This will also remove all associated classifiers and model files."
       )
     ) {
       return;
     }
     try {
-      await diagnosisAPI.adminDeleteDisease(diseaseId, hardDelete);
-      setMessage(
-        hardDelete ? "Disease deleted permanently" : "Disease deactivated"
-      );
+      await diseaseAPI.deleteDisease(diseaseId);
+      setMessage("Disease deleted successfully");
       setMessageType("success");
       loadDiseases();
     } catch (err) {
@@ -235,6 +231,7 @@ function AdminDiseaseUpload() {
         model_type: classifier.model_type || "",
         accuracy: classifier.accuracy || "",
         version: classifier.version || "",
+        required_features: classifier.required_features || [],
       });
     } else {
       setEditingClassifier(null);
@@ -246,41 +243,91 @@ function AdminDiseaseUpload() {
         model_type: "",
         accuracy: "",
         version: "",
+        required_features: [],
       });
     }
-    setModelFile(null);
+    setModelFiles({
+      features_file: null,
+      scaler_file: null,
+      imputer_file: null,
+      model_file: null,
+      class_file: null,
+    });
     setClassifierDialogOpen(true);
   };
 
   const handleClassifierSubmit = async () => {
     try {
       setLoading(true);
-      const formData = new FormData();
-      Object.keys(classifierForm).forEach((key) => {
-        if (classifierForm[key] !== "" && classifierForm[key] !== null) {
-          formData.append(key, classifierForm[key]);
-        }
-      });
 
-      if (modelFile) {
-        formData.append("model_file", modelFile);
-      } else if (!editingClassifier) {
-        setMessage("Model file is required for new classifiers");
-        setMessageType("error");
-        setLoading(false);
-        return;
-      }
+      // Prepare classifier data (non-file fields)
+      const classifierData = {
+        name: classifierForm.name,
+        description: classifierForm.description,
+        disease_id: parseInt(classifierForm.disease_id),
+        modality: classifierForm.modality,
+        model_type: classifierForm.model_type,
+        accuracy: classifierForm.accuracy
+          ? parseFloat(classifierForm.accuracy)
+          : null,
+        version: classifierForm.version,
+        required_features: classifierForm.required_features,
+      };
 
       if (editingClassifier) {
-        await diagnosisAPI.adminUpdateClassifier(
+        // Update existing classifier
+        await classifierAPI.updateClassifier(
           editingClassifier.id,
-          formData
+          classifierData
         );
+
+        // Upload new files if provided
+        const hasNewFiles = Object.values(modelFiles).some(
+          (file) => file !== null
+        );
+        if (hasNewFiles) {
+          const allFilesProvided = Object.values(modelFiles).every(
+            (file) => file !== null
+          );
+          if (!allFilesProvided) {
+            setMessage("All 5 model files must be provided together");
+            setMessageType("error");
+            setLoading(false);
+            return;
+          }
+          await classifierAPI.uploadModelFiles(
+            editingClassifier.id,
+            modelFiles
+          );
+        }
+
         setMessage("Classifier updated successfully");
       } else {
-        await diagnosisAPI.adminCreateClassifier(formData);
+        // Create new classifier
+        const newClassifier = await classifierAPI.createClassifier(
+          classifierData
+        );
+
+        // Upload model files if provided
+        const hasFiles = Object.values(modelFiles).some(
+          (file) => file !== null
+        );
+        if (hasFiles) {
+          const allFilesProvided = Object.values(modelFiles).every(
+            (file) => file !== null
+          );
+          if (!allFilesProvided) {
+            setMessage("All 5 model files must be provided together");
+            setMessageType("error");
+            setLoading(false);
+            return;
+          }
+          await classifierAPI.uploadModelFiles(newClassifier.id, modelFiles);
+        }
+
         setMessage("Classifier created successfully");
       }
+
       setMessageType("success");
       setClassifierDialogOpen(false);
       loadClassifiers();
@@ -292,21 +339,17 @@ function AdminDiseaseUpload() {
     }
   };
 
-  const handleDeleteClassifier = async (classifierId, hardDelete = false) => {
+  const handleDeleteClassifier = async (classifierId) => {
     if (
       !window.confirm(
-        `Are you sure you want to ${
-          hardDelete ? "permanently delete" : "deactivate"
-        } this classifier?`
+        "Are you sure you want to delete this classifier? This will also remove all associated model files."
       )
     ) {
       return;
     }
     try {
-      await diagnosisAPI.adminDeleteClassifier(classifierId, hardDelete);
-      setMessage(
-        hardDelete ? "Classifier deleted permanently" : "Classifier deactivated"
-      );
+      await classifierAPI.deleteClassifier(classifierId);
+      setMessage("Classifier deleted successfully");
       setMessageType("success");
       loadClassifiers();
     } catch (err) {
@@ -1340,56 +1383,285 @@ function AdminDiseaseUpload() {
                 />
               </Grid>
               <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Required Features"
+                  value={
+                    Array.isArray(classifierForm.required_features)
+                      ? classifierForm.required_features.join(", ")
+                      : ""
+                  }
+                  onChange={(e) => {
+                    const featuresString = e.target.value;
+                    const featuresArray = featuresString
+                      .split(",")
+                      .map((f) => f.trim())
+                      .filter((f) => f.length > 0);
+                    setClassifierForm({
+                      ...classifierForm,
+                      required_features: featuresArray,
+                    });
+                  }}
+                  placeholder="Enter feature names separated by commas (e.g., age, gender, bmi)"
+                  multiline
+                  rows={2}
+                  helperText="List of features that the model requires for prediction"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "&.Mui-focused fieldset": { borderColor: "#10B981" },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#10B981" },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
                 <Box
                   sx={{
                     border: "2px dashed #10B981",
                     borderRadius: 2,
                     p: 3,
-                    textAlign: "center",
                     backgroundColor: "#ECFDF5",
                   }}
                 >
-                  <input
-                    accept=".pkl"
-                    style={{ display: "none" }}
-                    id="model-file-upload"
-                    type="file"
-                    onChange={(e) => setModelFile(e.target.files[0])}
-                  />
-                  <label htmlFor="model-file-upload">
-                    <Button
-                      variant="outlined"
-                      component="span"
-                      startIcon={<CloudUpload />}
-                      sx={{
-                        borderColor: "#10B981",
-                        color: "#10B981",
-                        "&:hover": {
-                          borderColor: "#059669",
-                          backgroundColor: "white",
-                        },
-                      }}
-                    >
-                      {editingClassifier
-                        ? "Upload New Model (Optional)"
-                        : "Upload Model File (.pkl)"}
-                    </Button>
-                  </label>
-                  {modelFile && (
-                    <Typography
-                      variant="body2"
-                      sx={{ mt: 1, color: "#10B981" }}
-                    >
-                      Selected: {modelFile.name}
-                    </Typography>
-                  )}
-                  {editingClassifier && !modelFile && (
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ mb: 2, fontWeight: 600, color: "#10B981" }}
+                  >
+                    Model Files Upload (All 5 files required)
+                  </Typography>
+
+                  {/* Features File */}
+                  <Box sx={{ mb: 2 }}>
+                    <input
+                      accept=".pkl"
+                      style={{ display: "none" }}
+                      id="features-file-upload"
+                      type="file"
+                      onChange={(e) =>
+                        setModelFiles({
+                          ...modelFiles,
+                          features_file: e.target.files[0],
+                        })
+                      }
+                    />
+                    <label htmlFor="features-file-upload">
+                      <Button
+                        variant="outlined"
+                        component="span"
+                        size="small"
+                        startIcon={<CloudUpload />}
+                        sx={{
+                          borderColor: "#10B981",
+                          color: "#10B981",
+                          "&:hover": {
+                            borderColor: "#059669",
+                            backgroundColor: "white",
+                          },
+                          width: "100%",
+                          justifyContent: "flex-start",
+                        }}
+                      >
+                        features.pkl
+                        {modelFiles.features_file && " ✓"}
+                      </Button>
+                    </label>
+                    {modelFiles.features_file && (
+                      <Typography
+                        variant="caption"
+                        sx={{ ml: 1, color: "#6B7280" }}
+                      >
+                        {modelFiles.features_file.name}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* Scaler File */}
+                  <Box sx={{ mb: 2 }}>
+                    <input
+                      accept=".pkl"
+                      style={{ display: "none" }}
+                      id="scaler-file-upload"
+                      type="file"
+                      onChange={(e) =>
+                        setModelFiles({
+                          ...modelFiles,
+                          scaler_file: e.target.files[0],
+                        })
+                      }
+                    />
+                    <label htmlFor="scaler-file-upload">
+                      <Button
+                        variant="outlined"
+                        component="span"
+                        size="small"
+                        startIcon={<CloudUpload />}
+                        sx={{
+                          borderColor: "#10B981",
+                          color: "#10B981",
+                          "&:hover": {
+                            borderColor: "#059669",
+                            backgroundColor: "white",
+                          },
+                          width: "100%",
+                          justifyContent: "flex-start",
+                        }}
+                      >
+                        scaler.pkl
+                        {modelFiles.scaler_file && " ✓"}
+                      </Button>
+                    </label>
+                    {modelFiles.scaler_file && (
+                      <Typography
+                        variant="caption"
+                        sx={{ ml: 1, color: "#6B7280" }}
+                      >
+                        {modelFiles.scaler_file.name}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* Imputer File */}
+                  <Box sx={{ mb: 2 }}>
+                    <input
+                      accept=".pkl"
+                      style={{ display: "none" }}
+                      id="imputer-file-upload"
+                      type="file"
+                      onChange={(e) =>
+                        setModelFiles({
+                          ...modelFiles,
+                          imputer_file: e.target.files[0],
+                        })
+                      }
+                    />
+                    <label htmlFor="imputer-file-upload">
+                      <Button
+                        variant="outlined"
+                        component="span"
+                        size="small"
+                        startIcon={<CloudUpload />}
+                        sx={{
+                          borderColor: "#10B981",
+                          color: "#10B981",
+                          "&:hover": {
+                            borderColor: "#059669",
+                            backgroundColor: "white",
+                          },
+                          width: "100%",
+                          justifyContent: "flex-start",
+                        }}
+                      >
+                        imputer.pkl
+                        {modelFiles.imputer_file && " ✓"}
+                      </Button>
+                    </label>
+                    {modelFiles.imputer_file && (
+                      <Typography
+                        variant="caption"
+                        sx={{ ml: 1, color: "#6B7280" }}
+                      >
+                        {modelFiles.imputer_file.name}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* Model File */}
+                  <Box sx={{ mb: 2 }}>
+                    <input
+                      accept=".pkl"
+                      style={{ display: "none" }}
+                      id="model-file-upload"
+                      type="file"
+                      onChange={(e) =>
+                        setModelFiles({
+                          ...modelFiles,
+                          model_file: e.target.files[0],
+                        })
+                      }
+                    />
+                    <label htmlFor="model-file-upload">
+                      <Button
+                        variant="outlined"
+                        component="span"
+                        size="small"
+                        startIcon={<CloudUpload />}
+                        sx={{
+                          borderColor: "#10B981",
+                          color: "#10B981",
+                          "&:hover": {
+                            borderColor: "#059669",
+                            backgroundColor: "white",
+                          },
+                          width: "100%",
+                          justifyContent: "flex-start",
+                        }}
+                      >
+                        model.pkl
+                        {modelFiles.model_file && " ✓"}
+                      </Button>
+                    </label>
+                    {modelFiles.model_file && (
+                      <Typography
+                        variant="caption"
+                        sx={{ ml: 1, color: "#6B7280" }}
+                      >
+                        {modelFiles.model_file.name}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* Class File */}
+                  <Box sx={{ mb: 1 }}>
+                    <input
+                      accept=".pkl"
+                      style={{ display: "none" }}
+                      id="class-file-upload"
+                      type="file"
+                      onChange={(e) =>
+                        setModelFiles({
+                          ...modelFiles,
+                          class_file: e.target.files[0],
+                        })
+                      }
+                    />
+                    <label htmlFor="class-file-upload">
+                      <Button
+                        variant="outlined"
+                        component="span"
+                        size="small"
+                        startIcon={<CloudUpload />}
+                        sx={{
+                          borderColor: "#10B981",
+                          color: "#10B981",
+                          "&:hover": {
+                            borderColor: "#059669",
+                            backgroundColor: "white",
+                          },
+                          width: "100%",
+                          justifyContent: "flex-start",
+                        }}
+                      >
+                        class.pkl
+                        {modelFiles.class_file && " ✓"}
+                      </Button>
+                    </label>
+                    {modelFiles.class_file && (
+                      <Typography
+                        variant="caption"
+                        sx={{ ml: 1, color: "#6B7280" }}
+                      >
+                        {modelFiles.class_file.name}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {editingClassifier && (
                     <Typography
                       variant="caption"
                       color="text.secondary"
-                      sx={{ mt: 1, display: "block" }}
+                      sx={{ mt: 2, display: "block", textAlign: "center" }}
                     >
-                      Leave empty to keep existing model
+                      Leave empty to keep existing model files
                     </Typography>
                   )}
                 </Box>
@@ -1407,7 +1679,6 @@ function AdminDiseaseUpload() {
                 !classifierForm.name ||
                 !classifierForm.disease_id ||
                 !classifierForm.modality ||
-                (!editingClassifier && !modelFile) ||
                 loading
               }
               sx={{

@@ -160,6 +160,11 @@ class ClassifierService:
         classifier = db.query(Classifier).filter(Classifier.id == classifier_id).first()
         if not classifier:
             raise HTTPException(status_code=404, detail="Classifier not found")
+
+        # Add disease_name
+        if classifier.disease:
+            classifier.disease_name = classifier.disease.name
+
         return classifier
 
     @staticmethod
@@ -172,7 +177,7 @@ class ClassifierService:
         limit: int = 100,
     ) -> List[Classifier]:
         """Get list of classifiers with filters."""
-        query = db.query(Classifier)
+        query = db.query(Classifier).join(Disease, Classifier.disease_id == Disease.id)
 
         if disease_id is not None:
             query = query.filter(Classifier.disease_id == disease_id)
@@ -183,7 +188,14 @@ class ClassifierService:
         if is_active is not None:
             query = query.filter(Classifier.is_active == is_active)
 
-        return query.offset(skip).limit(limit).all()
+        classifiers = query.offset(skip).limit(limit).all()
+
+        # Add disease_name to each classifier
+        for classifier in classifiers:
+            if classifier.disease:
+                classifier.disease_name = classifier.disease.name
+
+        return classifiers
 
     @staticmethod
     def update_classifier(
