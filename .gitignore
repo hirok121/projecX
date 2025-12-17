@@ -7,3 +7,4 @@ start.sh
 /.github
 /plans
 **/.env.prod
+/docs
