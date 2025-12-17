@@ -30,7 +30,7 @@ app.add_middleware(LoggingMiddleware)
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url],
+    allow_origins=["localhost", settings.frontend_url],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -51,7 +51,7 @@ app.include_router(admin_diagnosis.router)
 def read_root():
     """Root endpoint."""
     app_logger.info("Root endpoint accessed")
-    return {"message": "FastAPI Authentication App is running!"}
+    return {"message": "The DeepMed Backend server is running!"}
 
 
 @app.get("/health")

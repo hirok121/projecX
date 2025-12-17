@@ -5,7 +5,7 @@ export const aiAssistantService = {
   // Chat management
   async getChats() {
     try {
-      const response = await api.get('/aiassistant/chats/');
+      const response = await api.get('/aiassistant/chats');
       // Backend returns array directly, not wrapped in {chats: [...]}
       const chatsArray = Array.isArray(response.data) ? response.data : [];
       return {

@@ -1,58 +1,56 @@
-import { defineConfig, loadEnv } from 'vite'
-import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+
+// DeepMed Vite Configuration
 export default defineConfig(({ mode }) => {
-  // Load env file based on `mode` in the current working directory.
-  const env = loadEnv(mode, '.', '')
-  
-  // Determine if this is production mode
-  const isProduction = mode === 'production'
-  
+  // Load environment variables for DeepMed
+  const env = loadEnv(mode, process.cwd(), '');
+  const isProduction = mode === 'production';
+
   return {
     plugins: [react()],
-    
-    // Server configuration
+
+    // DeepMed Dev Server
     server: {
       port: parseInt(env.VITE_DEV_SERVER_PORT) || 5173,
       host: true,
       open: false,
     },
-      // Build configuration
+
+    // DeepMed Build Output
     build: {
       outDir: 'dist',
-      sourcemap: isProduction ? false : true,
+      sourcemap: !isProduction,
       minify: isProduction ? 'esbuild' : false,
       target: isProduction ? 'es2020' : 'esnext',
-      
-
     },
-      // Preview configuration for SPA routing
+
+    // SPA Preview for DeepMed
     preview: {
       port: 4173,
       host: true,
       cors: true,
-      // Handle SPA routing for preview server
       middlewareMode: false,
     },
-    
-    // Optimization
+
+    // Optimize DeepMed dependencies
     optimizeDeps: {
       include: [
         'react',
         'react-dom',
         'react/jsx-runtime',
         '@mui/material',
-        'axios'
-      ]
+        'axios',
+      ],
     },
-    
-    // Base path for deployment
+
+    // Base path for DeepMed deployment
     base: '/',
-    
-    // Define global constants
+
+    // Global constants for DeepMed
     define: {
       __DEV__: !isProduction,
     },
-  }
-})
+  };
+});

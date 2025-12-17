@@ -2,8 +2,8 @@
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000',
-  FRONTEND_URL: import.meta.env.VITE_FRONTEND_URL || 'http://localhost:5173',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://127.0.0.1:8000',
+  FRONTEND_URL: import.meta.env.VITE_FRONTEND_URL || 'https://localhost:5173',
   TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 10000,
   VERSION: import.meta.env.VITE_API_VERSION || 'v1',
   RETRY_ATTEMPTS: parseInt(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
@@ -13,7 +13,7 @@ export const API_CONFIG = {
 // Authentication
 export const AUTH_CONFIG = {
   ACCESS_TOKEN_KEY: 'access_token',
-  TOKEN_REFRESH_THRESHOLD: 5 * 60 * 1000, // 5 minutes in milliseconds
+  TOKEN_REFRESH_THRESHOLD: 30 * 60 * 1000, // 30 minutes in milliseconds
 };
 
 // Application Constants
