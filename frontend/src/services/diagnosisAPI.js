@@ -32,6 +32,17 @@ export const diagnosisAPI = {
     }
   },
 
+  //Get all diagnoses for a user
+  getUserDiagnoses: async () => {
+    try {
+      const response = await api.get("/diagnosis/");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user diagnoses:", error);
+      throw error;
+    }
+  },
+
   // ============ Search & Query ============
 
   // Search diagnoses

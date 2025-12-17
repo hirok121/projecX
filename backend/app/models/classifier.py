@@ -29,7 +29,10 @@ class Classifier(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False, index=True)
+    title = Column(Text, nullable=True)
     description = Column(Text, nullable=True)
+    authors = Column(String(255), nullable=True)
+    blog_link = Column(String(500), nullable=True)
 
     # Disease association
     disease_id = Column(Integer, ForeignKey("diseases.id"), nullable=False, index=True)
@@ -81,7 +84,10 @@ class Classifier(Base):
         return {
             "id": self.id,
             "name": self.name,
+            "title": self.title,
             "description": self.description,
+            "authors": self.authors,
+            "blog_link": self.blog_link,
             "disease_id": self.disease_id,
             "disease_name": self.disease.name if self.disease else None,
             "modality": self.modality.value if self.modality else None,

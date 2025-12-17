@@ -25,9 +25,9 @@ import {
   Close as CloseIcon,
   Cancel as CancelIcon,
 } from "@mui/icons-material";
-import { useProfile, useProfileUpdate } from "../hooks/useProfile";
-import LoadingIndicator from "../components/ui/LoadingIndicator";
-import NavBar from "../components/layout/NavBar";
+import { useProfile, useProfileUpdate } from "../../hooks/useProfile";
+import LoadingIndicator from "../../components/ui/LoadingIndicator";
+import NavBar from "../../components/layout/NavBar";
 
 const ProfilePage = () => {
   const { profile, loading, error, refetch } = useProfile();

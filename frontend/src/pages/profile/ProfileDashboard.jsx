@@ -41,11 +41,11 @@ import {
   Line,
   Legend,
 } from "recharts";
-import NavBar from "../components/layout/NavBar";
-import DiagnosisSearch from "../components/diagnosis/DiagnosisSearch";
-import DiagnosisList from "../components/diagnosis/DiagnosisList";
+import NavBar from "../../components/layout/NavBar";
+import DiagnosisSearch from "../../components/diagnosis/DiagnosisSearch";
+import DiagnosisList from "../../components/diagnosis/DiagnosisList";
 import { useUserAnalytics, useSearchDiagnoses } from "../hooks/useDiagnosis";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 const COLORS = {
   primary: "#1976d2",
