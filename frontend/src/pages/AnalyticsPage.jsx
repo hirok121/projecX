@@ -22,13 +22,20 @@ import {
   Line,
   ResponsiveContainer,
 } from "recharts";
-import { useAnalytics } from "../hooks/useAnalytics";
 import NavBar from "../components/layout/NavBar";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const AnalyticsPage = () => {
-  const { data: analyticsData, isLoading, isError } = useAnalytics();
+  const {
+    data: analyticsData,
+    isLoading,
+    isError,
+  } = {
+    data: null,
+    isLoading: false,
+    isError: false,
+  }; // Replace with actual data fetching logic
 
   if (isLoading) {
     return (

@@ -25,21 +25,7 @@ export default defineConfig(({ mode }) => {
       minify: isProduction ? 'esbuild' : false,
       target: isProduction ? 'es2020' : 'esnext',
       
-      // Rollup options for advanced bundling (only in production)
-      ...(isProduction && {
-        rollupOptions: {
-          output: {
-            manualChunks: {
-              vendor: ['react', 'react-dom'],
-              ui: ['@mui/material', '@mui/icons-material'],
-              router: ['react-router-dom'],
-              query: ['@tanstack/react-query'],
-              charts: ['recharts'],
-              utils: ['axios', 'date-fns', 'jwt-decode']
-            },
-          }
-        }
-      })
+
     },
       // Preview configuration for SPA routing
     preview: {
@@ -57,7 +43,6 @@ export default defineConfig(({ mode }) => {
         'react-dom',
         'react/jsx-runtime',
         '@mui/material',
-        '@tanstack/react-query',
         'axios'
       ]
     },

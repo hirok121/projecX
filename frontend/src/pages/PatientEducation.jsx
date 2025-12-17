@@ -17,15 +17,15 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ScienceIcon from "@mui/icons-material/Science";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/layout/NavBar";
-import testImage from "../assets/blogimages/test.jpg";
-import image1 from "../assets/blogimages/image.png";
-import virusHuman3 from "../assets/blogimages/virushuman3.jpg";
-import virusImage from "../assets/blogimages/virus.jpg";
-import virus2Image from "../assets/blogimages/virus2.jpg";
-import image4 from "../assets/blogimages/image4.jpg";
-import livingWithHcv from "../assets/blogimages/livingwithhcv.png";
-import image5 from "../assets/blogimages/image5.jpg";
-import image2 from "../assets/blogimages/image2.png";
+import testImage from "../assets/deepmed.png";
+import image1 from "../assets/deepmed.png";
+import virusHuman3 from "../assets/deepmed.png";
+import virusImage from "../assets/deepmed.png";
+import virus2Image from "../assets/deepmed.png";
+import image4 from "../assets/deepmed.png";
+import livingWithHcv from "../assets/deepmed.png";
+import image5 from "../assets/deepmed.png";
+import image2 from "../assets/deepmed.png";
 
 function PatientEducation() {
   const navigate = useNavigate();

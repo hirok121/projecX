@@ -6,3 +6,4 @@ start.sh
 /.vscode
 /.github
 /plans
+**/.env.prod

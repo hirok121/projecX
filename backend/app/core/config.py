@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     smtp_username: Optional[str] = None
     smtp_password: Optional[str] = None
     smtp_from_email: Optional[str] = None
-    smtp_from_name: str = "ProjectX"
+    smtp_from_name: str = "DeepMed"
 
     # Superuser settings
     superuser_email: str = ""

@@ -44,7 +44,7 @@ import {
 import NavBar from "../../components/layout/NavBar";
 import DiagnosisSearch from "../../components/diagnosis/DiagnosisSearch";
 import DiagnosisList from "../../components/diagnosis/DiagnosisList";
-import { useUserAnalytics, useSearchDiagnoses } from "../hooks/useDiagnosis";
+// import { useUserAnalytics, useSearchDiagnoses } from "../hooks/useDiagnosis";
 import { useAuth } from "../../context/AuthContext";
 
 const COLORS = {
@@ -58,7 +58,15 @@ const COLORS = {
 
 const ProfileDashboard = () => {
   const { user } = useAuth();
-  const { data: analytics, isLoading, error } = useUserAnalytics(); // Search functionality state
+  const {
+    data: analytics,
+    isLoading,
+    error,
+  } = {
+    data: null,
+    isLoading: false,
+    error: null,
+  }; // Search functionality state
   const [showSearch, setShowSearch] = useState(true);
   const [searchFilters, setSearchFilters] = useState({});
   // Pagination state for DiagnosisList
@@ -66,11 +74,10 @@ const ProfileDashboard = () => {
   const [diagnosisPageSize, setDiagnosisPageSize] = useState(4);
 
   // Search diagnoses hook
-  const { data: searchResults, isError: searchError } = useSearchDiagnoses({
-    ...searchFilters,
-    page: diagnosisPage,
-    page_size: diagnosisPageSize,
-  });
+  const { data: searchResults, isError: searchError } = {
+    data: null,
+    isError: false,
+  };
 
   // Pagination handlers for DiagnosisList
   const handleDiagnosisPageChange = (event, newPage) => {
