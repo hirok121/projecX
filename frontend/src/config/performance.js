@@ -27,6 +27,7 @@ export const LazyComponents = {
   AdminDebugConsole: lazy(() => import('../pages/admin/AdminDebugConsole')),
   AdminDiagnosisManagement: lazy(() => import('../pages/admin/AdminDiagnosisManagement')),
   AdminDiseaseUpload: lazy(() => import('../pages/admin/AdminDiseaseUpload')),
+  AdminBlogManagement: lazy(() => import('../pages/admin/AdminBlogManagement')),
   UnderConstruction: lazy(() => import('../pages/admin/UnderConstruction')),
     // Main Application Components
   Home: lazy(() => import('../pages/Home')),
@@ -42,6 +43,11 @@ export const LazyComponents = {
   Analytics: lazy(() => import('../pages/AnalyticsPage')),
   AIAssistant: lazy(() => import('../pages/AIAssistant')),
   PatientEducation: lazy(() => import('../pages/PatientEducation')),
+  // Blog pages
+  BlogList: lazy(() => import('../pages/blog/BlogList')),
+  BlogView: lazy(() => import('../pages/blog/BlogView')),
+  CreateBlog: lazy(() => import('../pages/blog/CreateBlog')),
+  EditBlog: lazy(() => import('../pages/blog/EditBlog')),
   Research: lazy(() => import('../pages/Research')),
   ProfileDashboard: lazy(() => import('../pages/profile/ProfileDashboard')),
   ProfilePage: lazy(() => import('../pages/profile/ProfilePage')),

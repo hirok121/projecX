@@ -33,6 +33,7 @@ import {
   Help,
   BugReport,
   MedicalServices,
+  LibraryBooks,
   Menu as MenuIcon,
   Close as CloseIcon,
   Upload,
@@ -77,6 +78,7 @@ function AdminNavbar() {
       path: "/admin/disease-upload",
       icon: Upload,
     },
+    { label: "Blog Management", path: "/admin/blogs", icon: LibraryBooks },
     { label: "Debug Console", path: "/admin/debug", icon: BugReport },
     {
       label: "Analytics",

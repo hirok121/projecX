@@ -98,8 +98,8 @@ function NavBar() {
         featured: true,
       },
       {
-        label: "Patient Education",
-        path: "/patient-education",
+        label: "Blogs",
+        path: "/blogs",
         icon: <ArticleIcon />,
       },
       { label: "Research", path: "/research", icon: <LibraryBooksIcon /> },

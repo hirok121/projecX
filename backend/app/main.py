@@ -9,6 +9,7 @@ from app.routers import (
     classifier,
     notification,
     diagnosis,
+    blog,
 )
 from app.core.config import settings
 from app.core.logging import app_logger
@@ -45,6 +46,7 @@ app.include_router(classifier.router)
 app.include_router(diagnosis.router)
 app.include_router(notification.router)
 app.include_router(admin_diagnosis.router)
+app.include_router(blog.router)
 
 
 @app.get("/")

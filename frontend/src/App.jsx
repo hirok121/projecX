@@ -161,6 +161,14 @@ function App() {
               }
             />
             <Route
+              path="/admin/blogs"
+              element={
+                <ProtectedRoute>
+                  <LazyComponents.AdminBlogManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/ai-assistant"
               element={
                 <ProtectedRoute>
@@ -172,6 +180,25 @@ function App() {
               path="/patient-education"
               element={<LazyComponents.PatientEducation />}
             />
+            {/* Blog routes */}
+            <Route path="/blogs" element={<LazyComponents.BlogList />} />
+            <Route
+              path="/blogs/create"
+              element={
+                <ProtectedRoute>
+                  <LazyComponents.CreateBlog />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/blogs/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <LazyComponents.EditBlog />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/blogs/:slug" element={<LazyComponents.BlogView />} />
             <Route path="/research" element={<LazyComponents.Research />} />
             <Route path="/faq" element={<LazyComponents.FAQ />} />
             <Route

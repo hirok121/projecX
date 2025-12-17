@@ -59,6 +59,10 @@ class Settings(BaseSettings):
     ml_models_path: str = (
         "./ml_models"  # Base directory for ML model storage (relative to backend directory)
     )
+    # Supabase storage (optional)
+    supabase_url: Optional[str] = None
+    supabase_service_role_key: Optional[str] = None
+    supabase_public_bucket: str = "blogs"
 
     class Config:
         env_file = ".env"
