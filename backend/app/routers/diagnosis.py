@@ -110,14 +110,14 @@ def get_my_diagnoses(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all diagnoses for the current user."""
+    """Get all diagnoses for the current user with related disease and classifier info."""
     log_endpoint_activity(
         "diagnosis",
         "list_my_diagnoses",
         additional_info={"user_id": current_user.id, "disease_id": disease_id},
     )
 
-    return DiagnosisService.get_user_diagnoses(
+    diagnoses = DiagnosisService.get_user_diagnoses(
         db=db,
         user_id=current_user.id,
         disease_id=disease_id,
@@ -125,3 +125,109 @@ def get_my_diagnoses(
         skip=skip,
         limit=limit,
     )
+    
+    # Enrich with disease and classifier information
+    enriched_diagnoses = []
+    for diagnosis in diagnoses:
+        diagnosis_dict = {
+            "id": diagnosis.id,
+            "user_id": diagnosis.user_id,
+            "disease_id": diagnosis.disease_id,
+            "classifier_id": diagnosis.classifier_id,
+            "modality": diagnosis.modality,
+            "name": diagnosis.name,
+            "age": diagnosis.age,
+            "sex": diagnosis.sex,
+            "input_file": diagnosis.input_file,
+            "input_data": diagnosis.input_data,
+            "prediction": diagnosis.prediction,
+            "confidence": diagnosis.confidence,
+            "probabilities": diagnosis.probabilities,
+            "status": diagnosis.status.value if diagnosis.status else None,
+            "error_message": diagnosis.error_message,
+            "processing_time": diagnosis.processing_time,
+            "created_at": diagnosis.created_at,
+            "started_at": diagnosis.started_at,
+            "completed_at": diagnosis.completed_at,
+            # Disease info
+            "disease_name": diagnosis.disease.name if diagnosis.disease else None,
+            "disease_description": diagnosis.disease.description if diagnosis.disease else None,
+            "disease_blog_link": diagnosis.disease.blog_link if diagnosis.disease else None,
+            # Classifier info
+            "classifier_name": diagnosis.classifier.name if diagnosis.classifier else None,
+            "classifier_title": diagnosis.classifier.name if diagnosis.classifier else None,
+            "classifier_description": diagnosis.classifier.description if diagnosis.classifier else None,
+            "classifier_blog_link": diagnosis.classifier.blog_link if diagnosis.classifier else None,
+            "classifier_paper_link": diagnosis.classifier.paper_link if diagnosis.classifier else None,
+        }
+        enriched_diagnoses.append(diagnosis_dict)
+    
+    return enriched_diagnoses
+
+
+@router.get("/admin/all", response_model=list[DiagnosisResponse])
+@track_endpoint_performance("diagnosis", "list_all_admin")
+def get_all_diagnoses_admin(
+    disease_id: Optional[int] = None,
+    status: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get all diagnoses (admin only) with related disease and classifier info."""
+    # Check if user is admin
+    if not (current_user.is_staff or current_user.is_superuser):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    log_endpoint_activity(
+        "diagnosis",
+        "list_all_diagnoses_admin",
+        additional_info={"admin_id": current_user.id, "disease_id": disease_id},
+    )
+
+    diagnoses = DiagnosisService.get_all_diagnoses(
+        db=db,
+        disease_id=disease_id,
+        status=status,
+        skip=skip,
+        limit=limit,
+    )
+    
+    # Enrich with disease and classifier information
+    enriched_diagnoses = []
+    for diagnosis in diagnoses:
+        diagnosis_dict = {
+            "id": diagnosis.id,
+            "user_id": diagnosis.user_id,
+            "disease_id": diagnosis.disease_id,
+            "classifier_id": diagnosis.classifier_id,
+            "modality": diagnosis.modality,
+            "name": diagnosis.name,
+            "age": diagnosis.age,
+            "sex": diagnosis.sex,
+            "input_file": diagnosis.input_file,
+            "input_data": diagnosis.input_data,
+            "prediction": diagnosis.prediction,
+            "confidence": diagnosis.confidence,
+            "probabilities": diagnosis.probabilities,
+            "status": diagnosis.status.value if diagnosis.status else None,
+            "error_message": diagnosis.error_message,
+            "processing_time": diagnosis.processing_time,
+            "created_at": diagnosis.created_at,
+            "started_at": diagnosis.started_at,
+            "completed_at": diagnosis.completed_at,
+            # Disease info
+            "disease_name": diagnosis.disease.name if diagnosis.disease else None,
+            "disease_description": diagnosis.disease.description if diagnosis.disease else None,
+            "disease_blog_link": diagnosis.disease.blog_link if diagnosis.disease else None,
+            # Classifier info
+            "classifier_name": diagnosis.classifier.name if diagnosis.classifier else None,
+            "classifier_title": diagnosis.classifier.name if diagnosis.classifier else None,
+            "classifier_description": diagnosis.classifier.description if diagnosis.classifier else None,
+            "classifier_blog_link": diagnosis.classifier.blog_link if diagnosis.classifier else None,
+            "classifier_paper_link": diagnosis.classifier.paper_link if diagnosis.classifier else None,
+        }
+        enriched_diagnoses.append(diagnosis_dict)
+    
+    return enriched_diagnoses

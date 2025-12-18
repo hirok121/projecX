@@ -324,3 +324,23 @@ class DiagnosisService:
 
         query = query.order_by(Diagnosis.created_at.desc())
         return query.offset(skip).limit(limit).all()
+
+    @staticmethod
+    def get_all_diagnoses(
+        db: Session,
+        disease_id: Optional[int] = None,
+        status: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 100,
+    ):
+        """Get all diagnoses (admin only)."""
+        query = db.query(Diagnosis)
+
+        if disease_id is not None:
+            query = query.filter(Diagnosis.disease_id == disease_id)
+
+        if status is not None:
+            query = query.filter(Diagnosis.status == status)
+
+        query = query.order_by(Diagnosis.created_at.desc())
+        return query.offset(skip).limit(limit).all()

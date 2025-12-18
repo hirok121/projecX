@@ -38,6 +38,16 @@ class DiagnosisResponse(BaseModel):
     created_at: datetime
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
+    
+    # Additional fields for disease and classifier info
+    disease_name: Optional[str] = None
+    disease_description: Optional[str] = None
+    disease_blog_link: Optional[str] = None
+    classifier_name: Optional[str] = None
+    classifier_title: Optional[str] = None
+    classifier_description: Optional[str] = None
+    classifier_blog_link: Optional[str] = None
+    classifier_paper_link: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -34,12 +34,35 @@ export const diagnosisAPI = {
   },
 
   //Get all diagnoses for a user
-  getUserDiagnoses: async () => {
+  getUserDiagnoses: async (params = {}) => {
     try {
-      const response = await api.get("/diagnosis/");
+      const queryParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== "") {
+          queryParams.append(key, value);
+        }
+      });
+      const response = await api.get(`/diagnosis/?${queryParams}`);
       return response.data;
     } catch (error) {
       logger.error("Error fetching user diagnoses:", error);
+      throw error;
+    }
+  },
+
+  // Get all diagnoses (admin only)
+  getAllDiagnosesAdmin: async (params = {}) => {
+    try {
+      const queryParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== "") {
+          queryParams.append(key, value);
+        }
+      });
+      const response = await api.get(`/diagnosis/admin/all?${queryParams}`);
+      return response.data;
+    } catch (error) {
+      logger.error("Error fetching all diagnoses (admin):", error);
       throw error;
     }
   },

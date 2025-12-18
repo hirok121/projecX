@@ -1,6 +1,7 @@
 // Performance optimization configuration for React frontend
 import React, { lazy } from 'react';
 import { PERFORMANCE_CONFIG, API_CONFIG } from './constants.js';
+import logger from '../utils/logger.js';
 
 // Re-export performance config for backward compatibility
 export { PERFORMANCE_CONFIG } from './constants.js';
