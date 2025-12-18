@@ -3,6 +3,7 @@
  * Handles all classifier-related API calls
  */
 import api from "./api";
+import logger from '../utils/logger';
 
 export const classifierAPI = {
   // ============ Public Classifier Endpoints ============
@@ -21,7 +22,7 @@ export const classifierAPI = {
       const response = await api.get("/classifiers/", { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching classifiers:", error);
+      logger.error("Error fetching classifiers:", error);
       throw error;
     }
   },
@@ -35,7 +36,7 @@ export const classifierAPI = {
       const response = await api.get(`/classifiers/${classifierId}`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching classifier ${classifierId}:`, error);
+      logger.error(`Error fetching classifier ${classifierId}:`, error);
       throw error;
     }
   },
@@ -52,7 +53,7 @@ export const classifierAPI = {
       });
       return response.data;
     } catch (error) {
-      console.error(`Error fetching classifiers for disease ${diseaseId}:`, error);
+      logger.error(`Error fetching classifiers for disease ${diseaseId}:`, error);
       throw error;
     }
   },
@@ -76,7 +77,7 @@ export const classifierAPI = {
       const response = await api.post("/classifiers/", classifierData);
       return response.data;
     } catch (error) {
-      console.error("Error creating classifier:", error);
+      logger.error("Error creating classifier:", error);
       throw error;
     }
   },
@@ -111,7 +112,7 @@ export const classifierAPI = {
       );
       return response.data;
     } catch (error) {
-      console.error(`Error uploading model files for classifier ${classifierId}:`, error);
+      logger.error(`Error uploading model files for classifier ${classifierId}:`, error);
       throw error;
     }
   },
@@ -126,7 +127,7 @@ export const classifierAPI = {
       const response = await api.put(`/classifiers/${classifierId}`, classifierData);
       return response.data;
     } catch (error) {
-      console.error(`Error updating classifier ${classifierId}:`, error);
+      logger.error(`Error updating classifier ${classifierId}:`, error);
       throw error;
     }
   },
@@ -140,7 +141,7 @@ export const classifierAPI = {
       const response = await api.delete(`/classifiers/${classifierId}`);
       return response.data;
     } catch (error) {
-      console.error(`Error deleting classifier ${classifierId}:`, error);
+      logger.error(`Error deleting classifier ${classifierId}:`, error);
       throw error;
     }
   },

@@ -16,7 +16,7 @@ function ForgotPassword({ open, handleClose }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     // TODO: Implement forgot password logic
-    console.log("Forgot password for:", email);
+    logger.log("Forgot password for:", email);
     handleClose();
   };
 

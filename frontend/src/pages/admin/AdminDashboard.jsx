@@ -28,6 +28,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import AdminNavBar from "../../components/admin/AdminNavbar";
+import logger from "../../utils/logger";
 
 function AdminDashboard() {
   const { user } = useAuth();
@@ -71,7 +72,7 @@ function AdminDashboard() {
         setMessageType("info");
       }
     } catch (error) {
-      console.error("Dashboard data fetch error:", error);
+      logger.error("Dashboard data fetch error:", error);
       setMessage("Error loading dashboard data. Please try again.");
       setMessageType("error");
       setStats({
@@ -132,7 +133,7 @@ function AdminDashboard() {
                 },
               }}
             >
-              Debug Console
+              Debug logger
             </Button>
             <Button
               variant="outlined"
@@ -581,7 +582,7 @@ function AdminDashboard() {
               </Card>
             </Grid>
 
-            {/* Debug Console */}
+            {/* Debug logger */}
             <Grid item xs={12} sm={6} md={4}>
               <Card
                 sx={{
@@ -615,7 +616,7 @@ function AdminDashboard() {
                     <BugReport sx={{ color: "#10B981", fontSize: 32 }} />
                   </Box>
                   <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                    Debug Console
+                    Debug logger
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     System diagnostics and debugging

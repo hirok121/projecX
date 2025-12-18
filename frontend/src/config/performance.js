@@ -31,7 +31,6 @@ export const LazyComponents = {
   UnderConstruction: lazy(() => import('../pages/admin/UnderConstruction')),
     // Main Application Components
   Home: lazy(() => import('../pages/Home')),
-  Diagnosis: lazy(() => import('../pages/diagnosis/Diagnosis')),
   
   // New Diagnosis Platform Components
   DiagnosisMain: lazy(() => import('../pages/diagnosis/DiagnosisMain')),
@@ -75,7 +74,7 @@ export class PerformanceMonitor {
 
   static init() {
     if (PERFORMANCE_CONFIG.ENABLE_PERFORMANCE_MONITORING) {
-      console.log('HepatoCAI Performance Monitoring initialized');
+      logger.log('HepatoCAI Performance Monitoring initialized');
       this.startMeasurement('app-initialization');
     }
   }
@@ -91,7 +90,7 @@ export class PerformanceMonitor {
       this.metrics[name].duration = endTime - this.metrics[name].start;
       
       if (PERFORMANCE_CONFIG.ENABLE_PERFORMANCE_MONITORING) {
-        console.log(`Performance: ${name} took ${this.metrics[name].duration.toFixed(2)}ms`);
+        logger.log(`Performance: ${name} took ${this.metrics[name].duration.toFixed(2)}ms`);
       }
       
       return this.metrics[name].duration;
@@ -182,7 +181,7 @@ export const usePerformanceMonitoring = (componentName) => {
       
       return () => {
         const endTime = performance.now();
-        console.log(`${componentName} render time: ${(endTime - startTime).toFixed(2)}ms`);
+        logger.log(`${componentName} render time: ${(endTime - startTime).toFixed(2)}ms`);
       };
     }
   });

@@ -21,6 +21,7 @@ import { styled } from "@mui/material/styles";
 import AppTheme from "../../theme/AppTheme";
 import { DeepMedIcon } from "../../components/ui/CustomIcons";
 import api from "../../services/api";
+import logger from "../../utils/logger";
 
 // Styled components
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -120,7 +121,7 @@ export default function ResetPasswordConfirm() {
         state: { message: "Password reset successfully. Please sign in." },
       });
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       setSnackbar({
         open: true,
         severity: "error",

@@ -16,6 +16,7 @@ import DiseaseCard from "../../components/diagnosis/DiseaseCard";
 import NavBar from "../../components/layout/NavBar";
 import Footer from "../../components/landingPageComponents/Footer";
 import { DIAGNOSIS_CATEGORIES } from "../../const/disease";
+import logger from "../../utils/logger";
 
 function DiagnosisMain() {
   const [diseases, setDiseases] = useState([]);
@@ -44,7 +45,7 @@ function DiagnosisMain() {
       setDiseases(response.data || response);
       setFilteredDiseases(response.data || response);
     } catch (error) {
-      console.error("Error fetching diseases:", error);
+      logger.error("Error fetching diseases:", error);
     } finally {
       setLoading(false);
     }

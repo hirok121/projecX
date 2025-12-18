@@ -1,4 +1,5 @@
 import api from './api';
+import logger from '../utils/logger';
 
 const authAPI = {
   // User Registration
@@ -7,7 +8,7 @@ const authAPI = {
       const response = await api.post('/auth/register', userData);
       return response.data;
     } catch (error) {
-      console.error('Registration error:', error);
+      logger.error('Registration error:', error);
       throw error;
     }
   },
@@ -18,7 +19,7 @@ const authAPI = {
       const response = await api.post('/auth/login', credentials);
       return response.data;
     } catch (error) {
-      console.error('Login error:', error);
+      logger.error('Login error:', error);
       throw error;
     }
   },
@@ -29,7 +30,7 @@ const authAPI = {
       const response = await api.get('/auth/google');
       return response.data;
     } catch (error) {
-      console.error('Google auth URL error:', error);
+      logger.error('Google auth URL error:', error);
       throw error;
     }
   },
@@ -40,7 +41,7 @@ const authAPI = {
       const response = await api.post('/auth/google/callback', { code });
       return response.data;
     } catch (error) {
-      console.error('Google callback error:', error);
+      logger.error('Google callback error:', error);
       throw error;
     }
   },
@@ -51,7 +52,7 @@ const authAPI = {
       const response = await api.get('/auth/me');
       return response.data;
     } catch (error) {
-      console.error('Get current user error:', error);
+      logger.error('Get current user error:', error);
       throw error;
     }
   },
@@ -62,7 +63,7 @@ const authAPI = {
       const response = await api.post('/auth/verify-email', { token });
       return response.data;
     } catch (error) {
-      console.error('Email verification error:', error);
+      logger.error('Email verification error:', error);
       throw error;
     }
   },
@@ -73,7 +74,7 @@ const authAPI = {
       const response = await api.post('/auth/forgot-password', { email });
       return response.data;
     } catch (error) {
-      console.error('Forgot password error:', error);
+      logger.error('Forgot password error:', error);
       throw error;
     }
   },
@@ -87,7 +88,7 @@ const authAPI = {
       });
       return response.data;
     } catch (error) {
-      console.error('Reset password error:', error);
+      logger.error('Reset password error:', error);
       throw error;
     }
   },
@@ -101,7 +102,7 @@ const authAPI = {
       });
       return response.data;
     } catch (error) {
-      console.error('Change password error:', error);
+      logger.error('Change password error:', error);
       throw error;
     }
   },

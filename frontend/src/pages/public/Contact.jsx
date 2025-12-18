@@ -15,6 +15,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import api from "../../services/api";
+import logger from "../../utils/logger";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
@@ -49,7 +50,7 @@ function Contact() {
 
     try {
       const response = await api.post("users/contact/me/", formData);
-      console.log("Response:", response.data);
+      logger.log("Response:", response.data);
 
       if (response.data.status === "success") {
         setNotification({

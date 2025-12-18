@@ -1,4 +1,5 @@
 import api from './api';
+import logger from '../utils/logger';
 
 const userAPI = {
   // Get user profile
@@ -7,7 +8,7 @@ const userAPI = {
       const response = await api.get('/users/profile');
       return response.data;
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      logger.error('Error fetching profile:', error);
       throw error;
     }
   },
@@ -15,14 +16,14 @@ const userAPI = {
   // Update user profile
   updateProfile: async (profileData) => {
     try {
-      console.log('userAPI sending data:', profileData);
+      logger.log('userAPI sending data:', profileData);
       const response = await api.put('/users/profile', profileData);
-      console.log('userAPI received response:', response.data);
+      logger.log('userAPI received response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error updating profile:', error);
-      console.error('Request data was:', profileData);
-      console.error('Response error:', error.response?.data);
+      logger.error('Error updating profile:', error);
+      logger.error('Request data was:', profileData);
+      logger.error('Response error:', error.response?.data);
       throw error;
     }
   },
@@ -33,7 +34,7 @@ const userAPI = {
       const response = await api.get(`/users/${userId}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching user by ID:', error);
+      logger.error('Error fetching user by ID:', error);
       throw error;
     }
   },
@@ -44,7 +45,7 @@ const userAPI = {
       const response = await api.get('/users/admin/all', { params });
       return response.data;
     } catch (error) {
-      console.error('Error fetching all users:', error);
+      logger.error('Error fetching all users:', error);
       throw error;
     }
   },
@@ -55,7 +56,7 @@ const userAPI = {
       const response = await api.put(`/users/admin/${userId}`, userData);
       return response.data;
     } catch (error) {
-      console.error('Error updating user:', error);
+      logger.error('Error updating user:', error);
       throw error;
     }
   },
@@ -66,7 +67,7 @@ const userAPI = {
       const response = await api.delete(`/users/admin/${userId}`);
       return response.data;
     } catch (error) {
-      console.error('Error deleting user:', error);
+      logger.error('Error deleting user:', error);
       throw error;
     }
   },

@@ -27,7 +27,7 @@ function PredictionSummary({ disease, modality, selectedModelIds }) {
       );
       setModels(selectedModels);
     } catch (error) {
-      console.error("Error fetching models:", error);
+      logger.error("Error fetching models:", error);
     }
   };
 

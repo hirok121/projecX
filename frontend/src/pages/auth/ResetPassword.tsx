@@ -21,6 +21,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import AppTheme from "../../theme/AppTheme";
 import { DeepMedIcon } from "../../components/ui/CustomIcons";
 import { useAuth } from "../../context/AuthContext";
+import logger from "../../utils/logger";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -133,7 +134,7 @@ export default function ResetPasswordPage() {
         });
       }
     } catch (error) {
-      console.error("Forgot password error:", error);
+      logger.error("Forgot password error:", error);
       setSnackbar({
         open: true,
         severity: "error",
@@ -185,7 +186,7 @@ export default function ResetPasswordPage() {
         });
       }
     } catch (error) {
-      console.error("Reset password error:", error);
+      logger.error("Reset password error:", error);
       setSnackbar({
         open: true,
         severity: "error",

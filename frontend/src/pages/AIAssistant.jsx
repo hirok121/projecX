@@ -48,16 +48,16 @@ function AIAssistant() {
     setIsLoading(true);
     try {
       const response = await aiAssistantService.getChats();
-      console.log("API response getchats:", response);
+      logger.log("API response getchats:", response);
       if (response.success) {
         setChats(response.data);
       } else {
-        console.warn("API not available");
+        logger.warn("API not available");
         setChats([]);
         setError("Unable to load chats. Please check your connection.");
       }
     } catch (error) {
-      console.warn("Backend not available:", error);
+      logger.warn("Backend not available:", error);
       setChats([]);
       setError(
         "Backend service is currently unavailable. Please try again later."
@@ -72,19 +72,19 @@ function AIAssistant() {
       setSidebarLoading(true);
       setIsLoading(true);
       const response = await aiAssistantService.createChat();
-      console.log("API response createChat:", response);
+      logger.log("API response createChat:", response);
       if (response.success && response.data) {
         const newChat = response.data;
         setChats((prev) => [newChat, ...prev]);
         setCurrentChatId(newChat.id);
         setMessages([]);
-        console.log("New chat created:", newChat);
+        logger.log("New chat created:", newChat);
         if (isMobile) setSidebarOpen(false);
       } else {
         setError("Failed to create new chat");
       }
     } catch (error) {
-      console.error("Error creating new chat:", error);
+      logger.error("Error creating new chat:", error);
       setError("Failed to create new chat");
     } finally {
       setSidebarLoading(false);
@@ -100,15 +100,15 @@ function AIAssistant() {
       setMessages([]);
 
       const response = await aiAssistantService.getChatDetails(chatId);
-      console.log("API response getChatDetails:", response);
+      logger.log("API response getChatDetails:", response);
 
       if (response.success && response.data) {
         const chatData = response.data;
         const messages = chatData.messages || [];
-        console.log("Loading messages for chat:", chatId, messages);
+        logger.log("Loading messages for chat:", chatId, messages);
         setMessages(messages);
       } else {
-        console.warn(
+        logger.warn(
           "Could not load chat from backend:",
           response.error || "Unknown error"
         );
@@ -118,7 +118,7 @@ function AIAssistant() {
 
       if (isMobile) setSidebarOpen(false);
     } catch (error) {
-      console.error("Error loading chat:", error);
+      logger.error("Error loading chat:", error);
       setMessages([]);
       setError("Failed to load chat messages");
       if (isMobile) setSidebarOpen(false);
@@ -169,7 +169,7 @@ function AIAssistant() {
         chatId,
         messageContent
       );
-      console.log("API response sendMessage:", response);
+      logger.log("API response sendMessage:", response);
 
       if (response.success && response.data) {
         const { chat_id, chat_title, user_message, assistant_message } =
@@ -208,12 +208,12 @@ function AIAssistant() {
           return newMessages;
         });
       } else {
-        console.warn("Backend API failed");
+        logger.warn("Backend API failed");
         setError("Failed to send message");
         setMessages((prev) => prev.filter((msg) => msg.id !== userMessage.id));
       }
     } catch (error) {
-      console.warn("Backend not available:", error);
+      logger.warn("Backend not available:", error);
       setError("Backend service is currently unavailable");
       setMessages((prev) => prev.filter((msg) => msg.id !== userMessage.id));
     } finally {
@@ -264,7 +264,7 @@ function AIAssistant() {
           file,
           filePrompt
         );
-        console.log(
+        logger.log(
           `API response uploadImage (${i + 1}/${fileArray.length}):`,
           response
         );
@@ -297,11 +297,11 @@ function AIAssistant() {
 
           successCount++;
         } else {
-          console.warn(`File upload failed for ${file.name}:`, response.error);
+          logger.warn(`File upload failed for ${file.name}:`, response.error);
           errorCount++;
         }
       } catch (error) {
-        console.error(`Error uploading file ${file.name}:`, error);
+        logger.error(`Error uploading file ${file.name}:`, error);
         errorCount++;
       }
     }
@@ -339,7 +339,7 @@ function AIAssistant() {
         setError(response.error || "Failed to delete chat");
       }
     } catch (error) {
-      console.error("Error deleting chat:", error);
+      logger.error("Error deleting chat:", error);
       setError("Failed to delete chat");
     } finally {
       setIsLoading(false);
@@ -365,7 +365,7 @@ function AIAssistant() {
           setError(response.error || "Failed to update chat title");
         }
       } catch (error) {
-        console.error("Error updating chat title:", error);
+        logger.error("Error updating chat title:", error);
         setError("Failed to update chat title");
       }
     }

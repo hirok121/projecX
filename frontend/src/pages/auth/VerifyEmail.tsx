@@ -17,6 +17,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import AppTheme from "../../theme/AppTheme";
 import { DeepMedIcon } from "../../components/ui/CustomIcons";
 import { useAuth } from "../../context/AuthContext";
+import logger from "../../utils/logger";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -97,7 +98,7 @@ export default function VerifyEmailPage() {
         const result = await verifyEmail(token);
         setVerificationResult(result);
       } catch (error) {
-        console.error("Email verification error:", error);
+        logger.error("Email verification error:", error);
         setVerificationResult({
           success: false,
           message: "An error occurred during verification. Please try again.",

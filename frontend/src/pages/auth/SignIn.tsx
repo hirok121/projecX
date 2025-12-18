@@ -33,6 +33,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { CircularProgress } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
+import logger from "../../utils/logger";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -127,13 +128,13 @@ export default function SignIn(props) {
     const email = data.get("email") as string;
     const password = data.get("password") as string;
 
-    console.log("SignIn - attempting login with:", { email }); // Debug log (don't log password)
+    logger.log("SignIn - attempting login with:", { email }); // Debug log (don't log password)
 
     try {
       // Use login from AuthProvider directly - it handles all authentication logic
       const loginResult = await login({ email, password });
 
-      console.log("SignIn - login result:", loginResult); // Debug log
+      logger.log("SignIn - login result:", loginResult); // Debug log
 
       if (loginResult.success) {
         setSnackbar({
@@ -143,7 +144,7 @@ export default function SignIn(props) {
         });
         navigate("/"); // Navigate on successful login
       } else {
-        console.error("SignIn - login failed:", loginResult.error); // Debug log
+        logger.error("SignIn - login failed:", loginResult.error); // Debug log
         setSnackbar({
           open: true,
           severity: "error",
@@ -152,7 +153,7 @@ export default function SignIn(props) {
         });
       }
     } catch (err: any) {
-      console.error("SignIn - login error:", err);
+      logger.error("SignIn - login error:", err);
       setSnackbar({
         open: true,
         severity: "error",
@@ -172,7 +173,7 @@ export default function SignIn(props) {
         throw new Error("No Google auth URL received");
       }
     } catch (error) {
-      console.error("Google sign-in failed:", error);
+      logger.error("Google sign-in failed:", error);
       setSnackbar({
         open: true,
         severity: "error",

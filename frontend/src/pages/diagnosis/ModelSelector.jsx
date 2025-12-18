@@ -18,6 +18,7 @@ import { classifierAPI } from "../../services/classifierAPI";
 import NavBar from "../../components/layout/NavBar";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import logger from "../../utils/logger";
 
 function ModelSelector() {
   const { diseaseId, modality } = useParams();
@@ -48,7 +49,7 @@ function ModelSelector() {
 
       setModels(classifiersData);
     } catch (error) {
-      console.error("Error fetching models:", error);
+      logger.error("Error fetching models:", error);
     } finally {
       setLoading(false);
     }

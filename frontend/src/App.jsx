@@ -78,15 +78,6 @@ function App() {
                 </ProtectedRoute>
               }
             />{" "}
-            {/* Legacy Diagnosis Route (keep for backward compatibility) */}
-            <Route
-              path="/diagnosis-legacy"
-              element={
-                <ProtectedRoute>
-                  <LazyComponents.Diagnosis />
-                </ProtectedRoute>
-              }
-            />{" "}
             <Route
               path="/analytics"
               element={
@@ -115,7 +106,7 @@ function App() {
             <Route
               path="/admin"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin={true}>
                   <LazyComponents.AdminDashboard />
                 </ProtectedRoute>
               }
@@ -123,7 +114,7 @@ function App() {
             <Route
               path="/admin/users"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin={true}>
                   <LazyComponents.AdminUserManagement />
                 </ProtectedRoute>
               }
@@ -131,7 +122,7 @@ function App() {
             <Route
               path="/admin/under-construction"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin={true}>
                   <LazyComponents.UnderConstruction />
                 </ProtectedRoute>
               }
@@ -139,7 +130,7 @@ function App() {
             <Route
               path="/admin/debug"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin={true}>
                   <LazyComponents.AdminDebugConsole />
                 </ProtectedRoute>
               }
@@ -147,7 +138,7 @@ function App() {
             <Route
               path="/admin/diagnosis-management"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin={true}>
                   <LazyComponents.AdminDiagnosisManagement />
                 </ProtectedRoute>
               }
@@ -155,7 +146,7 @@ function App() {
             <Route
               path="/admin/disease-upload"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin={true}>
                   <LazyComponents.AdminDiseaseUpload />
                 </ProtectedRoute>
               }
@@ -163,7 +154,7 @@ function App() {
             <Route
               path="/admin/blogs"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin={true}>
                   <LazyComponents.AdminBlogManagement />
                 </ProtectedRoute>
               }

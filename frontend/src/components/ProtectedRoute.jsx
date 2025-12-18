@@ -1,10 +1,10 @@
-import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { AUTH_CONFIG } from "../config/constants";
+import PropTypes from "prop-types";
+import logger from "../utils/logger";
 
-const ProtectedRoute = ({ children, requireStaff = false }) => {
-  const { isAuthenticated, user, loading } = useAuth();
+const ProtectedRoute = ({ children, requireAdmin = false }) => {
+  const { isAuthenticated, loading, isStaff, isSuperuser } = useAuth();
 
   // Show loading while auth state is being determined
   if (loading) {
@@ -17,18 +17,31 @@ const ProtectedRoute = ({ children, requireStaff = false }) => {
 
   // Check if user is authenticated
   if (!isAuthenticated) {
-    console.log('🔒 User not authenticated, redirecting to signin');
+    logger.log("🔒 User not authenticated, redirecting to signin");
     return <Navigate to="/signin" />;
   }
 
-  // Check if staff access is required
-  if (requireStaff && !user?.is_staff) {
-    console.log('👮 Staff access required but user is not staff');
-    return <Navigate to="/" />; // Redirect to home if not staff
+  // Check if admin access is required (staff OR superuser)
+  if (requireAdmin && !isStaff && !isSuperuser) {
+    logger.security("Admin access required but user is not staff/superuser");
+    return (
+      <Navigate
+        to="/"
+        state={{
+          message: "Admin privileges required to access this page",
+          type: "error",
+        }}
+      />
+    );
   }
 
-  console.log('✅ Protected route access granted');
+  logger.success("Protected route access granted");
   return children;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+  requireAdmin: PropTypes.bool,
 };
 
 export default ProtectedRoute;

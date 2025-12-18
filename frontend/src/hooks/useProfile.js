@@ -10,13 +10,13 @@ export const useProfile = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('🔍 Fetching profile data...');
+      logger.log('🔍 Fetching profile data...');
       const profileData = await userAPI.getProfile();
-      console.log('✅ Profile data received:', profileData);
-      console.log('🔍 Profile data structure:', JSON.stringify(profileData, null, 2));
+      logger.log('✅ Profile data received:', profileData);
+      logger.log('🔍 Profile data structure:', JSON.stringify(profileData, null, 2));
       setProfile(profileData);
     } catch (err) {
-      console.error('❌ Profile fetch error:', err);
+      logger.error('❌ Profile fetch error:', err);
       setError(err.response?.data?.detail || 'Failed to fetch profile');
     } finally {
       setLoading(false);

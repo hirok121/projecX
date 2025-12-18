@@ -113,7 +113,7 @@ function DebugFieldButton({
   const handleDebugClick = () => {
     const generator = randomValueGenerators[fieldName];
     if (!generator) {
-      console.warn(`No random generator found for field: ${fieldName}`);
+      logger.warn(`No random generator found for field: ${fieldName}`);
       return;
     }
 

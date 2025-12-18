@@ -121,7 +121,7 @@ const DiagnosisForm = ({ onSuccess, onCancel }) => {
       }
       reset();
     } catch (error) {
-      console.error("Error creating diagnosis:", error);
+      logger.error("Error creating diagnosis:", error);
     }
   };
 

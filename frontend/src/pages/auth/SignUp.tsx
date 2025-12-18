@@ -21,6 +21,7 @@ import { GoogleIcon, DeepMedIcon } from "../../components/ui/CustomIcons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import authAPI from "../../services/authAPI";
+import logger from "../../utils/logger";
 
 // Styled components
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -162,7 +163,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
         });
       }
     } catch (err: any) {
-      console.error("Registration error:", err);
+      logger.error("Registration error:", err);
       setSnackbar({
         open: true,
         severity: "error",
@@ -183,7 +184,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
         throw new Error("No Google auth URL received");
       }
     } catch (error) {
-      console.error("Google sign-up failed:", error);
+      logger.error("Google sign-up failed:", error);
       setSnackbar({
         open: true,
         severity: "error",

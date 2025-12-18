@@ -44,7 +44,9 @@ const StyledSection = styled(Paper)(({ theme }) => ({
   },
 }));
 
-const AnimatedBox = styled(Box)(({ animationDelay = "0s" }) => ({
+const AnimatedBox = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'animationDelay',
+})(({ animationDelay = "0s" }) => ({
   animation: `${fadeInAnimation} 0.8s ease-out ${animationDelay} both`,
 }));
 

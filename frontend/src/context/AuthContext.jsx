@@ -1,8 +1,9 @@
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import authAPI from '../services/authAPI';
 import userAPI from '../services/userAPI';
 import { AUTH_CONFIG } from '../config/constants';
+import logger from '../utils/logger';
 
 // Create AuthContext with default values
 const AuthContext = createContext({
@@ -42,10 +43,10 @@ export const AuthProvider = ({ children }) => {
   // Fetch current user data
   const fetchUserData = useCallback(async () => {
     try {
-      console.log('🔍 Fetching user data...');
+      logger.loading('Fetching user data...');
       const userData = await authAPI.getCurrentUser();
-      console.log('✅ User data received:', userData);
-      console.log('👤 User permissions:', { 
+      logger.success('User data received:', userData);
+      logger.log('👤 User permissions:', { 
         is_staff: userData?.is_staff, 
         is_superuser: userData?.is_superuser,
         is_active: userData?.is_active 
@@ -53,7 +54,7 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       return userData;
     } catch (error) {
-      console.error('❌ Failed to fetch user data:', error);
+      logger.error('❌ Failed to fetch user data:', error);
       throw error;
     }
   }, []);
@@ -62,17 +63,17 @@ export const AuthProvider = ({ children }) => {
   const login = useCallback(async (credentials) => {
     setLoading(true);
     try {
-      console.log('🔐 Attempting login for:', credentials.email);
+      logger.auth('Attempting login for:', credentials.email);
       const response = await authAPI.login(credentials);
-      console.log('✅ Login response received:', { hasToken: !!response.access_token });
+      logger.success('Login response received:', { hasToken: !!response.access_token });
       
       if (response.access_token) {
         storeTokens(response.access_token);
-        console.log('💾 Token stored, fetching user data...');
+        logger.log('💾 Token stored, fetching user data...');
         
         // Fetch user data after successful login
         const userData = await fetchUserData();
-        console.log('👤 User data fetched:', { 
+        logger.log('👤 User data fetched:', { 
           email: userData?.email, 
           id: userData?.id,
           fullName: userData?.full_name 
@@ -84,13 +85,13 @@ export const AuthProvider = ({ children }) => {
         
         return { success: true, user: userData };
       } else {
-        console.error('❌ No access token in response');
+        logger.error('❌ No access token in response');
         setLoading(false);
         return { success: false, error: 'No access token received' };
       }
     } catch (error) {
       setLoading(false);
-      console.error('❌ Login error:', error);
+      logger.error('❌ Login error:', error);
       
       let errorMessage = 'Login failed. Please try again.';
       if (error.response?.data?.detail) {
@@ -119,7 +120,7 @@ export const AuthProvider = ({ children }) => {
       };
     } catch (error) {
       setLoading(false);
-      console.error('Registration error:', error);
+      logger.error('Registration error:', error);
       
       let errorMessage = 'Registration failed. Please try again.';
       if (error.response?.data?.detail) {
@@ -148,7 +149,7 @@ export const AuthProvider = ({ children }) => {
         message: response.message || 'If your email is registered, you will receive a password reset link.'
       };
     } catch (error) {
-      console.error('Forgot password error:', error);
+      logger.error('Forgot password error:', error);
       
       let errorMessage = 'Failed to send reset email. Please try again.';
       if (error.response?.data?.detail) {
@@ -168,7 +169,7 @@ export const AuthProvider = ({ children }) => {
         message: response.message || 'Password reset successfully! You can now login with your new password.'
       };
     } catch (error) {
-      console.error('Reset password error:', error);
+      logger.error('Reset password error:', error);
       
       let errorMessage = 'Failed to reset password. Please try again.';
       if (error.response?.data?.detail) {
@@ -188,7 +189,7 @@ export const AuthProvider = ({ children }) => {
         message: response.message || 'Password changed successfully!'
       };
     } catch (error) {
-      console.error('Change password error:', error);
+      logger.error('Change password error:', error);
       
       let errorMessage = 'Failed to change password. Please try again.';
       if (error.response?.data?.detail) {
@@ -211,7 +212,7 @@ export const AuthProvider = ({ children }) => {
         email: response.email
       };
     } catch (error) {
-      console.error('Email verification error:', error);
+      logger.error('Email verification error:', error);
       
       let errorMessage = 'Failed to verify email. Invalid or expired token.';
       if (error.response?.data?.detail) {
@@ -229,7 +230,7 @@ export const AuthProvider = ({ children }) => {
       setUser(updatedUser);
       return { success: true, user: updatedUser };
     } catch (error) {
-      console.error('Update profile error:', error);
+      logger.error('Update profile error:', error);
       
       let errorMessage = 'Failed to update profile. Please try again.';
       if (error.response?.data?.detail) {
@@ -246,7 +247,7 @@ export const AuthProvider = ({ children }) => {
       try {
         await fetchUserData();
       } catch (error) {
-        console.error('Failed to refresh user data:', error);
+        logger.error('Failed to refresh user data:', error);
         // If fetch fails, user might be logged out
         logout();
       }
@@ -256,12 +257,12 @@ export const AuthProvider = ({ children }) => {
   // Handle OAuth token (for Google/social login)
   const handleOAuthToken = useCallback(async (accessToken) => {
     try {
-      console.log('🔐 Handling OAuth token...');
+      logger.auth('Handling OAuth token...');
       storeTokens(accessToken);
       
       // Fetch user data with new token
       const userData = await fetchUserData();
-      console.log('✅ OAuth authentication successful:', { 
+      logger.success('OAuth authentication successful:', { 
         email: userData?.email, 
         id: userData?.id 
       });
@@ -271,7 +272,7 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, user: userData };
     } catch (error) {
-      console.error('❌ OAuth token handling failed:', error);
+      logger.error('❌ OAuth token handling failed:', error);
       clearTokens();
       return { success: false, error: error.message };
     }
@@ -281,24 +282,24 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
-      console.log('🔄 Checking auth on mount, token exists:', !!token);
+      logger.loading('Checking auth on mount, token exists:', !!token);
       
       if (token) {
         try {
           // Try to fetch user data to verify token is still valid
           const userData = await fetchUserData();
-          console.log('✅ Auth check successful, user authenticated');
+          logger.success('Auth check successful, user authenticated');
           setUser(userData);
           setIsAuthenticated(true);
         } catch (error) {
-          console.error('❌ Token validation failed:', error);
+          logger.error('❌ Token validation failed:', error);
           // Clear invalid tokens
           clearTokens();
           setIsAuthenticated(false);
           setUser(null);
         }
       } else {
-        console.log('ℹ️ No token found, user not authenticated');
+        logger.info('ℹ️ No token found, user not authenticated');
       }
       
       setLoading(false);

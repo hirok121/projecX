@@ -19,6 +19,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import HomeIcon from "@mui/icons-material/Home";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import logger from "../../utils/logger";
 
 function ResultsPage() {
   const { predictionId } = useParams();
@@ -35,7 +36,7 @@ function ResultsPage() {
       const response = await diagnosisAPI.getPredictionResult(predictionId);
       setResults([response.data]);
     } catch (error) {
-      console.error("Error fetching results:", error);
+      logger.error("Error fetching results:", error);
     } finally {
       setLoading(false);
     }

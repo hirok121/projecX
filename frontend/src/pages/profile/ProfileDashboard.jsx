@@ -46,6 +46,7 @@ import DiagnosisSearch from "../../components/diagnosis/DiagnosisSearch";
 import DiagnosisList from "../../components/diagnosis/DiagnosisList";
 // import { useUserAnalytics, useSearchDiagnoses } from "../hooks/useDiagnosis";
 import { useAuth } from "../../context/AuthContext";
+import logger from "../../utils/logger";
 
 const COLORS = {
   primary: "#1976d2",
@@ -186,16 +187,16 @@ const ProfileDashboard = () => {
   const hasGenderData =
     analyticsData.gender_distribution &&
     Object.values(analyticsData.gender_distribution).some((value) => value > 0);
-  //   console.log("Has gender data:", hasGenderData);
-  //   console.log("Gender distribution data prepared:", genderDistributionData);
+  //   logger.log("Has gender data:", hasGenderData);
+  //   logger.log("Gender distribution data prepared:", genderDistributionData);
 
   // Process monthly trends data - simplified like AdminDiagnosisManagement
   const monthlyTrendsData = analyticsData.monthly_trends || [];
 
   // Debug: Log monthly trends data to check if it's populated
-  console.log("Monthly trends data:", monthlyTrendsData);
+  logger.log("Monthly trends data:", monthlyTrendsData);
 
-  console.log("Analytics data:", analyticsData);
+  logger.log("Analytics data:", analyticsData);
   // Prepare stage distribution data for bar chart
   const stageDistributionData = Object.entries(
     analyticsData.hcv_stage_distribution || {}
@@ -225,12 +226,12 @@ const ProfileDashboard = () => {
     };
   });
   //   // Add debug logging for stage distribution
-  //   console.log("Stage distribution raw data:", analyticsData.stage_distribution);
-  //   console.log(
+  //   logger.log("Stage distribution raw data:", analyticsData.stage_distribution);
+  //   logger.log(
   //     "Stage distribution processed (all):",
   //     Object.entries(analyticsData.stage_distribution || {})
   //   );
-  //   console.log("Stage distribution filtered (>0):", stageDistributionData);
+  //   logger.log("Stage distribution filtered (>0):", stageDistributionData);
 
   // Sort by stage number for consistent ordering
   stageDistributionData.sort((a, b) => {

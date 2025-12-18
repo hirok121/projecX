@@ -30,6 +30,7 @@ import { blogAPI } from "../../services/blogAPI";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import NavBar from "../../components/layout/NavBar";
+import logger from "../../utils/logger";
 
 function BlogView({ blogData, isPreview = false }) {
   const { slug } = useParams();
@@ -57,7 +58,7 @@ function BlogView({ blogData, isPreview = false }) {
       setBlog(data);
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to load blog post");
-      console.error(err);
+      logger.error(err);
     } finally {
       setLoading(false);
     }

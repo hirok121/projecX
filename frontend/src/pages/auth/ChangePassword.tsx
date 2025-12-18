@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import AppTheme from "../../theme/AppTheme";
 import { DeepMedIcon } from "../../components/ui/CustomIcons";
 import { useAuth } from "../../context/AuthContext";
+import logger from "../../utils/logger";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -163,7 +164,7 @@ export default function ChangePasswordPage() {
         });
       }
     } catch (error) {
-      console.error("Change password error:", error);
+      logger.error("Change password error:", error);
       setSnackbar({
         open: true,
         severity: "error",

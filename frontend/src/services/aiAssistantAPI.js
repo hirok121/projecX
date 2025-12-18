@@ -1,4 +1,5 @@
 import api from './api';
+import logger from '../utils/logger';
 
 // AI Assistant API service
 export const aiAssistantService = {
@@ -14,7 +15,7 @@ export const aiAssistantService = {
         total: chatsArray.length
       };
     } catch (error) {
-      console.error('Error fetching chats:', error);
+      logger.error('Error fetching chats:', error);
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to fetch chats',
@@ -33,7 +34,7 @@ export const aiAssistantService = {
         data: response.data
       };
     } catch (error) {
-      console.error('Error creating chat:', error);
+      logger.error('Error creating chat:', error);
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to create chat'
@@ -50,7 +51,7 @@ export const aiAssistantService = {
         data: response.data
       };
     } catch (error) {
-      console.error('Error fetching chat details:', error);
+      logger.error('Error fetching chat details:', error);
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to fetch chat details'
@@ -66,7 +67,7 @@ export const aiAssistantService = {
         data: response.data
       };
     } catch (error) {
-      console.error('Error updating chat:', error);
+      logger.error('Error updating chat:', error);
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to update chat'
@@ -81,7 +82,7 @@ export const aiAssistantService = {
         success: true
       };
     } catch (error) {
-      console.error('Error deleting chat:', error);
+      logger.error('Error deleting chat:', error);
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to delete chat'
@@ -101,7 +102,7 @@ export const aiAssistantService = {
         data: response.data
       };
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message:', error);
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to send message'
@@ -118,7 +119,7 @@ export const aiAssistantService = {
         data: response.data
       };
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      logger.error('Error fetching user profile:', error);
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to fetch profile',
@@ -135,7 +136,7 @@ export const aiAssistantService = {
         data: response.data
       };
     } catch (error) {
-      console.error('Error updating profile:', error);
+      logger.error('Error updating profile:', error);
       return {
         success: false,
         error: error.response?.data?.error || 'Failed to update profile'
@@ -160,7 +161,7 @@ export const aiAssistantService = {
         data: response.data
       };
     } catch (error) {
-      console.error('Error uploading image:', error);
+      logger.error('Error uploading image:', error);
       return {
         success: false,
         error: error.response?.data?.detail || error.response?.data?.error || 'Failed to upload image'

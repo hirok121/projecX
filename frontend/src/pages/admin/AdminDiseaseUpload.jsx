@@ -117,7 +117,7 @@ function AdminDiseaseUpload() {
     } catch (err) {
       setMessage("Failed to load diseases");
       setMessageType("error");
-      console.error("Failed to load diseases:", err);
+      logger.error("Failed to load diseases:", err);
     } finally {
       setLoading(false);
     }
@@ -130,7 +130,7 @@ function AdminDiseaseUpload() {
       const classifiersData = Array.isArray(data) ? data : [];
       setClassifiers(classifiersData);
     } catch (err) {
-      console.error("Failed to load classifiers:", err);
+      logger.error("Failed to load classifiers:", err);
     }
   };
 

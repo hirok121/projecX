@@ -13,6 +13,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { diseaseAPI } from "../../services/diseaseAPI";
 import NavBar from "../../components/layout/NavBar";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import logger from "../../utils/logger";
 
 function ModalitySelector() {
   const { diseaseId } = useParams();
@@ -65,7 +66,7 @@ function ModalitySelector() {
       const response = await diseaseAPI.getDisease(diseaseId);
       setDisease(response);
     } catch (error) {
-      console.error("Error fetching disease:", error);
+      logger.error("Error fetching disease:", error);
     } finally {
       setLoading(false);
     }

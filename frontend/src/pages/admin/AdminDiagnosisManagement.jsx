@@ -105,7 +105,7 @@ function AdminDiagnosisManagement() {
 
       setMessage("");
     } catch (error) {
-      console.error("Diagnosis data fetch error:", error);
+      logger.error("Diagnosis data fetch error:", error);
       setMessage("Error loading diagnosis data. Please try again.");
       setMessageType("error");
     } finally {
@@ -132,7 +132,7 @@ function AdminDiagnosisManagement() {
       setMessage("Export completed successfully");
       setMessageType("success");
     } catch (error) {
-      console.error("Export error:", error);
+      logger.error("Export error:", error);
       setMessage("Error exporting data");
       setMessageType("error");
     }

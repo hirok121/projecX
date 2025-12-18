@@ -29,7 +29,7 @@ const DiagnosisList = ({
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(pageSize);
 
-  // console.log("DiagnosisList searchResults:", searchResults);
+  // logger.log("DiagnosisList searchResults:", searchResults);
 
   const diagnoses =
     searchResults?.data?.results || searchResults?.results || [];

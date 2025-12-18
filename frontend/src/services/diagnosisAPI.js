@@ -4,6 +4,7 @@
  * Note: For disease/classifier management, use diseaseAPI.js and classifierAPI.js directly
  */
 import api from "./api";
+import logger from '../utils/logger';
 
 const API_BASE = "/diagnosis";
 
@@ -16,7 +17,7 @@ export const diagnosisAPI = {
       const response = await api.post("/diagnosis/", diagnosisData);
       return response.data;
     } catch (error) {
-      console.error("Error creating prediction:", error);
+      logger.error("Error creating prediction:", error);
       throw error;
     }
   },
@@ -27,7 +28,7 @@ export const diagnosisAPI = {
       const response = await api.get(`/diagnosis/${diagnosisId}`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching diagnosis ${diagnosisId}:`, error);
+      logger.error(`Error fetching diagnosis ${diagnosisId}:`, error);
       throw error;
     }
   },
@@ -38,7 +39,7 @@ export const diagnosisAPI = {
       const response = await api.get("/diagnosis/");
       return response.data;
     } catch (error) {
-      console.error("Error fetching user diagnoses:", error);
+      logger.error("Error fetching user diagnoses:", error);
       throw error;
     }
   },
@@ -57,7 +58,7 @@ export const diagnosisAPI = {
       const response = await api.get(`/diagnosis/search/?${params}`);
       return response.data;
     } catch (error) {
-      console.error("Error searching diagnoses:", error);
+      logger.error("Error searching diagnoses:", error);
       throw error;
     }
   },
@@ -74,7 +75,7 @@ export const diagnosisAPI = {
       const response = await api.get(`/diagnosis/admin/search/?${params}`);
       return response.data;
     } catch (error) {
-      console.error("Error admin searching diagnoses:", error);
+      logger.error("Error admin searching diagnoses:", error);
       throw error;
     }
   },
@@ -87,7 +88,7 @@ export const diagnosisAPI = {
       const response = await api.get("/diagnosis/stats/");
       return response.data;
     } catch (error) {
-      console.error("Error fetching quick stats:", error);
+      logger.error("Error fetching quick stats:", error);
       throw error;
     }
   },
@@ -98,7 +99,7 @@ export const diagnosisAPI = {
       const response = await api.get("/diagnosis/analytics/user/");
       return response.data;
     } catch (error) {
-      console.error("Error fetching user analytics:", error);
+      logger.error("Error fetching user analytics:", error);
       throw error;
     }
   },
@@ -113,7 +114,7 @@ export const diagnosisAPI = {
       });
       return response;
     } catch (error) {
-      console.error("Error exporting CSV:", error);
+      logger.error("Error exporting CSV:", error);
       throw error;
     }
   },
@@ -126,7 +127,7 @@ export const diagnosisAPI = {
       });
       return response;
     } catch (error) {
-      console.error("Error exporting Excel:", error);
+      logger.error("Error exporting Excel:", error);
       throw error;
     }
   },

@@ -22,7 +22,7 @@ function DebugSectionButton({
     fields.forEach((fieldName) => {
       const generator = randomValueGenerators[fieldName];
       if (!generator) {
-        console.warn(`No random generator found for field: ${fieldName}`);
+        logger.warn(`No random generator found for field: ${fieldName}`);
         return;
       }
 

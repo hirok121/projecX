@@ -69,7 +69,7 @@ function UserManagement() {
         setMessage("");
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
+      logger.error("Error fetching users:", error);
       setMessage("Error fetching user data. Please try again.");
       setMessageType("error");
     } finally {
@@ -138,7 +138,7 @@ function UserManagement() {
         fetchUsers();
       }
     } catch (error) {
-      console.error("Error updating user:", error);
+      logger.error("Error updating user:", error);
       setMessage(
         error.response?.data?.detail || "Error updating user permissions"
       );

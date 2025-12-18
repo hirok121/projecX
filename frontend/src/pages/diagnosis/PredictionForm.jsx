@@ -17,6 +17,7 @@ import NavBar from "../../components/layout/NavBar";
 import ImageUploadForm from "../../components/diagnosis/ImageUploadForm";
 import PredictionSummary from "../../components/diagnosis/PredictionSummary";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import logger from "../../utils/logger";
 
 function PredictionForm() {
   const { diseaseId } = useParams();
@@ -58,7 +59,7 @@ function PredictionForm() {
 
         setRequiredFeatures(Array.from(allFeatures));
       } catch (err) {
-        console.error("Failed to fetch required features:", err);
+        logger.error("Failed to fetch required features:", err);
         setError("Failed to load input fields. Please try again.");
       } finally {
         setFetchingFeatures(false);
@@ -99,7 +100,7 @@ function PredictionForm() {
         return;
       }
     } catch (err) {
-      console.error("Prediction failed:", err);
+      logger.error("Prediction failed:", err);
       setError(
         err.response?.data?.detail ||
           "Prediction failed. Please try again or contact support."

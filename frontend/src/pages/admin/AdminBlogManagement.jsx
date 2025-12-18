@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { blogAPI } from "../../services/blogAPI";
 import AdminNavBar from "../../components/admin/AdminNavbar";
 import BlogCard from "../../components/common/BlogCard";
+import logger from "../../utils/logger";
 
 const AdminBlogManagement = () => {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ const AdminBlogManagement = () => {
       setTotalPages(Math.max(1, Math.ceil(data.length / blogsPerPage)));
       setError(null);
     } catch (err) {
-      console.error("Error fetching blogs:", err);
+      logger.error("Error fetching blogs:", err);
       setError("Failed to load blogs. Please try again.");
     } finally {
       setLoading(false);
@@ -100,7 +101,7 @@ const AdminBlogManagement = () => {
       setDeleteDialogOpen(false);
       setBlogToDelete(null);
     } catch (err) {
-      console.error("Error deleting blog:", err);
+      logger.error("Error deleting blog:", err);
       setError("Failed to delete blog. Please try again.");
       setDeleteDialogOpen(false);
     }

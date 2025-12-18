@@ -3,6 +3,7 @@
  * Handles all disease-related API calls
  */
 import api from "./api";
+import logger from '../utils/logger';
 
 export const diseaseAPI = {
   // ============ Public Disease Endpoints ============
@@ -20,7 +21,7 @@ export const diseaseAPI = {
       const response = await api.get("/diseases/", { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching diseases:", error);
+      logger.error("Error fetching diseases:", error);
       throw error;
     }
   },
@@ -34,7 +35,7 @@ export const diseaseAPI = {
       const response = await api.get(`/diseases/${diseaseId}`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching disease ${diseaseId}:`, error);
+      logger.error(`Error fetching disease ${diseaseId}:`, error);
       throw error;
     }
   },
@@ -54,7 +55,7 @@ export const diseaseAPI = {
       const response = await api.post("/diseases/", diseaseData);
       return response.data;
     } catch (error) {
-      console.error("Error creating disease:", error);
+      logger.error("Error creating disease:", error);
       throw error;
     }
   },
@@ -69,7 +70,7 @@ export const diseaseAPI = {
       const response = await api.put(`/diseases/${diseaseId}`, diseaseData);
       return response.data;
     } catch (error) {
-      console.error(`Error updating disease ${diseaseId}:`, error);
+      logger.error(`Error updating disease ${diseaseId}:`, error);
       throw error;
     }
   },
@@ -83,7 +84,7 @@ export const diseaseAPI = {
       const response = await api.delete(`/diseases/${diseaseId}`);
       return response.data;
     } catch (error) {
-      console.error(`Error deleting disease ${diseaseId}:`, error);
+      logger.error(`Error deleting disease ${diseaseId}:`, error);
       throw error;
     }
   },

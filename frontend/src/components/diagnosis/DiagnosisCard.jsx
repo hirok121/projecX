@@ -18,7 +18,7 @@ import { Person, Download, CalendarToday, Close } from "@mui/icons-material";
 
 const DiagnosisCard = ({ diagnosis }) => {
   const [openDetail, setOpenDetail] = useState(false);
-  // console.log("DiagnosisCard received diagnosis:", diagnosis);
+  // logger.log("DiagnosisCard received diagnosis:", diagnosis);
 
   // Simple test render first
   if (!diagnosis) {

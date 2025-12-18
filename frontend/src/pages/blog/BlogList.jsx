@@ -16,6 +16,7 @@ import { Search, LocalOffer, Article } from "@mui/icons-material";
 import { blogAPI } from "../../services/blogAPI";
 import NavBar from "../../components/layout/NavBar";
 import BlogCard from "../../components/common/BlogCard";
+import logger from "../../utils/logger";
 
 function BlogList() {
   const [blogs, setBlogs] = useState([]);
@@ -44,7 +45,7 @@ function BlogList() {
       setTotalBlogs(data.length); // Note: You may want to add total count from backend
     } catch (err) {
       setError("Failed to load blogs");
-      console.error(err);
+      logger.error(err);
     } finally {
       setLoading(false);
     }

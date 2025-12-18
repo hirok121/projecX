@@ -2,17 +2,18 @@ import { Box, Container, Paper } from "@mui/material";
 import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "../../../AuthContext";
 import AdminNavbar from "./AdminNavbar";
+import logger from "../../utils/logger";
 
 function AdminLayout() {
   const { user, loading } = useAuth();
 
-  console.log("AdminLayout - user:", user);
-  console.log("AdminLayout - loading:", loading);
-  console.log("AdminLayout - is_staff:", user?.is_staff);
-  console.log("AdminLayout - is_superuser:", user?.is_superuser);
+  logger.log("AdminLayout - user:", user);
+  logger.log("AdminLayout - loading:", loading);
+  logger.log("AdminLayout - is_staff:", user?.is_staff);
+  logger.log("AdminLayout - is_superuser:", user?.is_superuser);
 
   if (loading) {
-    console.log("AdminLayout - showing loading screen");
+    logger.log("AdminLayout - showing loading screen");
     return (
       <Box
         sx={{
@@ -29,11 +30,11 @@ function AdminLayout() {
 
   // Check if user has admin privileges
   if (!user || (!user.is_staff && !user.is_superuser)) {
-    console.log("AdminLayout - redirecting to home, no admin privileges");
+    logger.log("AdminLayout - redirecting to home, no admin privileges");
     return <Navigate to="/" replace />;
   }
 
-  console.log("AdminLayout - rendering admin interface");
+  logger.log("AdminLayout - rendering admin interface");
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
       <AdminNavbar />

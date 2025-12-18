@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Box, CircularProgress, Typography, Alert } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
 import authAPI from "../../services/authAPI";
+import logger from "../../utils/logger";
 
 const AuthCallback = () => {
   const [params] = useSearchParams();
@@ -14,14 +15,14 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const handleGoogleCallback = async () => {
-      console.log("AuthCallback component mounted, current URL:", window.location.href);
+      logger.log("AuthCallback component mounted, current URL:", window.location.href);
 
       const code = params.get("code");
       const state = params.get("state");
       const errorParam = params.get("error");
       const errorDescription = params.get("error_description");
 
-      console.log("AuthCallback - URL params:", {
+      logger.log("AuthCallback - URL params:", {
         code: !!code,
         state,
         error: errorParam,
@@ -31,7 +32,7 @@ const AuthCallback = () => {
 
       // Handle OAuth errors
       if (errorParam) {
-        console.error("AuthCallback - OAuth error:", errorParam, errorDescription);
+        logger.error("AuthCallback - OAuth error:", errorParam, errorDescription);
         setError(errorDescription || errorParam || "Authentication failed");
         setLoading(false);
         
@@ -47,7 +48,7 @@ const AuthCallback = () => {
 
       // Handle missing authorization code
       if (!code) {
-        console.error("AuthCallback - Missing authorization code");
+        logger.error("AuthCallback - Missing authorization code");
         setError("Authorization code not received");
         setLoading(false);
         
@@ -63,25 +64,20 @@ const AuthCallback = () => {
 
       // Exchange code for tokens
       try {
-        console.log("AuthCallback - Exchanging code for tokens");
+        logger.log("AuthCallback - Exchanging code for tokens");
         
         const response = await authAPI.googleCallback(code);
         
         if (response.access_token) {
-          console.log("AuthCallback - Token received, handling OAuth authentication...");
+          logger.log("AuthCallback - Token received, handling OAuth authentication...");
           
           // Use AuthContext to handle OAuth token and authenticate user
           const result = await handleOAuthToken(response.access_token);
           
           if (result.success) {
-            console.log("AuthCallback - OAuth authentication successful");
+            logger.log("AuthCallback - OAuth authentication successful");
             // Navigate to home page
-            navigate("/", { 
-              replace: true,
-              state: {
-                message: "Successfully signed in with Google!",
-              },
-            });
+            navigate("/");
           } else {
             throw new Error(result.error || "Failed to authenticate with OAuth token");
           }
@@ -89,7 +85,7 @@ const AuthCallback = () => {
           throw new Error("No access token received");
         }
       } catch (error) {
-        console.error("AuthCallback - Error during token exchange:", error);
+        logger.error("AuthCallback - Error during token exchange:", error);
         
         let errorMessage = "Authentication failed";
         if (error.response?.data?.detail) {

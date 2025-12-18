@@ -31,6 +31,7 @@ import { blogAPI } from "../../services/blogAPI";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../../components/layout/NavBar";
 import BlogView from "./BlogView";
+import logger from "../../utils/logger";
 
 function CreateBlog() {
   const navigate = useNavigate();
@@ -102,7 +103,7 @@ function CreateBlog() {
       const { slug } = await blogAPI.generateSlug(formData.title);
       setFormData((prev) => ({ ...prev, slug }));
     } catch (err) {
-      console.error("Failed to generate slug:", err);
+      logger.error("Failed to generate slug:", err);
     }
   };
 
