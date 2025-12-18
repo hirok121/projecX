@@ -28,6 +28,9 @@ class DiagnosisService:
         db: Session,
         user_id: int,
         classifier_id: int,
+        name: Optional[str] = None,
+        age: Optional[int] = None,
+        sex: Optional[str] = None,
         input_data: Optional[Dict[str, Any]] = None,
         input_file: Optional[str] = None,
     ) -> Diagnosis:
@@ -38,6 +41,9 @@ class DiagnosisService:
             db: Database session
             user_id: User ID
             classifier_id: Classifier ID to use
+            name: Patient name
+            age: Patient age
+            sex: Patient sex
             input_data: Tabular feature data
             input_file: Path to uploaded image file
 
@@ -69,6 +75,9 @@ class DiagnosisService:
             disease_id=disease.id,
             classifier_id=classifier.id,
             modality=classifier.modality.value,
+            name=name,
+            age=age,
+            sex=sex,
             input_data=input_data,
             input_file=input_file,
             status=DiagnosisStatus.PENDING,

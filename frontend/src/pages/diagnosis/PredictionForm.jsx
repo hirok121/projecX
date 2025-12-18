@@ -2,20 +2,20 @@ import { useState, useEffect } from "react";
 import {
   Container,
   Typography,
-  Grid,
   Paper,
   Box,
   Button,
   CircularProgress,
   Alert,
-  TextField,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { diagnosisAPI } from "../../services/diagnosisAPI";
 import { classifierAPI } from "../../services/classifierAPI";
 import NavBar from "../../components/layout/NavBar";
 import ImageUploadForm from "../../components/diagnosis/ImageUploadForm";
-import PredictionSummary from "../../components/diagnosis/PredictionSummary";
+import ClassifierInfoCard from "../../components/diagnosis/ClassifierInfoCard";
+import PatientInfoSection from "../../components/diagnosis/PatientInfoSection";
+import ClinicalDataSection from "../../components/diagnosis/ClinicalDataSection";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import logger from "../../utils/logger";
 
@@ -29,11 +29,18 @@ function PredictionForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [requiredFeatures, setRequiredFeatures] = useState([]);
+  const [featureMetadata, setFeatureMetadata] = useState({});
+  const [classifierData, setClassifierData] = useState(null);
   const [fetchingFeatures, setFetchingFeatures] = useState(true);
+  
+  // Patient information
+  const [patientName, setPatientName] = useState("");
+  const [patientAge, setPatientAge] = useState("");
+  const [patientSex, setPatientSex] = useState("");
 
-  // Fetch required features from selected classifier
+  // Fetch classifier data including features and metadata
   useEffect(() => {
-    const fetchRequiredFeatures = async () => {
+    const fetchClassifierData = async () => {
       if (!selectedModel) {
         setFetchingFeatures(false);
         return;
@@ -42,8 +49,10 @@ function PredictionForm() {
       try {
         setFetchingFeatures(true);
 
-        // Fetch the classifier and get its required_features
+        // Fetch the full classifier data
         const classifier = await classifierAPI.getClassifier(selectedModel.id);
+        setClassifierData(classifier);
+        
         if (
           classifier.required_features &&
           Array.isArray(classifier.required_features)
@@ -52,15 +61,19 @@ function PredictionForm() {
         } else {
           setRequiredFeatures([]);
         }
+
+        if (classifier.feature_metadata) {
+          setFeatureMetadata(classifier.feature_metadata);
+        }
       } catch (err) {
-        logger.error("Failed to fetch required features:", err);
-        setError("Failed to load input fields. Please try again.");
+        logger.error("Failed to fetch classifier data:", err);
+        setError("Failed to load classifier information. Please try again.");
       } finally {
         setFetchingFeatures(false);
       }
     };
 
-    fetchRequiredFeatures();
+    fetchClassifierData();
   }, [selectedModel]);
 
   const handleSubmit = async () => {
@@ -75,6 +88,9 @@ function PredictionForm() {
         // For tabular data, send as JSON
         const diagnosisData = {
           classifier_id: classifierId,
+          name: patientName || null,
+          age: patientAge ? parseInt(patientAge) : null,
+          sex: patientSex || null,
           input_data: inputData,
         };
 
@@ -117,10 +133,19 @@ function PredictionForm() {
     return labels[modality?.toLowerCase()] || modality?.toUpperCase();
   };
 
+  const getFilledFieldsCount = () => {
+    return requiredFeatures.filter((field) => inputData[field] && inputData[field] !== "").length;
+  };
+
+  const getFilledPercentage = () => {
+    if (requiredFeatures.length === 0) return 0;
+    return (getFilledFieldsCount() / requiredFeatures.length) * 100;
+  };
+
   const isFormValid = () => {
     if (modality === "tabular") {
-      // Check if all required fields are filled
-      return requiredFeatures.every((field) => inputData[field]);
+      // Require at least 50% of fields to be filled
+      return getFilledPercentage() >= 50;
     } else {
       // Check if image is uploaded
       return imageFile !== null;
@@ -165,6 +190,15 @@ function PredictionForm() {
           Back to Model Selection
         </Button>
 
+        {/* Classifier Info Card */}
+        {classifierData && (
+          <ClassifierInfoCard
+            classifierData={classifierData}
+            disease={disease}
+            modality={modality}
+          />
+        )}
+
         {/* Header */}
         <Typography
           variant="h4"
@@ -174,7 +208,7 @@ function PredictionForm() {
           Enter {getModalityLabel()} Data
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          {disease.name} - Provide the required data for prediction
+          Provide the required data for prediction
         </Typography>
 
         {/* Error Alert */}
@@ -184,10 +218,8 @@ function PredictionForm() {
           </Alert>
         )}
 
-        <Grid container spacing={3}>
-          {/* Main Form Area */}
-          <Grid item xs={12} md={8}>
-            <Paper sx={{ p: 3, borderRadius: 2 }}>
+        {/* Main Form Area */}
+        <Paper sx={{ p: 3, borderRadius: 2 }}>
               {fetchingFeatures ? (
                 <Box
                   sx={{
@@ -201,52 +233,23 @@ function PredictionForm() {
                 </Box>
               ) : modality === "tabular" ? (
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-                    Enter Clinical Data
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 3 }}
-                  >
-                    Please fill in all laboratory test results. All fields are
-                    required for accurate prediction.
-                  </Typography>
+                  <PatientInfoSection
+                    patientName={patientName}
+                    setPatientName={setPatientName}
+                    patientAge={patientAge}
+                    setPatientAge={setPatientAge}
+                    patientSex={patientSex}
+                    setPatientSex={setPatientSex}
+                  />
 
-                  <Grid container spacing={3}>
-                    {requiredFeatures.map((feature) => (
-                      <Grid item xs={12} sm={6} key={feature}>
-                        <TextField
-                          fullWidth
-                          label={feature}
-                          type="number"
-                          value={inputData[feature] || ""}
-                          onChange={(e) =>
-                            handleFieldChange(feature, e.target.value)
-                          }
-                          required
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              "&.Mui-focused fieldset": {
-                                borderColor: "#10B981",
-                              },
-                            },
-                            "& .MuiInputLabel-root.Mui-focused": {
-                              color: "#10B981",
-                            },
-                          }}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-
-                  {requiredFeatures.length === 0 && (
-                    <Box sx={{ textAlign: "center", py: 4 }}>
-                      <Typography variant="body1" color="text.secondary">
-                        No input fields configured for this disease
-                      </Typography>
-                    </Box>
-                  )}
+                  <ClinicalDataSection
+                    requiredFeatures={requiredFeatures}
+                    featureMetadata={featureMetadata}
+                    inputData={inputData}
+                    handleFieldChange={handleFieldChange}
+                    getFilledFieldsCount={getFilledFieldsCount}
+                    getFilledPercentage={getFilledPercentage}
+                  />
                 </Box>
               ) : (
                 <ImageUploadForm
@@ -287,17 +290,6 @@ function PredictionForm() {
                 </Button>
               </Box>
             </Paper>
-          </Grid>
-
-          {/* Sidebar - Selected Model Summary */}
-          <Grid item xs={12} md={4}>
-            <PredictionSummary
-              disease={disease}
-              modality={modality}
-              selectedModelIds={[selectedModel.id]}
-            />
-          </Grid>
-        </Grid>
       </Container>
     </Box>
   );

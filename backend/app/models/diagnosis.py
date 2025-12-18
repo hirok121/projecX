@@ -38,6 +38,11 @@ class Diagnosis(Base):
         Integer, ForeignKey("classifiers.id"), nullable=False, index=True
     )
 
+    # Patient information
+    name = Column(String(200), nullable=True)
+    age = Column(Integer, nullable=True)
+    sex = Column(String(20), nullable=True)  # "Male", "Female", "Other"
+
     # Input data
     modality = Column(String(50), nullable=False)  # "MRI", "CT", "X-Ray", "Tabular"
     input_file = Column(String(500), nullable=True)  # Path to uploaded image file
@@ -75,6 +80,9 @@ class Diagnosis(Base):
             "classifier_id": self.classifier_id,
             "classifier_name": self.classifier.name if self.classifier else None,
             "modality": self.modality,
+            "name": self.name,
+            "age": self.age,
+            "sex": self.sex,
             "input_file": self.input_file,
             "input_data": self.input_data,
             "prediction": self.prediction,

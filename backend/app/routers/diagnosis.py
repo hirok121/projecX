@@ -50,6 +50,9 @@ def create_diagnosis(
             db=db,
             user_id=current_user.id,
             classifier_id=diagnosis_data.classifier_id,
+            name=diagnosis_data.name,
+            age=diagnosis_data.age,
+            sex=diagnosis_data.sex,
             input_data=diagnosis_data.input_data,
             input_file=diagnosis_data.input_file,
         )

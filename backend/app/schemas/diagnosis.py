@@ -7,6 +7,9 @@ class DiagnosisCreate(BaseModel):
     """Schema for creating a diagnosis request."""
 
     classifier_id: int = Field(..., gt=0, description="ID of the classifier to use")
+    name: Optional[str] = Field(None, max_length=200, description="Patient name")
+    age: Optional[int] = Field(None, ge=0, le=150, description="Patient age")
+    sex: Optional[str] = Field(None, description="Patient sex (Male, Female, Other)")
     input_data: Optional[Dict[str, Any]] = Field(
         None, description="Tabular feature values"
     )
@@ -21,6 +24,9 @@ class DiagnosisResponse(BaseModel):
     disease_id: int
     classifier_id: int
     modality: str
+    name: Optional[str] = None
+    age: Optional[int] = None
+    sex: Optional[str] = None
     input_file: Optional[str] = None
     input_data: Optional[Dict[str, Any]] = None
     prediction: Optional[str] = None

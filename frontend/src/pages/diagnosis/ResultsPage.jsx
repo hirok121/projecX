@@ -190,6 +190,59 @@ function ResultsPage() {
                     </Box>
                   </Box>
 
+                  {/* Patient Information */}
+                  {(result.name || result.age || result.sex) && (
+                    <Paper
+                      sx={{
+                        p: 2,
+                        mb: 3,
+                        backgroundColor: "grey.50",
+                        borderRadius: 2,
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        color="text.secondary"
+                        gutterBottom
+                        sx={{ fontWeight: 600 }}
+                      >
+                        Patient Information
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {result.name && (
+                          <Grid item xs={12} sm={4}>
+                            <Typography variant="body2" color="text.secondary">
+                              Name
+                            </Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                              {result.name}
+                            </Typography>
+                          </Grid>
+                        )}
+                        {result.age && (
+                          <Grid item xs={6} sm={4}>
+                            <Typography variant="body2" color="text.secondary">
+                              Age
+                            </Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                              {result.age} years
+                            </Typography>
+                          </Grid>
+                        )}
+                        {result.sex && (
+                          <Grid item xs={6} sm={4}>
+                            <Typography variant="body2" color="text.secondary">
+                              Sex
+                            </Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                              {result.sex}
+                            </Typography>
+                          </Grid>
+                        )}
+                      </Grid>
+                    </Paper>
+                  )}
+
                   {/* Prediction Result */}
                   <Paper
                     sx={{
