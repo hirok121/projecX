@@ -47,6 +47,9 @@ class Disease(Base):
         JSON, nullable=False, default=list
     )  # Must contain only: MRI, CT, X-Ray, Tabular
 
+    # Blog link for detailed disease information
+    blog_link = Column(String(500), nullable=True)
+
     # Valid modality values from ModalityType enum
     VALID_MODALITIES = {m.value for m in ModalityType}
 
@@ -85,6 +88,7 @@ class Disease(Base):
             "category": self.category,
             "storage_path": self.storage_path,
             "available_modalities": self.available_modalities or [],
+            "blog_link": self.blog_link,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,

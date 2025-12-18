@@ -225,7 +225,7 @@ function NavBar() {
             >
               <Button
                 component={LinkBehavior}
-                to="/login"
+                to="/signin"
                 fullWidth
                 onClick={onDrawerClose}
                 startIcon={<LoginIcon />}
@@ -244,11 +244,11 @@ function NavBar() {
                   },
                 }}
               >
-                Login
+                SignIn
               </Button>
               <Button
                 component={LinkBehavior}
-                to="/register"
+                to="/signup"
                 fullWidth
                 onClick={onDrawerClose}
                 startIcon={<PersonAddIcon />}
@@ -265,7 +265,7 @@ function NavBar() {
                   },
                 }}
               >
-                Register
+                SignUp
               </Button>
             </Box>
           </>

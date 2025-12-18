@@ -42,6 +42,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "@mui/material/styles";
 import { DeepMedIcon } from "../ui/CustomIcons";
+import logger from "../../utils/logger";
 
 function AdminNavbar() {
   const { user, logout, loading } = useAuth();

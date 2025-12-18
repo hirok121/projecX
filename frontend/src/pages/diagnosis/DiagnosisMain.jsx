@@ -4,13 +4,13 @@ import {
   Typography,
   TextField,
   Box,
-  Grid,
   Chip,
   InputAdornment,
   CircularProgress,
   Pagination,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import { useNavigate } from "react-router-dom";
 import { diseaseAPI } from "../../services/diseaseAPI";
 import DiseaseCard from "../../components/diagnosis/DiseaseCard";
 import NavBar from "../../components/layout/NavBar";
@@ -19,6 +19,7 @@ import { DIAGNOSIS_CATEGORIES } from "../../const/disease";
 import logger from "../../utils/logger";
 
 function DiagnosisMain() {
+  const navigate = useNavigate();
   const [diseases, setDiseases] = useState([]);
   const [filteredDiseases, setFilteredDiseases] = useState([]);
   const [search, setSearch] = useState("");
@@ -29,14 +30,6 @@ function DiagnosisMain() {
 
   const categories = DIAGNOSIS_CATEGORIES;
 
-  useEffect(() => {
-    fetchDiseases();
-  }, []);
-
-  useEffect(() => {
-    filterDiseases();
-    setPage(1); // Reset to first page when filters change
-  }, [search, category, diseases]);
 
   const fetchDiseases = async () => {
     try {
@@ -74,6 +67,16 @@ function DiagnosisMain() {
     setFilteredDiseases(filtered);
   };
 
+    useEffect(() => {
+    fetchDiseases();
+  }, []);
+
+  useEffect(() => {
+    filterDiseases();
+    setPage(1); // Reset to first page when filters change
+  }, [search, category, diseases, filterDiseases]);
+
+
   const handleCategoryChange = (selectedCategory) => {
     setCategory(selectedCategory);
   };
@@ -81,6 +84,10 @@ function DiagnosisMain() {
   const handlePageChange = (event, value) => {
     setPage(value);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDiseaseClick = (disease) => {
+    navigate(`/diagnosis/${disease.id}/modality`);
   };
 
   // Paginate filtered diseases
@@ -202,7 +209,10 @@ function DiagnosisMain() {
                   minWidth: 0,
                 }}
               >
-                <DiseaseCard disease={disease} />
+                <DiseaseCard 
+                  disease={disease} 
+                  onClick={handleDiseaseClick}
+                />
               </Box>
             ))}
           </Box>

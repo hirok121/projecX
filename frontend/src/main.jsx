@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import "./index.css";
+import logger from "./utils/logger.js";
 
 // Error boundary component
 export class ErrorBoundary extends React.Component {
@@ -17,7 +18,7 @@ export class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("Error caught by boundary:", error, errorInfo);
+    logger.error("Error caught by boundary:", error, errorInfo);
   }
 
   render() {

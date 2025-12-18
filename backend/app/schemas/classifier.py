@@ -16,7 +16,8 @@ class ClassifierBase(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     authors: Optional[str] = None
-    blog_link: Optional[str] = None
+    blog_link: Optional[str] = Field(None, max_length=500)
+    paper_link: Optional[str] = Field(None, max_length=500)
     model_type: Optional[str] = None
     required_features: Optional[List[str]] = None
     accuracy: Optional[float] = Field(None, ge=0, le=1)
@@ -39,7 +40,8 @@ class ClassifierUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     authors: Optional[str] = None
-    blog_link: Optional[str] = None
+    blog_link: Optional[str] = Field(None, max_length=500)
+    paper_link: Optional[str] = Field(None, max_length=500)
     model_type: Optional[str] = None
     required_features: Optional[List[str]] = None
     accuracy: Optional[float] = Field(None, ge=0, le=1)
@@ -56,6 +58,8 @@ class ClassifierResponse(ClassifierBase):
     id: int
     model_path: str
     disease_name: Optional[str] = None
+    blog_link: Optional[str] = Field(None, max_length=500)
+    paper_link: Optional[str] = Field(None, max_length=500)
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None

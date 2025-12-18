@@ -46,6 +46,7 @@ class DiseaseService:
             description=disease_data.description,
             category=disease_data.category,
             available_modalities=disease_data.available_modalities,
+            blog_link=disease_data.blog_link,
         )
 
         try:
@@ -126,6 +127,9 @@ class DiseaseService:
 
         if disease_data.available_modalities is not None:
             disease.available_modalities = disease_data.available_modalities
+
+        if disease_data.blog_link is not None:
+            disease.blog_link = disease_data.blog_link
 
         if disease_data.is_active is not None:
             disease.is_active = disease_data.is_active

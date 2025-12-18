@@ -33,6 +33,7 @@ class Classifier(Base):
     description = Column(Text, nullable=True)
     authors = Column(String(255), nullable=True)
     blog_link = Column(String(500), nullable=True)
+    paper_link = Column(String(500), nullable=True)
 
     # Disease association
     disease_id = Column(Integer, ForeignKey("diseases.id"), nullable=False, index=True)
@@ -88,6 +89,7 @@ class Classifier(Base):
             "description": self.description,
             "authors": self.authors,
             "blog_link": self.blog_link,
+            "paper_link": self.paper_link,
             "disease_id": self.disease_id,
             "disease_name": self.disease.name if self.disease else None,
             "modality": self.modality.value if self.modality else None,

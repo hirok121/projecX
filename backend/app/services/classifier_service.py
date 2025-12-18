@@ -58,6 +58,8 @@ class ClassifierService:
             disease_id=classifier_data.disease_id,
             modality=modality_enum,
             description=classifier_data.description,
+            blog_link=classifier_data.blog_link,
+            paper_link=classifier_data.paper_link,
             model_type=classifier_data.model_type,
             required_features=classifier_data.required_features,
             accuracy=classifier_data.accuracy,
@@ -210,6 +212,10 @@ class ClassifierService:
             classifier.name = classifier_data.name
         if classifier_data.description is not None:
             classifier.description = classifier_data.description
+        if classifier_data.blog_link is not None:
+            classifier.blog_link = classifier_data.blog_link
+        if classifier_data.paper_link is not None:
+            classifier.paper_link = classifier_data.paper_link
         if classifier_data.model_type is not None:
             classifier.model_type = classifier_data.model_type
         if classifier_data.required_features is not None:

@@ -14,6 +14,7 @@ class DiseaseBase(BaseModel):
     description: Optional[str] = None
     category: Optional[str] = None
     available_modalities: Optional[List[str]] = None
+    blog_link: Optional[str] = Field(None, max_length=500)
 
 
 class DiseaseCreate(DiseaseBase):
@@ -29,6 +30,7 @@ class DiseaseUpdate(BaseModel):
     description: Optional[str] = None
     category: Optional[str] = None
     available_modalities: Optional[List[str]] = None
+    blog_link: Optional[str] = Field(None, max_length=500)
     is_active: Optional[bool] = None
 
 
@@ -37,6 +39,7 @@ class DiseaseResponse(DiseaseBase):
 
     id: int
     storage_path: str
+    blog_link: Optional[str] = Field(None, max_length=500)
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None

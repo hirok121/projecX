@@ -3,11 +3,7 @@ import {
   Container,
   Typography,
   Grid,
-  Card,
-  CardContent,
   Box,
-  Checkbox,
-  Chip,
   Button,
   CircularProgress,
   Alert,
@@ -16,8 +12,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { diseaseAPI } from "../../services/diseaseAPI";
 import { classifierAPI } from "../../services/classifierAPI";
 import NavBar from "../../components/layout/NavBar";
+import ClassifierCard from "../../components/diagnosis/ClassifierCard";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import logger from "../../utils/logger";
 
 function ModelSelector() {
@@ -25,11 +21,11 @@ function ModelSelector() {
   const navigate = useNavigate();
   const [disease, setDisease] = useState(null);
   const [models, setModels] = useState([]);
-  const [selectedModels, setSelectedModels] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [diseaseId, modality]);
 
   const fetchData = async () => {
@@ -55,17 +51,10 @@ function ModelSelector() {
     }
   };
 
-  const toggleModel = (modelId) => {
-    setSelectedModels((prev) =>
-      prev.includes(modelId)
-        ? prev.filter((id) => id !== modelId)
-        : [...prev, modelId]
-    );
-  };
-
-  const handleContinue = () => {
+  const handleSelectModel = (model) => {
+    // Immediately navigate to predict page with selected model
     navigate(`/diagnosis/${diseaseId}/predict`, {
-      state: { selectedModels, modality, disease },
+      state: { selectedModel: model, modality, disease },
     });
   };
 
@@ -127,8 +116,7 @@ function ModelSelector() {
           {disease?.name} - {getModalityLabel()}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-          Choose one or more models to run predictions. Selecting multiple
-          models allows you to compare results.
+          Click on a model to proceed with your diagnosis prediction.
         </Typography>
 
         {/* No Models Available */}
@@ -142,128 +130,18 @@ function ModelSelector() {
         {/* Models Grid */}
         <Grid container spacing={3}>
           {models.map((model) => {
-            const isSelected = selectedModels.includes(model.id);
-
             return (
               <Grid item xs={12} md={6} key={model.id}>
-                <Card
-                  onClick={() => toggleModel(model.id)}
-                  sx={{
-                    border: isSelected ? 3 : 1,
-                    borderColor: isSelected ? "#10B981" : "divider",
-                    cursor: "pointer",
-                    position: "relative",
-                    transition: "all 0.3s",
-                    "&:hover": {
-                      boxShadow: 4,
-                      transform: "translateY(-4px)",
-                    },
-                    backgroundColor: isSelected ? "#ECFDF5" : "white",
-                  }}
-                >
-                  {isSelected && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 12,
-                        right: 12,
-                        color: "#10B981",
-                      }}
-                    >
-                      <CheckCircleIcon fontSize="large" />
-                    </Box>
-                  )}
-
-                  <CardContent>
-                    <Box
-                      sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}
-                    >
-                      <Checkbox
-                        checked={isSelected}
-                        onChange={() => toggleModel(model.id)}
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ mt: -1 }}
-                      />
-
-                      <Box sx={{ flexGrow: 1 }}>
-                        {/* Model Name */}
-                        <Typography variant="h6" gutterBottom>
-                          {model.name}
-                        </Typography>
-
-                        {/* Model Description */}
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 2 }}
-                        >
-                          {model.description ||
-                            "AI-powered classification model"}
-                        </Typography>
-
-                        {/* Model Stats */}
-                        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                          {model.accuracy && (
-                            <Chip
-                              label={`Accuracy: ${(
-                                model.accuracy * 100
-                              ).toFixed(1)}%`}
-                              size="small"
-                              color="success"
-                              variant={isSelected ? "filled" : "outlined"}
-                            />
-                          )}
-                          {model.model_type && (
-                            <Chip
-                              label={model.model_type}
-                              size="small"
-                              variant="outlined"
-                              color="primary"
-                            />
-                          )}
-                        </Box>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
+                <ClassifierCard
+                  classifier={model}
+                  selected={false}
+                  onClick={handleSelectModel}
+                  showLinks={true}
+                />
               </Grid>
             );
           })}
         </Grid>
-
-        {/* Action Buttons */}
-        {models.length > 0 && (
-          <Box
-            sx={{
-              mt: 4,
-              display: "flex",
-              gap: 2,
-              justifyContent: "flex-end",
-              position: "sticky",
-              bottom: 20,
-              backgroundColor: "white",
-              p: 2,
-              borderRadius: 2,
-              boxShadow: 3,
-            }}
-          >
-            <Button variant="outlined" onClick={handleBack}>
-              Back
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleContinue}
-              disabled={selectedModels.length === 0}
-              size="large"
-              sx={{
-                backgroundColor: "#10B981",
-                "&:hover": { backgroundColor: "#059669" },
-              }}
-            >
-              Continue ({selectedModels.length} selected)
-            </Button>
-          </Box>
-        )}
       </Container>
     </Box>
   );

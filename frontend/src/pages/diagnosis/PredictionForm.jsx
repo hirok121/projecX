@@ -10,7 +10,7 @@ import {
   Alert,
   TextField,
 } from "@mui/material";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { diagnosisAPI } from "../../services/diagnosisAPI";
 import { classifierAPI } from "../../services/classifierAPI";
 import NavBar from "../../components/layout/NavBar";
@@ -20,10 +20,9 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import logger from "../../utils/logger";
 
 function PredictionForm() {
-  const { diseaseId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedModels, modality, disease } = location.state || {};
+  const { selectedModel, modality, disease } = location.state || {};
 
   const [inputData, setInputData] = useState({});
   const [imageFile, setImageFile] = useState(null);
@@ -32,32 +31,27 @@ function PredictionForm() {
   const [requiredFeatures, setRequiredFeatures] = useState([]);
   const [fetchingFeatures, setFetchingFeatures] = useState(true);
 
-  // Fetch required features from selected classifiers
+  // Fetch required features from selected classifier
   useEffect(() => {
     const fetchRequiredFeatures = async () => {
-      if (!selectedModels || selectedModels.length === 0) {
+      if (!selectedModel) {
         setFetchingFeatures(false);
         return;
       }
 
       try {
         setFetchingFeatures(true);
-        const allFeatures = new Set();
 
-        // Fetch each classifier and collect their required_features
-        for (const modelId of selectedModels) {
-          const classifier = await classifierAPI.getClassifier(modelId);
-          if (
-            classifier.required_features &&
-            Array.isArray(classifier.required_features)
-          ) {
-            classifier.required_features.forEach((feature) =>
-              allFeatures.add(feature)
-            );
-          }
+        // Fetch the classifier and get its required_features
+        const classifier = await classifierAPI.getClassifier(selectedModel.id);
+        if (
+          classifier.required_features &&
+          Array.isArray(classifier.required_features)
+        ) {
+          setRequiredFeatures(classifier.required_features);
+        } else {
+          setRequiredFeatures([]);
         }
-
-        setRequiredFeatures(Array.from(allFeatures));
       } catch (err) {
         logger.error("Failed to fetch required features:", err);
         setError("Failed to load input fields. Please try again.");
@@ -67,16 +61,15 @@ function PredictionForm() {
     };
 
     fetchRequiredFeatures();
-  }, [selectedModels]);
+  }, [selectedModel]);
 
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // The backend currently only supports one classifier at a time
-      // Use the first selected classifier
-      const classifierId = selectedModels[0];
+      // Use the selected classifier
+      const classifierId = selectedModel.id;
 
       if (modality === "tabular") {
         // For tabular data, send as JSON
@@ -138,7 +131,7 @@ function PredictionForm() {
     setInputData({ ...inputData, [field]: value });
   };
 
-  if (!disease || !selectedModels) {
+  if (!disease || !selectedModel) {
     return (
       <Box sx={{ backgroundColor: "#F0F4F8", minHeight: "100vh" }}>
         <NavBar />
@@ -296,12 +289,12 @@ function PredictionForm() {
             </Paper>
           </Grid>
 
-          {/* Sidebar - Selected Models Summary */}
+          {/* Sidebar - Selected Model Summary */}
           <Grid item xs={12} md={4}>
             <PredictionSummary
               disease={disease}
               modality={modality}
-              selectedModelIds={selectedModels}
+              selectedModelIds={[selectedModel.id]}
             />
           </Grid>
         </Grid>

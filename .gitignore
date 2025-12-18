@@ -8,3 +8,4 @@ start.sh
 /plans
 **/.env.prod
 /docs
+/.kiro
