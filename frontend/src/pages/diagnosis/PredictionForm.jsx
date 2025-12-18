@@ -16,6 +16,7 @@ import ImageUploadForm from "../../components/diagnosis/ImageUploadForm";
 import ClassifierInfoCard from "../../components/diagnosis/ClassifierInfoCard";
 import PatientInfoSection from "../../components/diagnosis/PatientInfoSection";
 import ClinicalDataSection from "../../components/diagnosis/ClinicalDataSection";
+import DiagnosisResultDialog from "../../components/diagnosis/DiagnosisResultDialog";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import logger from "../../utils/logger";
 
@@ -37,6 +38,10 @@ function PredictionForm() {
   const [patientName, setPatientName] = useState("");
   const [patientAge, setPatientAge] = useState("");
   const [patientSex, setPatientSex] = useState("");
+
+  // Dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [diagnosisResponse, setDiagnosisResponse] = useState(null);
 
   // Fetch classifier data including features and metadata
   useEffect(() => {
@@ -96,11 +101,10 @@ function PredictionForm() {
 
         const response = await diagnosisAPI.predict(diagnosisData);
 
-        // Navigate to results page
+        // Show dialog with response
         if (response && response.id) {
-          navigate(`/diagnosis/${response.id}`, {
-            state: { diagnosis: response, disease, modality },
-          });
+          setDiagnosisResponse(response);
+          setDialogOpen(true);
         }
       } else {
         // For image modalities - not yet implemented
@@ -117,6 +121,16 @@ function PredictionForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoHome = () => {
+    setDialogOpen(false);
+    navigate("/");
+  };
+
+  const handleNewDiagnosis = () => {
+    setDialogOpen(false);
+    navigate("/diagnosis");
   };
 
   const handleBack = () => {
@@ -291,6 +305,14 @@ function PredictionForm() {
               </Box>
             </Paper>
       </Container>
+
+      {/* Result Dialog */}
+      <DiagnosisResultDialog
+        open={dialogOpen}
+        response={diagnosisResponse}
+        onGoHome={handleGoHome}
+        onNewDiagnosis={handleNewDiagnosis}
+      />
     </Box>
   );
 }
