@@ -15,8 +15,8 @@ function TabularFileUploadStep({
   onFileChange,
   extractedFeatures,
   onFeaturesExtracted,
-  classifierId,
   onNext,
+  onBack,
   onCancel,
   isEditMode,
 }) {
@@ -34,14 +34,14 @@ function TabularFileUploadStep({
 
   const allFilesSelected = fileTypes.every((type) => modelFiles[type.key] !== null);
 
-  const handleUploadFiles = async () => {
-    if (!classifierId) {
-      setUploadError("Classifier ID is required to upload files");
+  const handleExtractFeatures = async () => {
+    if (!allFilesSelected) {
+      setUploadError("Please select all 5 files before extracting features");
       return;
     }
 
-    if (!allFilesSelected) {
-      setUploadError("Please select all 5 files before uploading");
+    if (!modelFiles.features_file) {
+      setUploadError("features.pkl file is required to extract features");
       return;
     }
 
@@ -49,23 +49,27 @@ function TabularFileUploadStep({
       setUploading(true);
       setUploadError("");
       
-      // Upload files - features are automatically extracted
-      const result = await classifierAPI.uploadModelFiles(classifierId, modelFiles);
+      // Create a temporary FormData to extract features
+      const formData = new FormData();
+      formData.append("features_file", modelFiles.features_file);
+      
+      // Call backend to extract features from the file
+      const response = await classifierAPI.extractFeaturesFromFile(formData);
       
       // Update extracted features from response
-      onFeaturesExtracted(result.extracted_features || []);
+      onFeaturesExtracted(response.features || []);
       setUploadSuccess(true);
     } catch (error) {
       setUploadError(
-        error.response?.data?.detail || "Failed to upload files. Please try again."
+        error.response?.data?.detail || "Failed to extract features. Please try again."
       );
     } finally {
       setUploading(false);
     }
   };
 
-  // In edit mode, can skip without uploading. In create mode, must upload.
-  const canProceed = isEditMode || (uploadSuccess && extractedFeatures.length > 0);
+  // Can proceed if files are selected and features extracted (or in edit mode)
+  const canProceed = isEditMode || (allFilesSelected && uploadSuccess && extractedFeatures.length > 0);
 
   return (
     <Box>
@@ -75,7 +79,7 @@ function TabularFileUploadStep({
 
       <Typography variant="body2" sx={{ mb: 3, color: "#6B7280" }}>
         Select all 5 pickle files required for the tabular classifier. Features will be
-        automatically extracted from features.pkl when you upload.
+        automatically extracted from features.pkl. Files will be uploaded when you complete the wizard.
       </Typography>
 
       {uploadError && (
@@ -154,8 +158,8 @@ function TabularFileUploadStep({
           <Box sx={{ mt: 3, textAlign: "center" }}>
             <Button
               variant="contained"
-              onClick={handleUploadFiles}
-              disabled={uploading || !classifierId}
+              onClick={handleExtractFeatures}
+              disabled={uploading}
               sx={{
                 backgroundColor: "#10B981",
                 "&:hover": { backgroundColor: "#059669" },
@@ -164,17 +168,12 @@ function TabularFileUploadStep({
               {uploading ? (
                 <>
                   <CircularProgress size={20} sx={{ mr: 1, color: "white" }} />
-                  Uploading Files & Extracting Features...
+                  Extracting Features...
                 </>
               ) : (
-                "Upload Files & Extract Features"
+                "Extract Features"
               )}
             </Button>
-            {!classifierId && (
-              <Typography variant="caption" sx={{ display: "block", mt: 1, color: "#EF4444" }}>
-                Please save basic info first before uploading files
-              </Typography>
-            )}
           </Box>
         )}
       </Box>
@@ -210,32 +209,66 @@ function TabularFileUploadStep({
       )}
 
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-        <Button 
-          onClick={onCancel}
-          variant="outlined"
-          sx={{ 
-            color: "#6B7280",
-            borderColor: "#D1D5DB",
-            "&:hover": {
-              borderColor: "#9CA3AF",
-              backgroundColor: "#F9FAFB"
-            }
-          }}
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          onClick={onNext}
-          disabled={!canProceed}
-          sx={{
-            backgroundColor: "#10B981",
-            "&:hover": { backgroundColor: "#059669" },
-            "&:disabled": { backgroundColor: "#D1D5DB" },
-          }}
-        >
-          {isEditMode ? "Skip / Next" : "Submit & Next"}
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button 
+            onClick={onBack}
+            variant="outlined"
+            sx={{ 
+              color: "#6B7280",
+              borderColor: "#D1D5DB",
+              "&:hover": {
+                borderColor: "#9CA3AF",
+                backgroundColor: "#F9FAFB"
+              }
+            }}
+          >
+            Back
+          </Button>
+          <Button 
+            onClick={onCancel}
+            variant="outlined"
+            sx={{ 
+              color: "#6B7280",
+              borderColor: "#D1D5DB",
+              "&:hover": {
+                borderColor: "#9CA3AF",
+                backgroundColor: "#F9FAFB"
+              }
+            }}
+          >
+            Cancel
+          </Button>
+        </Box>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          {isEditMode && (
+            <Button
+              variant="outlined"
+              onClick={onNext}
+              sx={{
+                color: "#10B981",
+                borderColor: "#10B981",
+                "&:hover": { 
+                  borderColor: "#059669",
+                  backgroundColor: "#ECFDF5"
+                },
+              }}
+            >
+              Skip
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            onClick={onNext}
+            disabled={!canProceed}
+            sx={{
+              backgroundColor: "#10B981",
+              "&:hover": { backgroundColor: "#059669" },
+              "&:disabled": { backgroundColor: "#D1D5DB" },
+            }}
+          >
+            Next
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

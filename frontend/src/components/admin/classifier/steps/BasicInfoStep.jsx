@@ -21,6 +21,7 @@ function BasicInfoStep({
   onChange,
   diseases,
   onNext,
+  onBack,
   onCancel,
   isEditMode,
 }) {
@@ -353,6 +354,22 @@ function BasicInfoStep({
           * Required fields must be filled to proceed
         </Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
+          {onBack && (
+            <Button 
+              onClick={onBack} 
+              variant="outlined"
+              sx={{ 
+                color: "#6B7280",
+                borderColor: "#D1D5DB",
+                "&:hover": {
+                  borderColor: "#9CA3AF",
+                  backgroundColor: "#F9FAFB"
+                }
+              }}
+            >
+              Back
+            </Button>
+          )}
           <Button 
             onClick={onCancel} 
             variant="outlined"
@@ -382,7 +399,7 @@ function BasicInfoStep({
               fontWeight: 600
             }}
           >
-            Submit & Next
+            Next
           </Button>
         </Box>
       </Box>

@@ -8,16 +8,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress,
 } from "@mui/material";
 import { CloudUpload, CheckCircle } from "@mui/icons-material";
-import { classifierAPI } from "../../../../services/classifierAPI";
 
-function ImageFileUploadStep({ imageModelFile, onFileChange, classifierId, onNext, onCancel, isEditMode }) {
+function ImageFileUploadStep({ imageModelFile, onFileChange, onNext, onBack, onCancel, isEditMode }) {
   const [framework, setFramework] = useState("tensorflow");
   const [uploadError, setUploadError] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const frameworkOptions = [
     { value: "tensorflow", label: "TensorFlow/Keras", extensions: ".h5,.keras" },
@@ -48,36 +44,8 @@ function ImageFileUploadStep({ imageModelFile, onFileChange, classifierId, onNex
     }
   };
 
-  const handleUploadModel = async () => {
-    if (!classifierId) {
-      setUploadError("Classifier ID is required to upload model");
-      return;
-    }
-
-    if (!imageModelFile) {
-      setUploadError("Please select a model file before uploading");
-      return;
-    }
-
-    try {
-      setUploading(true);
-      setUploadError("");
-      
-      // Upload image model file
-      await classifierAPI.uploadImageModel(classifierId, imageModelFile);
-      
-      setUploadSuccess(true);
-    } catch (error) {
-      setUploadError(
-        error.response?.data?.detail || "Failed to upload model. Please try again."
-      );
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // In edit mode, can skip without uploading. In create mode, must upload.
-  const canProceed = isEditMode || uploadSuccess;
+  // In edit mode, can skip without selecting file. In create mode, must select file.
+  const canProceed = isEditMode || imageModelFile !== null;
 
   return (
     <Box>
@@ -86,19 +54,13 @@ function ImageFileUploadStep({ imageModelFile, onFileChange, classifierId, onNex
       </Typography>
 
       <Typography variant="body2" sx={{ mb: 3, color: "#6B7280" }}>
-        Upload your trained image classification model. Select the framework and upload
-        the corresponding model file.
+        Select your trained image classification model. Choose the framework and select
+        the corresponding model file. The file will be uploaded when you complete the wizard.
       </Typography>
 
       {uploadError && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setUploadError("")}>
           {uploadError}
-        </Alert>
-      )}
-
-      {uploadSuccess && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          Model uploaded successfully!
         </Alert>
       )}
 
@@ -163,7 +125,7 @@ function ImageFileUploadStep({ imageModelFile, onFileChange, classifierId, onNex
                 fontSize: "1rem",
               }}
             >
-              {imageModelFile ? "Change Model File" : "Upload Model File"}
+              {imageModelFile ? "Change Model File" : "Select Model File"}
             </Button>
           </label>
 
@@ -186,68 +148,74 @@ function ImageFileUploadStep({ imageModelFile, onFileChange, classifierId, onNex
         </Box>
       </Box>
 
-      {imageModelFile && !uploadSuccess && (
-        <Box sx={{ mt: 3, textAlign: "center" }}>
-          <Button
-            variant="contained"
-            onClick={handleUploadModel}
-            disabled={uploading || !classifierId}
-            sx={{
-              backgroundColor: "#10B981",
-              "&:hover": { backgroundColor: "#059669" },
-            }}
-          >
-            {uploading ? (
-              <>
-                <CircularProgress size={20} sx={{ mr: 1, color: "white" }} />
-                Uploading Model...
-              </>
-            ) : (
-              "Upload Model"
-            )}
-          </Button>
-          {!classifierId && (
-            <Typography variant="caption" sx={{ display: "block", mt: 1, color: "#EF4444" }}>
-              Please save basic info first before uploading files
-            </Typography>
-          )}
-        </Box>
-      )}
-
       <Alert severity="info" sx={{ mb: 3 }}>
         <Typography variant="body2">
           <strong>Note:</strong> Make sure your model file is compatible with the selected
-          framework. You'll configure the model details in the next step.
+          framework. The file will be uploaded when you complete the wizard.
         </Typography>
       </Alert>
 
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-        <Button 
-          onClick={onCancel}
-          variant="outlined"
-          sx={{ 
-            color: "#6B7280",
-            borderColor: "#D1D5DB",
-            "&:hover": {
-              borderColor: "#9CA3AF",
-              backgroundColor: "#F9FAFB"
-            }
-          }}
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          onClick={onNext}
-          disabled={!canProceed}
-          sx={{
-            backgroundColor: "#10B981",
-            "&:hover": { backgroundColor: "#059669" },
-            "&:disabled": { backgroundColor: "#D1D5DB" },
-          }}
-        >
-          {isEditMode ? "Skip / Next" : "Submit & Next"}
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button 
+            onClick={onBack}
+            variant="outlined"
+            sx={{ 
+              color: "#6B7280",
+              borderColor: "#D1D5DB",
+              "&:hover": {
+                borderColor: "#9CA3AF",
+                backgroundColor: "#F9FAFB"
+              }
+            }}
+          >
+            Back
+          </Button>
+          <Button 
+            onClick={onCancel}
+            variant="outlined"
+            sx={{ 
+              color: "#6B7280",
+              borderColor: "#D1D5DB",
+              "&:hover": {
+                borderColor: "#9CA3AF",
+                backgroundColor: "#F9FAFB"
+              }
+            }}
+          >
+            Cancel
+          </Button>
+        </Box>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          {isEditMode && (
+            <Button
+              variant="outlined"
+              onClick={onNext}
+              sx={{
+                color: "#10B981",
+                borderColor: "#10B981",
+                "&:hover": { 
+                  borderColor: "#059669",
+                  backgroundColor: "#ECFDF5"
+                },
+              }}
+            >
+              Skip
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            onClick={onNext}
+            disabled={!canProceed}
+            sx={{
+              backgroundColor: "#10B981",
+              "&:hover": { backgroundColor: "#059669" },
+              "&:disabled": { backgroundColor: "#D1D5DB" },
+            }}
+          >
+            Next
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

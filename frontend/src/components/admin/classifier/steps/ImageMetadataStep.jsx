@@ -7,7 +7,10 @@ import {
   TextField,
   Paper,
   Chip,
-  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { Add, Close } from "@mui/icons-material";
 import { useState } from "react";
@@ -16,14 +19,15 @@ import AccuracyMetricsForm from "../components/AccuracyMetricsForm";
 function ImageMetadataStep({
   formData,
   onChange,
-  classifierId,
   onSubmit,
+  onBack,
   onCancel,
   loading,
   isEditMode,
 }) {
   const [newLabel, setNewLabel] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   const classLabels = formData.classifier_config?.class_labels || [];
 
@@ -62,15 +66,12 @@ function ImageMetadataStep({
     onChange(metrics);
   };
 
-  const handleSubmit = async () => {
-    // Confirmation prompt
-    const confirmed = window.confirm(
-      "Are you sure you want to create this classifier? This will save all the information and files you've uploaded."
-    );
-    
-    if (!confirmed) {
-      return;
-    }
+  const handleSubmitClick = () => {
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setConfirmDialogOpen(false);
     
     try {
       setSubmitError("");
@@ -80,17 +81,25 @@ function ImageMetadataStep({
         classifier_config: formData.classifier_config || {},
         accuracy: formData.accuracy ? parseFloat(formData.accuracy) : null,
         auc_roc: formData.auc_roc ? parseFloat(formData.auc_roc) : null,
-        sensitivity: formData.sensitivity ? parseFloat(formData.sensitivity) : null,
-        specificity: formData.specificity ? parseFloat(formData.specificity) : null,
+        sensitivity: formData.sensitivity
+          ? parseFloat(formData.sensitivity)
+          : null,
+        specificity: formData.specificity
+          ? parseFloat(formData.specificity)
+          : null,
         training_date: formData.training_date || null,
-        training_samples: formData.training_samples ? parseInt(formData.training_samples) : null,
+        training_samples: formData.training_samples
+          ? parseInt(formData.training_samples)
+          : null,
       };
       
       // Call parent submit with metadata
       await onSubmit(metadata, false); // false = not tabular (image)
     } catch (error) {
       setSubmitError(
-        error.response?.data?.detail || error.message || "Failed to save metadata. Please try again."
+        error.response?.data?.detail ||
+          error.message ||
+          "Failed to save metadata. Please try again."
       );
     }
   };
@@ -239,42 +248,107 @@ function ImageMetadataStep({
       </Alert>
 
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-        <Button 
-          onClick={onCancel} 
-          disabled={loading}
-          variant="outlined"
-          sx={{ 
-            color: "#6B7280",
-            borderColor: "#D1D5DB",
-            "&:hover": {
-              borderColor: "#9CA3AF",
-              backgroundColor: "#F9FAFB"
-            }
-          }}
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={loading}
-          sx={{
-            backgroundColor: "#10B981",
-            "&:hover": { backgroundColor: "#059669" },
-            "&:disabled": { backgroundColor: "#D1D5DB" },
-            px: 4,
-          }}
-        >
-          {loading ? (
-            <>
-              <CircularProgress size={20} sx={{ mr: 1, color: "white" }} />
-              {isEditMode ? "Updating..." : "Creating..."}
-            </>
-          ) : (
-            <>{isEditMode ? "Update Classifier" : "Create Classifier"}</>
-          )}
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button 
+            onClick={onBack}
+            disabled={loading}
+            variant="outlined"
+            sx={{ 
+              color: "#6B7280",
+              borderColor: "#D1D5DB",
+              "&:hover": {
+                borderColor: "#9CA3AF",
+                backgroundColor: "#F9FAFB"
+              }
+            }}
+          >
+            Back
+          </Button>
+          <Button 
+            onClick={onCancel} 
+            disabled={loading}
+            variant="outlined"
+            sx={{ 
+              color: "#6B7280",
+              borderColor: "#D1D5DB",
+              "&:hover": {
+                borderColor: "#9CA3AF",
+                backgroundColor: "#F9FAFB"
+              }
+            }}
+          >
+            Cancel
+          </Button>
+        </Box>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleSubmitClick}
+            disabled={loading}
+            sx={{
+              backgroundColor: "#10B981",
+              "&:hover": { backgroundColor: "#059669" },
+              "&:disabled": { backgroundColor: "#D1D5DB" },
+              px: 4,
+            }}
+          >
+            {loading ? (
+              <>
+                <CircularProgress size={20} sx={{ mr: 1, color: "white" }} />
+                {isEditMode ? "Updating..." : "Creating..."}
+              </>
+            ) : (
+              <>{isEditMode ? "Update Classifier" : "Create Classifier"}</>
+            )}
+          </Button>
+        </Box>
       </Box>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialogOpen}
+        onClose={() => setConfirmDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ color: "#2C3E50", fontWeight: 600 }}>
+          {isEditMode ? "Update Classifier?" : "Create Classifier?"}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ color: "#6B7280" }}>
+            {isEditMode
+              ? "Are you sure you want to update this classifier? This will save all changes you've made."
+              : "Are you sure you want to create this classifier? This will save all the information and files you've uploaded."}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button
+            onClick={() => setConfirmDialogOpen(false)}
+            variant="outlined"
+            sx={{
+              color: "#6B7280",
+              borderColor: "#D1D5DB",
+              "&:hover": {
+                borderColor: "#9CA3AF",
+                backgroundColor: "#F9FAFB",
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmSubmit}
+            variant="contained"
+            sx={{
+              backgroundColor: "#10B981",
+              "&:hover": { backgroundColor: "#059669" },
+              px: 3,
+            }}
+          >
+            {isEditMode ? "Yes, Update" : "Yes, Create"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

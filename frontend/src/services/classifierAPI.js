@@ -254,4 +254,27 @@ export const classifierAPI = {
       throw error;
     }
   },
+
+  /**
+   * Extract features from a features.pkl file without requiring a classifier ID (admin only)
+   * @param {FormData} formData - FormData containing features_file
+   * @returns {Promise<{features: string[], count: number}>} Extracted features
+   */
+  extractFeaturesFromFile: async (formData) => {
+    try {
+      const response = await api.post(
+        "/classifiers/extract-features-from-file",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      logger.error("Error extracting features from file:", error);
+      throw error;
+    }
+  },
 };

@@ -41,6 +41,41 @@ def create_classifier(classifier_data: ClassifierCreate, db: Session = Depends(g
     return ClassifierService.create_classifier(db=db, classifier_data=classifier_data)
 
 
+@router.post("/extract-features-from-file")
+@track_endpoint_performance("classifier", "extract_features_from_file")
+def extract_features_from_file(
+    features_file: UploadFile = File(...),
+):
+    """
+    Extract features from a features.pkl file without requiring a classifier ID.
+    
+    This endpoint is used during the wizard to preview features before creating the classifier.
+    
+    Args:
+        features_file: The features.pkl file
+        
+    Returns:
+        Dict with extracted features and count
+    """
+    log_endpoint_activity(
+        "classifier",
+        "extract_features_from_file",
+        additional_info={"filename": features_file.filename},
+    )
+
+    if not features_file.filename.endswith(".pkl"):
+        raise HTTPException(
+            status_code=400, detail="File must be a .pkl file"
+        )
+
+    result = ClassifierService.extract_features_from_file(features_file)
+    
+    return {
+        "features": result["features"],
+        "count": result["count"],
+    }
+
+
 @router.post("/{classifier_id}/upload-model-files")
 @track_endpoint_performance("classifier", "upload_files")
 def upload_model_files(

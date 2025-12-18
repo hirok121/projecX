@@ -21,6 +21,8 @@ function ClassifierWizard({
   onSubmit,
   loading,
 }) {
+  const [imageModelFile, setImageModelFile] = useState(null);
+  const [extractedFeatures, setExtractedFeatures] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     name: "",
@@ -114,9 +116,6 @@ function ClassifierWizard({
     class_file: null,
   });
 
-  const [imageModelFile, setImageModelFile] = useState(null);
-  const [extractedFeatures, setExtractedFeatures] = useState([]);
-
   const isTabular = formData.modality === "Tabular";
   const isEditMode = !!classifier;
 
@@ -126,38 +125,58 @@ function ClassifierWizard({
     isTabular ? "Feature Metadata & Metrics" : "Configuration & Metrics",
   ];
 
-  const handleNext = async () => {
-    // If moving from step 0 to step 1 and not editing, create the classifier first
-    if (activeStep === 0 && !isEditMode && !createdClassifierId) {
-      try {
-        setSubmitLoading(true);
-        const { classifierAPI } = await import("../../../services/classifierAPI");
-        
-        const basicData = {
-          name: formData.name,
-          title: formData.title,
-          description: formData.description,
-          disease_id: parseInt(formData.disease_id),
-          modality: formData.modality,
-          model_type: formData.model_type,
-          version: formData.version,
-          authors: formData.authors,
-          blog_link: formData.blog_link,
-          paper_link: formData.paper_link,
-        };
-        
-        const newClassifier = await classifierAPI.createClassifier(basicData);
-        setCreatedClassifierId(newClassifier.id);
-      } catch (error) {
-        console.error("Failed to create classifier:", error);
-        alert("Failed to create classifier. Please try again.");
-        return;
-      } finally {
-        setSubmitLoading(false);
-      }
-    }
-    
+  const handleNext = () => {
+    // Just move to next step - no API calls until the end
     setActiveStep((prev) => prev + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prev) => prev - 1);
+  };
+
+  const handleCancel = () => {
+    // Reset form data to initial state
+    setFormData({
+      name: "",
+      title: "",
+      description: "",
+      disease_id: "",
+      modality: "",
+      model_type: "",
+      version: "",
+      authors: "",
+      blog_link: "",
+      paper_link: "",
+      required_features: [],
+      feature_metadata: {},
+      classifier_config: {},
+      accuracy: "",
+      precision: "",
+      recall: "",
+      f1_score: "",
+      auc_roc: "",
+      sensitivity: "",
+      specificity: "",
+      training_date: "",
+      training_samples: "",
+    });
+
+    // Clear file selections
+    setModelFiles({
+      features_file: null,
+      scaler_file: null,
+      imputer_file: null,
+      model_file: null,
+      class_file: null,
+    });
+    setImageModelFile(null);
+    setExtractedFeatures([]);
+
+    // Reset to first step
+    setActiveStep(0);
+
+    // Close the wizard
+    onClose();
   };
 
   const handleFormChange = (updates) => {
@@ -168,7 +187,6 @@ function ClassifierWizard({
     setModelFiles((prev) => ({ ...prev, [fileKey]: file }));
   };
 
-  const [createdClassifierId, setCreatedClassifierId] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
 
   const handleFinalSubmit = async (metadata, isTabular) => {
@@ -176,15 +194,61 @@ function ClassifierWizard({
       setSubmitLoading(true);
       const { classifierAPI } = await import("../../../services/classifierAPI");
       
-      const classifierId = createdClassifierId || classifier?.id;
+      // Step 1: Create or update basic classifier info
+      const basicData = {
+        name: formData.name,
+        title: formData.title,
+        description: formData.description,
+        disease_id: parseInt(formData.disease_id),
+        modality: formData.modality,
+        model_type: formData.model_type,
+        version: formData.version,
+        authors: formData.authors,
+        blog_link: formData.blog_link,
+        paper_link: formData.paper_link,
+      };
       
+      let classifierId;
+      
+      if (isEditMode) {
+        // Update existing classifier
+        classifierId = classifier.id;
+        await classifierAPI.updateClassifier(classifierId, basicData);
+      } else {
+        // Create new classifier
+        const newClassifier = await classifierAPI.createClassifier(basicData);
+        classifierId = newClassifier.id;
+      }
+      
+      // Step 2: Upload model files (only if files are selected)
       if (isTabular) {
-        // Update tabular metadata
+        const allFilesSelected = Object.values(modelFiles).every(file => file !== null);
+        if (allFilesSelected) {
+          await classifierAPI.uploadModelFiles(classifierId, modelFiles);
+        }
+      } else {
+        if (imageModelFile) {
+          await classifierAPI.uploadImageModel(classifierId, imageModelFile);
+        }
+      }
+      
+      // Step 3: Update metadata
+      if (isTabular) {
         await classifierAPI.updateTabularMetadata(classifierId, metadata);
       } else {
-        // Update image metadata
         await classifierAPI.updateImageMetadata(classifierId, metadata);
       }
+      
+      // Clear file selections after successful submission
+      setModelFiles({
+        features_file: null,
+        scaler_file: null,
+        imputer_file: null,
+        model_file: null,
+        class_file: null,
+      });
+      setImageModelFile(null);
+      setExtractedFeatures([]);
       
       // Reload classifiers list
       await onSubmit();
@@ -192,7 +256,7 @@ function ClassifierWizard({
       // Close wizard
       onClose();
     } catch (error) {
-      console.error("Failed to save metadata:", error);
+      console.error("Failed to save classifier:", error);
       throw error;
     } finally {
       setSubmitLoading(false);
@@ -208,7 +272,8 @@ function ClassifierWizard({
             onChange={handleFormChange}
             diseases={diseases}
             onNext={handleNext}
-            onCancel={onClose}
+            onBack={null}
+            onCancel={handleCancel}
             isEditMode={isEditMode}
           />
         );
@@ -223,9 +288,9 @@ function ClassifierWizard({
                 setExtractedFeatures(features);
                 handleFormChange({ required_features: features });
               }}
-              classifierId={createdClassifierId || classifier?.id}
               onNext={handleNext}
-              onCancel={onClose}
+              onBack={handleBack}
+              onCancel={handleCancel}
               isEditMode={isEditMode}
             />
           );
@@ -234,9 +299,9 @@ function ClassifierWizard({
             <ImageFileUploadStep
               imageModelFile={imageModelFile}
               onFileChange={setImageModelFile}
-              classifierId={createdClassifierId || classifier?.id}
               onNext={handleNext}
-              onCancel={onClose}
+              onBack={handleBack}
+              onCancel={handleCancel}
               isEditMode={isEditMode}
             />
           );
@@ -248,9 +313,9 @@ function ClassifierWizard({
               formData={formData}
               onChange={handleFormChange}
               extractedFeatures={extractedFeatures}
-              classifierId={createdClassifierId || classifier?.id}
               onSubmit={handleFinalSubmit}
-              onCancel={onClose}
+              onBack={handleBack}
+              onCancel={handleCancel}
               loading={submitLoading}
               isEditMode={isEditMode}
             />
@@ -260,9 +325,9 @@ function ClassifierWizard({
             <ImageMetadataStep
               formData={formData}
               onChange={handleFormChange}
-              classifierId={createdClassifierId || classifier?.id}
               onSubmit={handleFinalSubmit}
-              onCancel={onClose}
+              onBack={handleBack}
+              onCancel={handleCancel}
               loading={submitLoading}
               isEditMode={isEditMode}
             />

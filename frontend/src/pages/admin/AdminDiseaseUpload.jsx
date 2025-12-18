@@ -66,7 +66,8 @@ function AdminDiseaseUpload() {
   const handleClassifierSubmit = async () => {
     // Reload classifiers after wizard completes
     await classifierManager.loadClassifiers();
-    setMessage("Classifier created successfully");
+    const isEditMode = !!classifierManager.editingClassifier;
+    setMessage(isEditMode ? "Classifier updated successfully" : "Classifier created successfully");
     setMessageType("success");
   };
 

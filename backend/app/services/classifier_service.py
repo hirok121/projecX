@@ -94,6 +94,47 @@ class ClassifierService:
             )
 
     @staticmethod
+    def extract_features_from_file(features_file: UploadFile) -> Dict[str, Any]:
+        """
+        Extract features from a features.pkl file without requiring a classifier ID.
+        
+        This is used during the wizard to preview features before creating the classifier.
+
+        Args:
+            features_file: The features.pkl UploadFile
+
+        Returns:
+            Dict with extracted features and count
+
+        Raises:
+            HTTPException: If feature extraction fails
+        """
+        import pickle
+
+        try:
+            # Read features from file
+            features_content = features_file.file.read()
+            features_file.file.seek(0)  # Reset file pointer
+            
+            # Extract features from the uploaded file
+            features = pickle.loads(features_content)
+            if not isinstance(features, list):
+                features = list(features) if hasattr(features, '__iter__') else []
+            
+            logger.info(f"✅ Extracted {len(features)} features from features.pkl")
+            
+            return {
+                "features": features,
+                "count": len(features),
+            }
+        except Exception as e:
+            logger.error(f"❌ Failed to extract features: {str(e)}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Failed to extract features from file: {str(e)}"
+            )
+
+    @staticmethod
     def upload_model_files(
         db: Session,
         classifier_id: int,
