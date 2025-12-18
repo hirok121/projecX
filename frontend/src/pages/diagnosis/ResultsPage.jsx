@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { diagnosisAPI } from "../../services/diagnosisAPI";
+import { notificationAPI } from "../../services/notificationAPI";
 import NavBar from "../../components/layout/NavBar";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -34,11 +35,42 @@ function ResultsPage() {
       setError(null);
       const response = await diagnosisAPI.getDiagnosis(predictionId);
       setDiagnosis(response);
+      
+      // Mark related notifications as read
+      await markRelatedNotificationsAsRead(predictionId);
     } catch (err) {
       logger.error("Error fetching diagnosis:", err);
       setError(err.response?.data?.detail || "Failed to load diagnosis results");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const markRelatedNotificationsAsRead = async (diagnosisId) => {
+    try {
+      // Fetch all unread notifications
+      const notifications = await notificationAPI.getNotifications({ 
+        is_read: false,
+        limit: 100 
+      });
+      
+      // Find notifications related to this diagnosis
+      const relatedNotifications = notifications.filter(
+        (n) => n.diagnosis_id === parseInt(diagnosisId)
+      );
+      
+      // Mark each related notification as read
+      for (const notification of relatedNotifications) {
+        try {
+          await notificationAPI.markAsRead(notification.id);
+          logger.info(`Marked notification ${notification.id} as read`);
+        } catch (error) {
+          logger.error(`Failed to mark notification ${notification.id} as read:`, error);
+        }
+      }
+    } catch (error) {
+      // Don't fail the page load if notification marking fails
+      logger.error("Failed to mark related notifications as read:", error);
     }
   };
 

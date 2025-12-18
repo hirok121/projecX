@@ -44,6 +44,7 @@ import LoginIcon from "@mui/icons-material/Login";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { useAuth } from "../../context/AuthContext";
 import { DeepMedIcon } from "../ui/CustomIcons";
+import NotificationBell from "../notifications/NotificationBell";
 
 // Add LinkBehavior component before menuItems
 const LinkBehavior = forwardRef((props, ref) => {
@@ -436,21 +437,7 @@ function NavBar() {
             {isAuthenticated ? (
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 {/* Notifications */}
-                <IconButton
-                  sx={{
-                    color: "#2C3E50",
-                    borderRadius: "8px",
-                    "&:hover": {
-                      backgroundColor: "#ECFDF5",
-                      transform: "scale(1.05)",
-                    },
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  <Badge badgeContent={3} color="error">
-                    <NotificationsIcon sx={{ fontSize: "1.5rem" }} />
-                  </Badge>
-                </IconButton>
+                <NotificationBell />
 
                 {/* User Profile Section with Name/Email */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

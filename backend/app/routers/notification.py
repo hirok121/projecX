@@ -29,7 +29,7 @@ def get_my_notifications(
     log_endpoint_activity(
         "notification",
         "list_notifications",
-        extra={"user_id": current_user.id, "is_read": is_read},
+        additional_info={"user_id": current_user.id, "is_read": is_read},
     )
 
     return NotificationService.get_user_notifications(
@@ -59,7 +59,7 @@ def mark_notification_read(
     log_endpoint_activity(
         "notification",
         "mark_read",
-        extra={"notification_id": notification_id, "user_id": current_user.id},
+        additional_info={"notification_id": notification_id, "user_id": current_user.id},
     )
 
     try:
