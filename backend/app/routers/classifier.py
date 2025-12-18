@@ -12,6 +12,9 @@ from app.schemas.classifier import (
     ClassifierCreate,
     ClassifierUpdate,
     ClassifierResponse,
+    ClassifierListResponse,
+    TabularMetadataUpdate,
+    ImageMetadataUpdate,
 )
 from app.core.logging import log_endpoint_activity, track_endpoint_performance
 
@@ -21,7 +24,11 @@ router = APIRouter(prefix="/classifiers", tags=["classifiers"])
 @router.post("/", response_model=ClassifierResponse)
 @track_endpoint_performance("classifier", "create")
 def create_classifier(classifier_data: ClassifierCreate, db: Session = Depends(get_db)):
-    """Create a new classifier with automatic storage directory."""
+    """
+    Create a new classifier - Step 1: Basic Information.
+    
+    Creates classifier with basic info including title, description, authors, and links.
+    """
     log_endpoint_activity(
         "classifier",
         "create_classifier",
@@ -46,10 +53,12 @@ def upload_model_files(
     db: Session = Depends(get_db),
 ):
     """
-    Upload model pickle files for a classifier.
+    Upload model pickle files for a tabular classifier - Step 2 (Tabular).
+    
+    Automatically extracts and updates required_features from features.pkl.
 
     Required files:
-    - features.pkl: Feature names
+    - features.pkl: Feature names (automatically extracted)
     - scaler.pkl: Data scaler
     - imputer.pkl: Missing data imputer
     - model.pkl: Trained ML model
@@ -76,7 +85,7 @@ def upload_model_files(
                 status_code=400, detail=f"{name} file must be a .pkl file"
             )
 
-    saved_paths = ClassifierService.upload_model_files(
+    result = ClassifierService.upload_model_files(
         db=db,
         classifier_id=classifier_id,
         features_file=features_file,
@@ -86,20 +95,134 @@ def upload_model_files(
         class_file=class_file,
     )
 
-    return {"message": "Model files uploaded successfully", "saved_files": saved_paths}
+    return {
+        "message": "Model files uploaded successfully",
+        "saved_files": result["saved_files"],
+        "extracted_features": result["extracted_features"],
+        "feature_count": result["feature_count"]
+    }
 
 
-@router.get("/", response_model=List[ClassifierResponse])
+@router.post("/{classifier_id}/upload-image-model")
+@track_endpoint_performance("classifier", "upload_image_model")
+def upload_image_model(
+    classifier_id: int,
+    model_file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    """
+    Upload single model file for image classifier - Step 2 (Image).
+
+    Supported formats:
+    - TensorFlow: .h5, .keras
+    - PyTorch: .pt, .pth
+    - ONNX: .onnx
+    """
+    log_endpoint_activity(
+        "classifier",
+        "upload_image_model",
+        additional_info={"classifier_id": classifier_id},
+    )
+
+    saved_paths = ClassifierService.upload_image_model_file(
+        db=db,
+        classifier_id=classifier_id,
+        model_file=model_file,
+    )
+
+    return {"message": "Image model file uploaded successfully", "saved_files": saved_paths}
+
+
+@router.post("/{classifier_id}/extract-features")
+@track_endpoint_performance("classifier", "extract_features")
+def extract_features(classifier_id: int, db: Session = Depends(get_db)):
+    """
+    Extract feature names from uploaded features.pkl file - Step 2 (Tabular).
+    
+    This automatically updates the classifier's required_features field.
+    """
+    log_endpoint_activity(
+        "classifier",
+        "extract_features",
+        additional_info={"classifier_id": classifier_id},
+    )
+
+    features = ClassifierService.extract_features_from_pkl(
+        db=db, classifier_id=classifier_id
+    )
+
+    return {
+        "message": "Features extracted successfully",
+        "features": features,
+        "count": len(features),
+    }
+
+
+@router.put("/{classifier_id}/tabular-metadata", response_model=ClassifierResponse)
+@track_endpoint_performance("classifier", "update_tabular_metadata")
+def update_tabular_metadata(
+    classifier_id: int,
+    metadata: TabularMetadataUpdate,
+    db: Session = Depends(get_db),
+):
+    """
+    Update tabular classifier metadata - Step 3 (Tabular).
+    
+    Updates feature metadata and performance metrics for tabular models.
+    """
+    log_endpoint_activity(
+        "classifier",
+        "update_tabular_metadata",
+        additional_info={"classifier_id": classifier_id},
+    )
+
+    return ClassifierService.update_tabular_metadata(
+        db=db, classifier_id=classifier_id, metadata=metadata
+    )
+
+
+@router.put("/{classifier_id}/image-metadata", response_model=ClassifierResponse)
+@track_endpoint_performance("classifier", "update_image_metadata")
+def update_image_metadata(
+    classifier_id: int,
+    metadata: ImageMetadataUpdate,
+    db: Session = Depends(get_db),
+):
+    """
+    Update image classifier metadata - Step 3 (Image).
+    
+    Updates model configuration and performance metrics for image models.
+    """
+    log_endpoint_activity(
+        "classifier",
+        "update_image_metadata",
+        additional_info={"classifier_id": classifier_id},
+    )
+
+    return ClassifierService.update_image_metadata(
+        db=db, classifier_id=classifier_id, metadata=metadata
+    )
+
+
+@router.get("/", response_model=List[ClassifierListResponse])
 @track_endpoint_performance("classifier", "list")
 def list_classifiers(
     disease_id: Optional[int] = None,
     modality: Optional[str] = None,
-    is_active: Optional[bool] = True,
+    is_active: Optional[bool] = None,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
 ):
-    """Get list of classifiers with optional filters."""
+    """
+    Get list of classifiers with optional filters - Summary view only.
+    
+    Returns: name, modality, description, authors, links, required_features, accuracy
+    Excludes: feature_metadata, classifier_config, detailed metrics
+    
+    Note: is_active defaults to None (returns all classifiers). 
+    Set to True for active only, False for inactive only.
+    """
     log_endpoint_activity(
         "classifier",
         "list_classifiers",
@@ -119,7 +242,11 @@ def list_classifiers(
 @router.get("/{classifier_id}", response_model=ClassifierResponse)
 @track_endpoint_performance("classifier", "get")
 def get_classifier(classifier_id: int, db: Session = Depends(get_db)):
-    """Get a specific classifier by ID."""
+    """
+    Get a specific classifier by ID - Full details.
+    
+    Returns all fields including feature_metadata, classifier_config, and all metrics.
+    """
     log_endpoint_activity(
         "classifier", "get_classifier", additional_info={"classifier_id": classifier_id}
     )
@@ -149,7 +276,16 @@ def get_classifiers_by_disease(
 def update_classifier(
     classifier_id: int, classifier_data: ClassifierUpdate, db: Session = Depends(get_db)
 ):
-    """Update a classifier."""
+    """
+    Update a classifier - Basic info only (same as create).
+    
+    Updates: name, title, description, authors, links, model_type, version, is_active
+    
+    Note: 
+    - disease_id and modality cannot be updated
+    - Use PUT /classifiers/{id}/tabular-metadata to update tabular metadata
+    - Use PUT /classifiers/{id}/image-metadata to update image metadata
+    """
     log_endpoint_activity(
         "classifier",
         "update_classifier",
@@ -159,6 +295,23 @@ def update_classifier(
     return ClassifierService.update_classifier(
         db=db, classifier_id=classifier_id, classifier_data=classifier_data
     )
+
+
+@router.patch("/{classifier_id}/toggle-active")
+@track_endpoint_performance("classifier", "toggle_active")
+def toggle_classifier_active(classifier_id: int, db: Session = Depends(get_db)):
+    """
+    Toggle classifier active status (activate/deactivate).
+    
+    Toggles the is_active field between True and False.
+    """
+    log_endpoint_activity(
+        "classifier",
+        "toggle_classifier_active",
+        additional_info={"classifier_id": classifier_id},
+    )
+
+    return ClassifierService.toggle_classifier_active(db=db, classifier_id=classifier_id)
 
 
 @router.delete("/{classifier_id}")

@@ -84,9 +84,14 @@ class DiseaseService:
         skip: int = 0,
         limit: int = 100,
         category: Optional[str] = None,
-        is_active: Optional[bool] = True,
+        is_active: Optional[bool] = None,
     ) -> List[Disease]:
-        """Get list of diseases with filters."""
+        """
+        Get list of diseases with filters.
+        
+        Args:
+            is_active: None = all diseases, True = active only, False = inactive only
+        """
         query = db.query(Disease)
 
         if is_active is not None:
@@ -144,6 +149,44 @@ class DiseaseService:
             logger.error(f"❌ Failed to update disease: {str(e)}")
             raise HTTPException(
                 status_code=500, detail=f"Failed to update disease: {str(e)}"
+            )
+
+    @staticmethod
+    def toggle_disease_active(db: Session, disease_id: int) -> "Disease":
+        """
+        Toggle disease active status (activate/deactivate).
+
+        Args:
+            db: Database session
+            disease_id: ID of disease to toggle
+
+        Returns:
+            Disease: Updated disease with toggled is_active status
+
+        Raises:
+            HTTPException: If disease not found
+        """
+        disease = db.query(Disease).filter(Disease.id == disease_id).first()
+        if not disease:
+            raise HTTPException(status_code=404, detail="Disease not found")
+
+        try:
+            # Toggle is_active status
+            disease.is_active = not disease.is_active
+            db.commit()
+            db.refresh(disease)
+
+            status = "activated" if disease.is_active else "deactivated"
+            logger.info(
+                f"✅ {status.capitalize()} disease: {disease.name} (ID: {disease.id})"
+            )
+            return disease
+
+        except Exception as e:
+            db.rollback()
+            logger.error(f"❌ Failed to toggle disease status: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to toggle disease status: {str(e)}"
             )
 
     @staticmethod

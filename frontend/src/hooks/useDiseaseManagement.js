@@ -17,6 +17,8 @@ export function useDiseaseManagement() {
   const loadDiseases = async () => {
     try {
       setLoading(true);
+      // Load ALL diseases (both active and inactive) for admin page
+      // Backend now defaults to returning all when is_active is not specified
       const data = await diseaseAPI.getDiseases();
       const diseasesData = Array.isArray(data) ? data : [];
       setDiseases(diseasesData);
@@ -101,6 +103,23 @@ export function useDiseaseManagement() {
     }
   };
 
+  const toggleActive = async (diseaseId) => {
+    try {
+      const updatedDisease = await diseaseAPI.toggleDiseaseActive(diseaseId);
+      await loadDiseases();
+      const status = updatedDisease.is_active ? "activated" : "deactivated";
+      return { 
+        success: true, 
+        message: `Disease ${status} successfully` 
+      };
+    } catch (err) {
+      return { 
+        success: false, 
+        error: "Failed to toggle disease status" 
+      };
+    }
+  };
+
   return {
     diseases,
     loading,
@@ -113,5 +132,6 @@ export function useDiseaseManagement() {
     closeDialog,
     submitDisease,
     deleteDisease,
+    toggleActive,
   };
 }

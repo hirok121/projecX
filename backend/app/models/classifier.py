@@ -61,11 +61,24 @@ class Classifier(Base):
         JSON, nullable=True
     )  # ["age", "glucose", "bmi", ...] - list of feature names
 
+    # Feature metadata (for tabular models)
+    feature_metadata = Column(
+        JSON, nullable=True
+    )  # {"age": {"unit": "years", "description": "...", "range": "0-120"}}
+
+    # Model configuration (for image models - simple)
+    classifier_config = Column(
+        JSON, nullable=True
+    )  # {"class_labels": ["Normal", "Abnormal"], "input_shape": [224, 224, 3]}
+
     # Performance metrics
     accuracy = Column(Float, nullable=True)
     precision = Column(Float, nullable=True)
     recall = Column(Float, nullable=True)
     f1_score = Column(Float, nullable=True)
+    auc_roc = Column(Float, nullable=True)
+    sensitivity = Column(Float, nullable=True)
+    specificity = Column(Float, nullable=True)
 
     # Training info
     training_date = Column(DateTime(timezone=True), nullable=True)
@@ -97,10 +110,15 @@ class Classifier(Base):
             "model_link": self.model_link,
             "model_type": self.model_type,
             "required_features": self.required_features or [],
+            "feature_metadata": self.feature_metadata or {},
+            "classifier_config": self.classifier_config or {},
             "accuracy": self.accuracy,
             "precision": self.precision,
             "recall": self.recall,
             "f1_score": self.f1_score,
+            "auc_roc": self.auc_roc,
+            "sensitivity": self.sensitivity,
+            "specificity": self.specificity,
             "training_date": (
                 self.training_date.isoformat() if self.training_date else None
             ),

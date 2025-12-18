@@ -29,12 +29,17 @@ def create_disease(disease_data: DiseaseCreate, db: Session = Depends(get_db)):
 @track_endpoint_performance("disease", "list")
 def list_diseases(
     category: Optional[str] = None,
-    is_active: Optional[bool] = True,
+    is_active: Optional[bool] = None,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
 ):
-    """Get list of diseases with optional filters."""
+    """
+    Get list of diseases with optional filters.
+    
+    Note: is_active defaults to None (returns all diseases). 
+    Set to True for active only, False for inactive only.
+    """
     log_endpoint_activity(
         "disease",
         "list_diseases",
@@ -70,6 +75,23 @@ def update_disease(
     return DiseaseService.update_disease(
         db=db, disease_id=disease_id, disease_data=disease_data
     )
+
+
+@router.patch("/{disease_id}/toggle-active")
+@track_endpoint_performance("disease", "toggle_active")
+def toggle_disease_active(disease_id: int, db: Session = Depends(get_db)):
+    """
+    Toggle disease active status (activate/deactivate).
+    
+    Toggles the is_active field between True and False.
+    """
+    log_endpoint_activity(
+        "disease",
+        "toggle_disease_active",
+        additional_info={"disease_id": disease_id},
+    )
+
+    return DiseaseService.toggle_disease_active(db=db, disease_id=disease_id)
 
 
 @router.delete("/{disease_id}")

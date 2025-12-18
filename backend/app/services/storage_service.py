@@ -164,6 +164,23 @@ class StorageService:
         return saved_paths
 
     @classmethod
+    def get_model_file_path(
+        cls, disease_storage_path: str, classifier_model_path: str, filename: str
+    ) -> str:
+        """
+        Get the full path to a specific model file.
+
+        Args:
+            disease_storage_path: UUID-based path for the disease
+            classifier_model_path: UUID-based path for the classifier
+            filename: Name of the file (e.g., 'features.pkl')
+
+        Returns:
+            str: Full path to the file
+        """
+        return str(cls.BASE_DIR / disease_storage_path / classifier_model_path / filename)
+
+    @classmethod
     def get_full_storage_path(
         cls, disease_storage_path: str, classifier_model_path: Optional[str] = None
     ) -> str:

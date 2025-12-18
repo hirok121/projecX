@@ -30,7 +30,7 @@ import {
 import { useState } from "react";
 import { MODALITY_OPTIONS } from "../../../const/disease";
 
-function ClassifierTable({ classifiers, diseases, onEdit, onDelete }) {
+function ClassifierTable({ classifiers, diseases, onEdit, onDelete, onToggleActive }) {
   const [search, setSearch] = useState("");
   const [diseaseFilter, setDiseaseFilter] = useState("all");
   const [modalityFilter, setModalityFilter] = useState("all");
@@ -261,9 +261,11 @@ function ClassifierTable({ classifiers, diseases, onEdit, onDelete }) {
                         <Typography variant="subtitle2">
                           {classifier.name}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {classifier.version || "N/A"}
-                        </Typography>
+                        {classifier.title && (
+                          <Typography variant="caption" color="text.secondary">
+                            {classifier.title}
+                          </Typography>
+                        )}
                       </TableCell>
                       <TableCell>
                         {classifier.disease_name || "N/A"}
@@ -278,7 +280,13 @@ function ClassifierTable({ classifiers, diseases, onEdit, onDelete }) {
                           }}
                         />
                       </TableCell>
-                      <TableCell>{classifier.model_type || "N/A"}</TableCell>
+                      <TableCell>
+                        {classifier.model_type || (
+                          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
+                            Not specified
+                          </Typography>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Chip
                           label={`${(classifier.accuracy * 100).toFixed(1)}%`}
@@ -287,21 +295,27 @@ function ClassifierTable({ classifiers, diseases, onEdit, onDelete }) {
                         />
                       </TableCell>
                       <TableCell>
-                        {classifier.is_active ? (
-                          <Chip
-                            icon={<CheckCircle />}
-                            label="Active"
-                            color="success"
-                            size="small"
-                          />
-                        ) : (
-                          <Chip
-                            icon={<Cancel />}
-                            label="Inactive"
-                            color="default"
-                            size="small"
-                          />
-                        )}
+                        <Tooltip title="Click to toggle status">
+                          {classifier.is_active ? (
+                            <Chip
+                              icon={<CheckCircle />}
+                              label="Active"
+                              color="success"
+                              size="small"
+                              onClick={() => onToggleActive(classifier.id)}
+                              sx={{ cursor: "pointer" }}
+                            />
+                          ) : (
+                            <Chip
+                              icon={<Cancel />}
+                              label="Inactive"
+                              color="default"
+                              size="small"
+                              onClick={() => onToggleActive(classifier.id)}
+                              sx={{ cursor: "pointer" }}
+                            />
+                          )}
+                        </Tooltip>
                       </TableCell>
                       <TableCell>
                         <Tooltip title="Edit">

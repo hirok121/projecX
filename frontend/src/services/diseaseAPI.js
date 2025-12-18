@@ -76,6 +76,21 @@ export const diseaseAPI = {
   },
 
   /**
+   * Toggle disease active status (admin only)
+   * @param {number} diseaseId - Disease ID
+   * @returns {Promise<Object>} Updated disease
+   */
+  toggleDiseaseActive: async (diseaseId) => {
+    try {
+      const response = await api.patch(`/diseases/${diseaseId}/toggle-active`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Error toggling disease ${diseaseId} status:`, error);
+      throw error;
+    }
+  },
+
+  /**
    * Delete a disease (admin only)
    * @param {number} diseaseId - Disease ID
    */

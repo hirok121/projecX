@@ -9,3 +9,4 @@ start.sh
 **/.env.prod
 /docs
 /.kiro
+**/**.md

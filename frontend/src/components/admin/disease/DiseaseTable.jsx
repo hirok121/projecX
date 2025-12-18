@@ -27,7 +27,7 @@ import {
 import { useState } from "react";
 import { CATEGORY_OPTIONS } from "../../../const/disease";
 
-function DiseaseTable({ diseases, onEdit, onDelete }) {
+function DiseaseTable({ diseases, onEdit, onDelete, onToggleActive }) {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [page, setPage] = useState(0);
@@ -195,21 +195,27 @@ function DiseaseTable({ diseases, onEdit, onDelete }) {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        {disease.is_active ? (
-                          <Chip
-                            icon={<CheckCircle />}
-                            label="Active"
-                            color="success"
-                            size="small"
-                          />
-                        ) : (
-                          <Chip
-                            icon={<Cancel />}
-                            label="Inactive"
-                            color="default"
-                            size="small"
-                          />
-                        )}
+                        <Tooltip title="Click to toggle status">
+                          {disease.is_active ? (
+                            <Chip
+                              icon={<CheckCircle />}
+                              label="Active"
+                              color="success"
+                              size="small"
+                              onClick={() => onToggleActive(disease.id)}
+                              sx={{ cursor: "pointer" }}
+                            />
+                          ) : (
+                            <Chip
+                              icon={<Cancel />}
+                              label="Inactive"
+                              color="default"
+                              size="small"
+                              onClick={() => onToggleActive(disease.id)}
+                              sx={{ cursor: "pointer" }}
+                            />
+                          )}
+                        </Tooltip>
                       </TableCell>
                       <TableCell>
                         <Tooltip title="Edit">

@@ -12,7 +12,7 @@ import AdminNavbar from "../../components/admin/AdminNavbar";
 import DiseaseTable from "../../components/admin/disease/DiseaseTable";
 import DiseaseDialog from "../../components/admin/disease/DiseaseDialog";
 import ClassifierTable from "../../components/admin/classifier/ClassifierTable";
-import ClassifierDialog from "../../components/admin/classifier/ClassifierDialog";
+import ClassifierWizard from "../../components/admin/classifier/ClassifierWizard";
 import { useDiseaseManagement } from "../../hooks/useDiseaseManagement";
 import { useClassifierManagement } from "../../hooks/useClassifierManagement";
 
@@ -27,7 +27,8 @@ function AdminDiseaseUpload() {
   useEffect(() => {
     diseaseManager.loadDiseases();
     classifierManager.loadClassifiers();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   const handleDiseaseSubmit = async () => {
     const result = await diseaseManager.submitDisease();
@@ -51,8 +52,8 @@ function AdminDiseaseUpload() {
     }
   };
 
-  const handleClassifierSubmit = async () => {
-    const result = await classifierManager.submitClassifier();
+  const handleDiseaseToggleActive = async (diseaseId) => {
+    const result = await diseaseManager.toggleActive(diseaseId);
     if (result.success) {
       setMessage(result.message);
       setMessageType("success");
@@ -62,12 +63,30 @@ function AdminDiseaseUpload() {
     }
   };
 
+  const handleClassifierSubmit = async () => {
+    // Reload classifiers after wizard completes
+    await classifierManager.loadClassifiers();
+    setMessage("Classifier created successfully");
+    setMessageType("success");
+  };
+
   const handleClassifierDelete = async (classifierId) => {
     const result = await classifierManager.deleteClassifier(classifierId);
     if (result.success) {
       setMessage(result.message);
       setMessageType("success");
     } else if (!result.cancelled) {
+      setMessage(result.error);
+      setMessageType("error");
+    }
+  };
+
+  const handleClassifierToggleActive = async (classifierId) => {
+    const result = await classifierManager.toggleActive(classifierId);
+    if (result.success) {
+      setMessage(result.message);
+      setMessageType("success");
+    } else {
       setMessage(result.error);
       setMessageType("error");
     }
@@ -193,6 +212,7 @@ function AdminDiseaseUpload() {
             diseases={diseaseManager.diseases}
             onEdit={diseaseManager.openDialog}
             onDelete={handleDiseaseDelete}
+            onToggleActive={handleDiseaseToggleActive}
           />
         )}
 
@@ -203,6 +223,7 @@ function AdminDiseaseUpload() {
             diseases={diseaseManager.diseases}
             onEdit={classifierManager.openDialog}
             onDelete={handleClassifierDelete}
+            onToggleActive={handleClassifierToggleActive}
           />
         )}
 
@@ -217,18 +238,14 @@ function AdminDiseaseUpload() {
           loading={diseaseManager.loading}
         />
 
-        {/* Classifier Dialog */}
-        <ClassifierDialog
+        {/* Classifier Wizard */}
+        <ClassifierWizard
           open={classifierManager.dialogOpen}
           onClose={classifierManager.closeDialog}
           classifier={classifierManager.editingClassifier}
-          formData={classifierManager.formData}
-          onChange={classifierManager.setFormData}
-          modelFiles={classifierManager.modelFiles}
-          onFileChange={classifierManager.updateModelFile}
+          diseases={diseaseManager.diseases}
           onSubmit={handleClassifierSubmit}
           loading={classifierManager.loading}
-          diseases={diseaseManager.diseases}
         />
       </Container>
     </Box>

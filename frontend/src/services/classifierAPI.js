@@ -83,7 +83,8 @@ export const classifierAPI = {
   },
 
   /**
-   * Upload model files for a classifier (admin only)
+   * Upload model files for a tabular classifier (admin only)
+   * Automatically extracts and updates required_features from features.pkl
    * @param {number} classifierId - Classifier ID
    * @param {Object} files - Model files
    * @param {File} files.features_file - features.pkl file
@@ -91,6 +92,7 @@ export const classifierAPI = {
    * @param {File} files.imputer_file - imputer.pkl file
    * @param {File} files.model_file - model.pkl file
    * @param {File} files.class_file - class.pkl file
+   * @returns {Promise<{message: string, saved_files: Object, extracted_features: string[], feature_count: number}>}
    */
   uploadModelFiles: async (classifierId, files) => {
     try {
@@ -118,6 +120,83 @@ export const classifierAPI = {
   },
 
   /**
+   * Upload single model file for image classifier (admin only)
+   * @param {number} classifierId - Classifier ID
+   * @param {File} modelFile - Model file (.h5, .pt, .onnx, etc.)
+   * @returns {Promise<{message: string, saved_files: Object}>}
+   */
+  uploadImageModel: async (classifierId, modelFile) => {
+    try {
+      const formData = new FormData();
+      formData.append("model_file", modelFile);
+
+      const response = await api.post(
+        `/classifiers/${classifierId}/upload-image-model`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      logger.error(`Error uploading image model for classifier ${classifierId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update tabular classifier metadata (admin only)
+   * @param {number} classifierId - Classifier ID
+   * @param {Object} metadata - Metadata to update
+   * @param {Object} metadata.feature_metadata - Feature metadata
+   * @param {number} metadata.accuracy - Accuracy
+   * @param {number} metadata.precision - Precision
+   * @param {number} metadata.recall - Recall
+   * @param {number} metadata.f1_score - F1 score
+   * @param {string} metadata.training_date - Training date
+   * @param {number} metadata.training_samples - Training samples
+   */
+  updateTabularMetadata: async (classifierId, metadata) => {
+    try {
+      const response = await api.put(
+        `/classifiers/${classifierId}/tabular-metadata`,
+        metadata
+      );
+      return response.data;
+    } catch (error) {
+      logger.error(`Error updating tabular metadata for classifier ${classifierId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update image classifier metadata (admin only)
+   * @param {number} classifierId - Classifier ID
+   * @param {Object} metadata - Metadata to update
+   * @param {Object} metadata.classifier_config - Classifier configuration
+   * @param {number} metadata.accuracy - Accuracy
+   * @param {number} metadata.auc_roc - AUC-ROC
+   * @param {number} metadata.sensitivity - Sensitivity
+   * @param {number} metadata.specificity - Specificity
+   * @param {string} metadata.training_date - Training date
+   * @param {number} metadata.training_samples - Training samples
+   */
+  updateImageMetadata: async (classifierId, metadata) => {
+    try {
+      const response = await api.put(
+        `/classifiers/${classifierId}/image-metadata`,
+        metadata
+      );
+      return response.data;
+    } catch (error) {
+      logger.error(`Error updating image metadata for classifier ${classifierId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
    * Update an existing classifier (admin only)
    * @param {number} classifierId - Classifier ID
    * @param {Object} classifierData - Classifier update data
@@ -133,6 +212,21 @@ export const classifierAPI = {
   },
 
   /**
+   * Toggle classifier active status (admin only)
+   * @param {number} classifierId - Classifier ID
+   * @returns {Promise<Object>} Updated classifier
+   */
+  toggleClassifierActive: async (classifierId) => {
+    try {
+      const response = await api.patch(`/classifiers/${classifierId}/toggle-active`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Error toggling classifier ${classifierId} status:`, error);
+      throw error;
+    }
+  },
+
+  /**
    * Delete a classifier (admin only)
    * @param {number} classifierId - Classifier ID
    */
@@ -142,6 +236,21 @@ export const classifierAPI = {
       return response.data;
     } catch (error) {
       logger.error(`Error deleting classifier ${classifierId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Extract features from uploaded features.pkl file (admin only)
+   * @param {number} classifierId - Classifier ID
+   * @returns {Promise<{features: string[], count: number}>} Extracted features
+   */
+  extractFeatures: async (classifierId) => {
+    try {
+      const response = await api.post(`/classifiers/${classifierId}/extract-features`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Error extracting features for classifier ${classifierId}:`, error);
       throw error;
     }
   },
