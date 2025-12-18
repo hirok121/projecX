@@ -79,6 +79,14 @@ function App() {
               }
             />{" "}
             <Route
+              path="/diagnosis/:predictionId"
+              element={
+                <ProtectedRoute>
+                  <LazyComponents.ResultsPage />
+                </ProtectedRoute>
+              }
+            />{" "}
+            <Route
               path="/analytics"
               element={
                 <ProtectedRoute>

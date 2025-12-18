@@ -8,31 +8,39 @@ import {
   Box,
   Alert,
   Chip,
+  Link,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HomeIcon from "@mui/icons-material/Home";
 import AddIcon from "@mui/icons-material/Add";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+
+import PropTypes from "prop-types";
 
 /**
  * Dialog component to show diagnosis submission response
- * @param {Object} props
- * @param {boolean} props.open - Dialog open state
- * @param {Object} props.response - API response (DiagnosisAcknowledgement)
- * @param {Function} props.onGoHome - Handler for "Go Home" button
- * @param {Function} props.onNewDiagnosis - Handler for "New Diagnosis" button
  */
 function DiagnosisResultDialog({ open, response, onGoHome, onNewDiagnosis }) {
+  const navigate = useNavigate();
+
   if (!response) return null;
+
+  const handleViewResults = () => {
+    navigate(`/diagnosis/${response.id}`);
+  };
 
   return (
     <Dialog
       open={open}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 2,
-          p: 1,
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 2,
+            p: 1,
+          },
         },
       }}
     >
@@ -78,26 +86,43 @@ function DiagnosisResultDialog({ open, response, onGoHome, onNewDiagnosis }) {
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Result Link
                 </Typography>
-                <Typography
-                  variant="body2"
+                <Link
+                  onClick={handleViewResults}
                   sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
                     color: "#10B981",
-                    wordBreak: "break-all",
-                    fontFamily: "monospace",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     backgroundColor: "#F3F4F6",
-                    p: 1,
+                    p: 1.5,
                     borderRadius: 1,
+                    "&:hover": {
+                      backgroundColor: "#E5E7EB",
+                      textDecoration: "underline",
+                    },
                   }}
                 >
-                  {response.result_link}
-                </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      wordBreak: "break-all",
+                      fontFamily: "monospace",
+                      flex: 1,
+                    }}
+                  >
+                    {response.result_link}
+                  </Typography>
+                  <OpenInNewIcon fontSize="small" />
+                </Link>
               </Box>
             )}
           </Box>
 
           <Box sx={{ mt: 3, p: 2, backgroundColor: "#F0F9FF", borderRadius: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              <strong>What's next?</strong>
+              <strong>What&apos;s next?</strong>
               <br />
               Your diagnosis is being processed in the background. You will
               receive an email notification when the results are ready. You can
@@ -132,5 +157,17 @@ function DiagnosisResultDialog({ open, response, onGoHome, onNewDiagnosis }) {
     </Dialog>
   );
 }
+
+DiagnosisResultDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  response: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    status: PropTypes.string.isRequired,
+    message: PropTypes.string.isRequired,
+    result_link: PropTypes.string,
+  }),
+  onGoHome: PropTypes.func.isRequired,
+  onNewDiagnosis: PropTypes.func.isRequired,
+};
 
 export default DiagnosisResultDialog;
