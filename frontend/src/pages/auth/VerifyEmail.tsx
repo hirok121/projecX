@@ -15,7 +15,7 @@ import { styled } from "@mui/material/styles";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AppTheme from "../../theme/AppTheme";
-import { HepatoCAIIcon } from "../../components/ui/CustomIcons";
+import { DeepMedIcon } from "../../components/ui/CustomIcons";
 import { useAuth } from "../../context/AuthContext";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -125,7 +125,7 @@ export default function VerifyEmailPage() {
       <CssBaseline enableColorScheme />
       <VerifyEmailContainer direction="column" justifyContent="center">
         <Card variant="outlined">
-          <HepatoCAIIcon />
+          <DeepMedIcon />
           <Typography component="h1" variant="h4" sx={{ textAlign: "center" }}>
             Email Verification
           </Typography>

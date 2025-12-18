@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AppTheme from "../../theme/AppTheme";
-import { HepatoCAIIcon } from "../../components/ui/CustomIcons";
+import { DeepMedIcon } from "../../components/ui/CustomIcons";
 import api from "../../services/api";
 
 // Styled components
@@ -136,7 +136,7 @@ export default function ResetPasswordConfirm() {
       <CssBaseline enableColorScheme />{" "}
       <Container direction="column" justifyContent="center">
         <Card variant="outlined">
-          <HepatoCAIIcon />
+          <DeepMedIcon />
           <Typography component="h1" variant="h4">
             Set New Password
           </Typography>

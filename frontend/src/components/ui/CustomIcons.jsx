@@ -4,10 +4,10 @@ import { Box } from "@mui/system";
 import { Typography } from "@mui/material";
 import deepmedIcon from "../../assets/deepmed.png";
 
-export function HepatoCAIIcon() {
+export function DeepMedIcon() {
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
-      <HepatoCAIIconMini sx={{ marginRight: "0.5rem" }} />
+      <DeepMedIconMini sx={{ marginRight: "0.5rem" }} />
       <Typography
         variant="h5"
         component="span"
@@ -29,7 +29,7 @@ export function HepatoCAIIcon() {
   );
 }
 
-export function HepatoCAIIconMini({ sx }) {
+export function DeepMedIconMini({ sx }) {
   return (
     <Box
       component="img"
@@ -44,7 +44,7 @@ export function HepatoCAIIconMini({ sx }) {
   );
 }
 
-HepatoCAIIconMini.propTypes = {
+DeepMedIconMini.propTypes = {
   sx: PropTypes.object,
 };
 

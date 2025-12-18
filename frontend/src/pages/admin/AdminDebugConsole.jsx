@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Typography,
@@ -25,21 +26,20 @@ import { API_CONFIG, AUTH_CONFIG } from "../../config/constants";
 import AdminNavbar from "../../components/admin/AdminNavbar";
 
 function AdminDebugConsole() {
-  const { user, isAuthorized, isStaff, loading } = useAuth();
+  const { user, isAuthenticated, isStaff, loading } = useAuth();
   const [systemInfo, setSystemInfo] = useState({});
 
-  const checkSystemInfo = () => {
+  const checkSystemInfo = useCallback(() => {
     const accessToken = localStorage.getItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
     const refreshToken = localStorage.getItem(AUTH_CONFIG.REFRESH_TOKEN_KEY);
 
     const info = {
       // User Info
       currentUser: user?.email || user?.username || "Not logged in",
-      firstName: user?.first_name || "N/A",
-      lastName: user?.last_name || "N/A",
+      fullName: user?.full_name || "N/A",
       isStaff: isStaff,
       isSuperuser: user?.is_superuser || false,
-      isAuthorized: isAuthorized,
+      isAuthorized: isAuthenticated,
       authLoading: loading,
 
       // Token Info
@@ -55,11 +55,11 @@ function AdminDebugConsole() {
       timestamp: new Date().toLocaleString(),
     };
     setSystemInfo(info);
-  };
+  }, [user, isAuthenticated, isStaff, loading]);
 
   useEffect(() => {
     checkSystemInfo();
-  }, [user, isAuthorized, isStaff, loading]);
+  }, [checkSystemInfo]);
 
   const InfoCard = ({ title, icon: Icon, data, color = "#10B981" }) => (
     <Card sx={{ height: "100%" }}>
@@ -120,6 +120,13 @@ function AdminDebugConsole() {
     </Card>
   );
 
+  InfoCard.propTypes = {
+    title: PropTypes.string.isRequired,
+    icon: PropTypes.elementType.isRequired,
+    data: PropTypes.object.isRequired,
+    color: PropTypes.string,
+  };
+
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#F8F9FA" }}>
       <AdminNavbar />
@@ -160,8 +167,7 @@ function AdminDebugConsole() {
               color="#10B981"
               data={{
                 currentUser: systemInfo.currentUser,
-                firstName: systemInfo.firstName,
-                lastName: systemInfo.lastName,
+                fullName: systemInfo.fullName,
                 isStaff: systemInfo.isStaff,
                 isSuperuser: systemInfo.isSuperuser,
                 isAuthorized: systemInfo.isAuthorized,

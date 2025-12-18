@@ -1,19 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Container,
   Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  CardActions,
   Button,
-  IconButton,
-  Chip,
   TextField,
   InputAdornment,
-  Stack,
   Pagination,
   CircularProgress,
   Alert,
@@ -25,16 +17,11 @@ import {
 import {
   Add as AddIcon,
   Search as SearchIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  CalendarToday,
-  Person,
-  Visibility as VisibilityIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { blogAPI } from "../../services/blogAPI";
-import ReactMarkdown from "react-markdown";
-import NavBar from "../../components/layout/NavBar";
+import AdminNavBar from "../../components/admin/AdminNavbar";
+import BlogCard from "../../components/common/BlogCard";
 
 const AdminBlogManagement = () => {
   const navigate = useNavigate();
@@ -48,11 +35,8 @@ const AdminBlogManagement = () => {
   const [blogToDelete, setBlogToDelete] = useState(null);
   const blogsPerPage = 9;
 
-  useEffect(() => {
-    fetchBlogs();
-  }, [currentPage, searchQuery]);
 
-  const fetchBlogs = async () => {
+  const fetchBlogs = useCallback(async () => {
     try {
       setLoading(true);
       const params = {
@@ -73,7 +57,12 @@ const AdminBlogManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchQuery]);
+
+    useEffect(() => {
+    fetchBlogs();
+  }, [fetchBlogs]);
+
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -124,7 +113,7 @@ const AdminBlogManagement = () => {
 
   return (
     <>
-      <NavBar />
+      <AdminNavBar />
       <Container maxWidth="xl" sx={{ mt: 4, mb: 8 }}>
         {/* Header */}
         <Box
@@ -240,214 +229,24 @@ const AdminBlogManagement = () => {
             {/* Blog Grid */}
             <Box
               sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 3, // same as Grid spacing={3}
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(3, 1fr)",
+                },
+                gap: 4,
               }}
             >
               {blogs.map((blog) => (
-                <Box
+                <BlogCard
                   key={blog.id}
-                  sx={{
-                    flex: {
-                      xs: "1 1 100%", // xs={12}
-                      sm: "1 1 calc(50% - 24px)", // sm={6}
-                      md: "1 1 calc(33.333% - 24px)", // md={4}
-                    },
-                  }}
-                >
-                  <Card
-                    sx={{
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      borderRadius: 3,
-                      boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                      transition: "all 0.3s ease",
-                      border: "1px solid #E5E7EB",
-                      "&:hover": {
-                        boxShadow: "0 8px 24px rgba(16, 185, 129, 0.15)",
-                        transform: "translateY(-4px)",
-                        borderColor: "#10B981",
-                      },
-                    }}
-                  >
-                    {/* Image */}
-                    {blog.image_url ? (
-                      <CardMedia
-                        component="img"
-                        height="100"
-                        image={blog.image_url}
-                        alt={blog.title}
-                        sx={{ objectFit: "cover" }}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          height: 200,
-                          bgcolor: "#ECFDF5",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Typography sx={{ color: "#10B981", fontWeight: 600 }}>
-                          No Image
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {/* Content */}
-                    <CardContent
-                      sx={{
-                        flexGrow: 1,
-                        p: 3,
-                        display: "flex",
-                        flexDirection: "column",
-                      }}
-                    >
-                      {/* Title */}
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        sx={{
-                          fontWeight: 700,
-                          color: "#1F2937",
-                          mb: 1.5,
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          minHeight: "3.6em",
-                        }}
-                      >
-                        {blog.title}
-                      </Typography>
-
-                      {/* Summary */}
-                      <Box
-                        sx={{
-                          color: "#6B7280",
-                          fontSize: "0.875rem",
-                          mb: 2,
-                          minHeight: "2.8em",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          "& p": { margin: 0, lineHeight: 1.4 },
-                        }}
-                      >
-                        <ReactMarkdown>
-                          {blog.summary || blog.content}
-                        </ReactMarkdown>
-                      </Box>
-
-                      {/* Metadata */}
-                      <Stack spacing={1} sx={{ mb: 2 }}>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <Person sx={{ fontSize: "1rem" }} />
-                          <Typography variant="caption">
-                            {blog.author?.email || "Unknown"}
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <CalendarToday sx={{ fontSize: "1rem" }} />
-                          <Typography variant="caption">
-                            {new Date(blog.created_at).toLocaleDateString()}
-                          </Typography>
-                        </Box>
-                      </Stack>
-
-                      {/* Tags */}
-                      {blog.tags?.length > 0 && (
-                        <Stack
-                          direction="row"
-                          spacing={0.5}
-                          flexWrap="wrap"
-                          gap={0.5}
-                        >
-                          {blog.tags.slice(0, 3).map((tag) => (
-                            <Chip
-                              key={tag}
-                              label={tag}
-                              size="small"
-                              sx={{
-                                bgcolor: "#ECFDF5",
-                                color: "#059669",
-                                fontSize: "0.75rem",
-                                height: 24,
-                              }}
-                            />
-                          ))}
-                          {blog.tags.length > 3 && (
-                            <Chip
-                              label={`+${blog.tags.length - 3}`}
-                              size="small"
-                              sx={{
-                                bgcolor: "#F3F4F6",
-                                color: "#6B7280",
-                                fontSize: "0.75rem",
-                                height: 24,
-                              }}
-                            />
-                          )}
-                        </Stack>
-                      )}
-
-                      <Box sx={{ flexGrow: 1 }} />
-
-                      {/* Status */}
-                      <Box sx={{ mt: 2 }}>
-                        <Chip
-                          label={blog.published ? "Published" : "Draft"}
-                          size="small"
-                          sx={{
-                            bgcolor: blog.published ? "#ECFDF5" : "#FEF3C7",
-                            color: blog.published ? "#059669" : "#D97706",
-                            fontWeight: 600,
-                          }}
-                        />
-                      </Box>
-                    </CardContent>
-
-                    {/* Actions */}
-                    <CardActions
-                      sx={{ p: 2, pt: 0, justifyContent: "space-between" }}
-                    >
-                      <Button
-                        size="small"
-                        startIcon={<VisibilityIcon />}
-                        onClick={() => handleViewBlog(blog.slug)}
-                        sx={{
-                          color: "#10B981",
-                          fontWeight: 600,
-                          "&:hover": { bgcolor: "#ECFDF5" },
-                        }}
-                      >
-                        View
-                      </Button>
-                      <Stack direction="row" spacing={1}>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEditBlog(blog.id)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDeleteClick(blog)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Stack>
-                    </CardActions>
-                  </Card>
-                </Box>
+                  blog={blog}
+                  showAdminActions={true}
+                  onEdit={handleEditBlog}
+                  onDelete={handleDeleteClick}
+                  onView={handleViewBlog}
+                />
               ))}
             </Box>
 
@@ -497,7 +296,7 @@ const AdminBlogManagement = () => {
           </DialogTitle>
           <DialogContent>
             <Typography>
-              Are you sure you want to delete "{blogToDelete?.title}"? This
+              Are you sure you want to delete &ldquo;{blogToDelete?.title}&rdquo;? This
               action cannot be undone.
             </Typography>
           </DialogContent>

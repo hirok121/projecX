@@ -10,6 +10,7 @@ import {
   Alert,
   CircularProgress,
   Container,
+  Chip,
 } from "@mui/material";
 import {
   People,
@@ -17,6 +18,12 @@ import {
   Refresh,
   BugReport,
   Storage,
+  LibraryBooks,
+  Upload,
+  Analytics,
+  Settings,
+  MedicalServices,
+  ArrowForward,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
@@ -171,7 +178,7 @@ function AdminDashboard() {
         )}
 
         {/* Statistics Cards */}
-        <Grid container spacing={3}>
+        <Grid container spacing={3} sx={{ mb: 6 }}>
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
@@ -344,6 +351,424 @@ function AdminDashboard() {
             </Card>
           </Grid>
         </Grid>
+
+        {/* Admin Features Section */}
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: 600, color: "#2C3E50", mb: 3 }}
+          >
+            Admin Features
+          </Typography>
+          <Grid container spacing={3}>
+            {/* User Management */}
+            <Grid item xs={12} sm={6} md={4}>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 2,
+                  border: "1px solid #E8EAED",
+                  boxShadow: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+                    transform: "translateY(-2px)",
+                    borderColor: "#10B981",
+                  },
+                }}
+                onClick={() => navigate("/admin/users")}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      backgroundColor: "#ECFDF5",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <People sx={{ color: "#10B981", fontSize: 32 }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    User Management
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Manage users, roles, and permissions
+                  </Typography>
+                  <Button
+                    endIcon={<ArrowForward />}
+                    sx={{
+                      color: "#10B981",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      p: 0,
+                      "&:hover": { bgcolor: "transparent" },
+                    }}
+                  >
+                    Open
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Diagnosis Management */}
+            <Grid item xs={12} sm={6} md={4}>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 2,
+                  border: "1px solid #E8EAED",
+                  boxShadow: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+                    transform: "translateY(-2px)",
+                    borderColor: "#10B981",
+                  },
+                }}
+                onClick={() => navigate("/admin/diagnosis-management")}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      backgroundColor: "#ECFDF5",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <MedicalServices sx={{ color: "#10B981", fontSize: 32 }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Diagnosis Management
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    View and manage patient diagnoses
+                  </Typography>
+                  <Button
+                    endIcon={<ArrowForward />}
+                    sx={{
+                      color: "#10B981",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      p: 0,
+                      "&:hover": { bgcolor: "transparent" },
+                    }}
+                  >
+                    Open
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Disease & Models */}
+            <Grid item xs={12} sm={6} md={4}>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 2,
+                  border: "1px solid #E8EAED",
+                  boxShadow: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+                    transform: "translateY(-2px)",
+                    borderColor: "#10B981",
+                  },
+                }}
+                onClick={() => navigate("/admin/disease-upload")}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      backgroundColor: "#ECFDF5",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <Upload sx={{ color: "#10B981", fontSize: 32 }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Disease & Models
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Upload and manage ML models
+                  </Typography>
+                  <Button
+                    endIcon={<ArrowForward />}
+                    sx={{
+                      color: "#10B981",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      p: 0,
+                      "&:hover": { bgcolor: "transparent" },
+                    }}
+                  >
+                    Open
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Blog Management */}
+            <Grid item xs={12} sm={6} md={4}>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 2,
+                  border: "1px solid #E8EAED",
+                  boxShadow: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+                    transform: "translateY(-2px)",
+                    borderColor: "#10B981",
+                  },
+                }}
+                onClick={() => navigate("/admin/blogs")}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      backgroundColor: "#ECFDF5",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <LibraryBooks sx={{ color: "#10B981", fontSize: 32 }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Blog Management
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Create and manage blog posts
+                  </Typography>
+                  <Button
+                    endIcon={<ArrowForward />}
+                    sx={{
+                      color: "#10B981",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      p: 0,
+                      "&:hover": { bgcolor: "transparent" },
+                    }}
+                  >
+                    Open
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Debug Console */}
+            <Grid item xs={12} sm={6} md={4}>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 2,
+                  border: "1px solid #E8EAED",
+                  boxShadow: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+                    transform: "translateY(-2px)",
+                    borderColor: "#10B981",
+                  },
+                }}
+                onClick={() => navigate("/admin/debug")}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      backgroundColor: "#ECFDF5",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <BugReport sx={{ color: "#10B981", fontSize: 32 }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Debug Console
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    System diagnostics and debugging
+                  </Typography>
+                  <Button
+                    endIcon={<ArrowForward />}
+                    sx={{
+                      color: "#10B981",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      p: 0,
+                      "&:hover": { bgcolor: "transparent" },
+                    }}
+                  >
+                    Open
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Analytics */}
+            <Grid item xs={12} sm={6} md={4}>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 2,
+                  border: "1px solid #E8EAED",
+                  boxShadow: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+                    transform: "translateY(-2px)",
+                    borderColor: "#10B981",
+                  },
+                }}
+                onClick={() => navigate("/admin/under-construction", { state: { pageName: "Analytics" } })}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      backgroundColor: "#F3F4F6",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <Analytics sx={{ color: "#6B7280", fontSize: 32 }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Analytics
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    View system analytics and reports
+                  </Typography>
+                  <Chip label="Coming Soon" size="small" sx={{ bgcolor: "#FEF3C7", color: "#D97706", fontWeight: 600 }} />
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* System Settings */}
+            <Grid item xs={12} sm={6} md={4}>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 2,
+                  border: "1px solid #E8EAED",
+                  boxShadow: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+                    transform: "translateY(-2px)",
+                    borderColor: "#10B981",
+                  },
+                }}
+                onClick={() => navigate("/admin/under-construction", { state: { pageName: "System Settings" } })}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      backgroundColor: "#F3F4F6",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <Settings sx={{ color: "#6B7280", fontSize: 32 }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    System Settings
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Configure system preferences
+                  </Typography>
+                  <Chip label="Coming Soon" size="small" sx={{ bgcolor: "#FEF3C7", color: "#D97706", fontWeight: 600 }} />
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Database */}
+            <Grid item xs={12} sm={6} md={4}>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 2,
+                  border: "1px solid #E8EAED",
+                  boxShadow: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+                    transform: "translateY(-2px)",
+                    borderColor: "#10B981",
+                  },
+                }}
+                onClick={() => navigate("/admin/under-construction", { state: { pageName: "Database Management" } })}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      backgroundColor: "#F3F4F6",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <Storage sx={{ color: "#6B7280", fontSize: 32 }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Database
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Database management and backups
+                  </Typography>
+                  <Chip label="Coming Soon" size="small" sx={{ bgcolor: "#FEF3C7", color: "#D97706", fontWeight: 600 }} />
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
       </Container>
     </Box>
   );

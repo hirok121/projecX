@@ -1,13 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Button,
   Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  CardActions,
   Chip,
   TextField,
   InputAdornment,
@@ -18,13 +13,11 @@ import {
   Container,
 } from "@mui/material";
 import { Search, LocalOffer, Article } from "@mui/icons-material";
-import ReactMarkdown from "react-markdown";
 import { blogAPI } from "../../services/blogAPI";
-import { useNavigate } from "react-router-dom";
 import NavBar from "../../components/layout/NavBar";
+import BlogCard from "../../components/common/BlogCard";
 
 function BlogList() {
-  const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,7 +27,7 @@ function BlogList() {
   const [totalBlogs, setTotalBlogs] = useState(0);
   const blogsPerPage = 12;
 
-  const fetchBlogs = async () => {
+  const fetchBlogs = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -55,11 +48,11 @@ function BlogList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, searchQuery, selectedTag]);
 
   useEffect(() => {
     fetchBlogs();
-  }, [page, selectedTag]);
+  }, [fetchBlogs]);
 
   const handleSearch = () => {
     setPage(1);
@@ -79,10 +72,7 @@ function BlogList() {
     return Array.from(tagSet);
   };
 
-  const truncateText = (text, maxLength) => {
-    if (!text) return "";
-    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-  };
+
 
   return (
     <>
@@ -240,173 +230,21 @@ function BlogList() {
                 </Box>
               ) : (
                 <>
-                  <Grid container spacing={3}>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "1fr",
+                        sm: "repeat(2, 1fr)",
+                        md: "repeat(3, 1fr)",
+                      },
+                      gap: 4,
+                    }}
+                  >
                     {blogs.map((blog) => (
-                      <Grid item xs={12} sm={6} md={4} key={blog.id}>
-                        <Card
-                          sx={{
-                            height: "100%",
-                            display: "flex",
-                            flexDirection: "column",
-                            cursor: "pointer",
-                            borderRadius: 3,
-                            border: "1px solid #E5E7EB",
-                            transition: "all 0.3s ease",
-                            bgcolor: "white",
-                            "&:hover": {
-                              transform: "translateY(-4px)",
-                              boxShadow:
-                                "0 10px 15px -3px rgba(16, 185, 129, 0.2)",
-                              borderColor: "#10B981",
-                            },
-                          }}
-                          onClick={() => navigate(`/blogs/${blog.slug}`)}
-                        >
-                          {blog.image_url ? (
-                            <CardMedia
-                              component="img"
-                              height={200}
-                              image={blog.image_url}
-                              alt={blog.title}
-                              sx={{ objectFit: "cover" }}
-                            />
-                          ) : (
-                            <Box
-                              sx={{
-                                height: 200,
-                                bgcolor: "#ECFDF5",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <Typography
-                                sx={{ color: "#10B981", fontWeight: 600 }}
-                              >
-                                No Image
-                              </Typography>
-                            </Box>
-                          )}
-                          <CardContent
-                            sx={{
-                              flexGrow: 1,
-                              p: 3,
-                              display: "flex",
-                              flexDirection: "column",
-                            }}
-                          >
-                            <Typography
-                              variant="h6"
-                              gutterBottom
-                              sx={{
-                                fontWeight: 700,
-                                color: "#000000",
-                                mb: 2,
-                                display: "-webkit-box",
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: "vertical",
-                                overflow: "hidden",
-                                minHeight: "3.6em",
-                              }}
-                            >
-                              {blog.title}
-                            </Typography>
-
-                            {/* Render markdown summary/content preview */}
-                            <Box
-                              sx={{
-                                mb: 2,
-                                color: "#666666",
-                                minHeight: "2.8em",
-                                "& p": {
-                                  fontSize: "0.875rem",
-                                  lineHeight: 1.4,
-                                  mb: 1,
-                                },
-                                "& h1, & h2, & h3, & h4, & h5, & h6": {
-                                  fontSize: "0.875rem",
-                                  fontWeight: 600,
-                                  mb: 0.5,
-                                },
-                                "& ul, & ol": {
-                                  pl: 2,
-                                  mb: 1,
-                                },
-                                "& li": {
-                                  fontSize: "0.875rem",
-                                },
-                                "& code": {
-                                  bgcolor: "#F3F4F6",
-                                  px: 0.5,
-                                  py: 0.25,
-                                  borderRadius: 0.5,
-                                  fontSize: "0.8rem",
-                                },
-                                overflow: "hidden",
-                                display: "-webkit-box",
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: "vertical",
-                              }}
-                            >
-                              <ReactMarkdown>
-                                {truncateText(
-                                  blog.summary || blog.content,
-                                  120
-                                )}
-                              </ReactMarkdown>
-                            </Box>
-
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                gap: 0.5,
-                              }}
-                            >
-                              {blog.tags?.slice(0, 3).map((tag) => (
-                                <Chip
-                                  key={tag}
-                                  label={tag}
-                                  size="small"
-                                  sx={{
-                                    bgcolor: "#ECFDF5",
-                                    color: "#10B981",
-                                    fontWeight: 600,
-                                    border: "1px solid #D1FAE5",
-                                    fontSize: "0.75rem",
-                                  }}
-                                />
-                              ))}
-                            </Box>
-
-                            {/* Spacer to push actions to bottom */}
-                            <Box sx={{ flexGrow: 1 }} />
-                          </CardContent>
-                          <CardActions
-                            sx={{
-                              px: 3,
-                              pb: 2,
-                              pt: 0,
-                            }}
-                          >
-                            <Typography
-                              variant="caption"
-                              sx={{ color: "#999999", fontWeight: 500 }}
-                            >
-                              {new Date(blog.created_at).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                }
-                              )}
-                            </Typography>
-                          </CardActions>
-                        </Card>
-                      </Grid>
+                      <BlogCard key={blog.id} blog={blog} />
                     ))}
-                  </Grid>
+                  </Box>
 
                   {/* Pagination */}
                   {totalBlogs > blogsPerPage && (

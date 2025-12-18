@@ -24,7 +24,7 @@ import uuid
 router = APIRouter(prefix="/blogs", tags=["blogs"])
 
 
-@router.get("/", response_model=List[BlogOut])
+@router.get("/", response_model=List[BlogWithAuthor])
 def list_blogs(
     db: Session = Depends(get_db),
     author_id: Optional[int] = Query(None, description="Filter by author ID"),
@@ -45,8 +45,33 @@ def list_blogs(
             limit=limit,
             offset=offset,
         )
-        app_logger.info(f"Listed {len(blogs)} blogs")
-        return blogs
+        
+        # Convert to BlogWithAuthor to include author details
+        blogs_with_author = []
+        for blog in blogs:
+            blog_dict = {
+                "id": getattr(blog, "id"),
+                "title": getattr(blog, "title"),
+                "slug": getattr(blog, "slug"),
+                "content": getattr(blog, "content"),
+                "summary": getattr(blog, "summary", None),
+                "tags": getattr(blog, "tags", None),
+                "published": getattr(blog, "published", False),
+                "author_id": getattr(blog, "author_id"),
+                "image_url": getattr(blog, "image_url", None),
+                "created_at": getattr(blog, "created_at"),
+                "updated_at": getattr(blog, "updated_at"),
+                "author_name": (
+                    getattr(blog.author, "full_name", None) if blog.author else None
+                ),
+                "author_email": (
+                    getattr(blog.author, "email", None) if blog.author else None
+                ),
+            }
+            blogs_with_author.append(BlogWithAuthor(**blog_dict))
+        
+        app_logger.info(f"Listed {len(blogs_with_author)} blogs")
+        return blogs_with_author
     except Exception as e:
         app_logger.error(f"Error listing blogs: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to list blogs")

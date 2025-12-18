@@ -17,7 +17,7 @@ import {
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import AppTheme from "../../theme/AppTheme";
-import { GoogleIcon, HepatoCAIIcon } from "../../components/ui/CustomIcons";
+import { GoogleIcon, DeepMedIcon } from "../../components/ui/CustomIcons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import authAPI from "../../services/authAPI";
@@ -199,7 +199,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       <CssBaseline enableColorScheme />
       <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
-          <HepatoCAIIcon />
+          <DeepMedIcon />
           <Typography variant="h4" component="h1">
             Sign up
           </Typography>

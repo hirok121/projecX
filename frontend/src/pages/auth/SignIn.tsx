@@ -23,7 +23,7 @@ import {
   GoogleIcon,
   FacebookIcon,
   SitemarkIcon,
-  HepatoCAIIcon,
+  DeepMedIcon,
 } from "../../components/ui/CustomIcons";
 import { API_CONFIG } from "../../config/constants";
 import authAPI from "../../services/authAPI";
@@ -216,7 +216,7 @@ export default function SignIn(props) {
       <SignInContainer direction="column" justifyContent="space-between">
         {/* <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} /> */}
         <Card variant="outlined">
-          <HepatoCAIIcon />
+          <DeepMedIcon />
           <Typography
             component="h1"
             variant="h4"

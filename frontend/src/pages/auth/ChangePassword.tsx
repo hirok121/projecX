@@ -19,7 +19,7 @@ import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppTheme from "../../theme/AppTheme";
-import { HepatoCAIIcon } from "../../components/ui/CustomIcons";
+import { DeepMedIcon } from "../../components/ui/CustomIcons";
 import { useAuth } from "../../context/AuthContext";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -183,7 +183,7 @@ export default function ChangePasswordPage() {
       <CssBaseline enableColorScheme />
       <ChangePasswordContainer direction="column" justifyContent="center">
         <Card variant="outlined">
-          <HepatoCAIIcon />
+          <DeepMedIcon />
           <Typography component="h1" variant="h4">
             Change Password
           </Typography>

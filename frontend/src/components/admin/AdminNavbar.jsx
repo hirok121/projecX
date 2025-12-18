@@ -41,7 +41,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "@mui/material/styles";
-import { HepatoCAIIcon } from "../ui/CustomIcons";
+import { DeepMedIcon } from "../ui/CustomIcons";
 
 function AdminNavbar() {
   const { user, logout, loading } = useAuth();
@@ -421,7 +421,7 @@ function AdminNavbar() {
                 transition: "all 0.3s ease",
               }}
             >
-              <HepatoCAIIcon />
+              <DeepMedIcon />
             </Button>
             <Chip
               label="Admin"
@@ -444,7 +444,7 @@ function AdminNavbar() {
                 ml: 2,
               }}
             >
-              {navigationItems.slice(0, 4).map((item) => {
+              {navigationItems.slice(0, 5).map((item) => {
                 const Icon = item.icon;
                 return (
                   <Box key={item.path} sx={{ position: "relative" }}>

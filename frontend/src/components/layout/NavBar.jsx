@@ -43,7 +43,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import LoginIcon from "@mui/icons-material/Login";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { useAuth } from "../../context/AuthContext";
-import { HepatoCAIIcon } from "../ui/CustomIcons";
+import { DeepMedIcon } from "../ui/CustomIcons";
 
 // Add LinkBehavior component before menuItems
 const LinkBehavior = forwardRef((props, ref) => {
@@ -353,7 +353,7 @@ function NavBar() {
                 transition: "all 0.3s ease",
               }}
             >
-              <HepatoCAIIcon />
+              <DeepMedIcon />
             </Button>{" "}
             {/* Enhanced Desktop Navigation Links */}
             <Box
