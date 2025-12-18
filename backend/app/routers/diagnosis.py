@@ -85,7 +85,7 @@ def get_diagnosis(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get a diagnosis by ID."""
+    """Get a diagnosis by ID with related disease and classifier info."""
     log_endpoint_activity(
         "diagnosis",
         "get_diagnosis",
@@ -93,9 +93,44 @@ def get_diagnosis(
     )
 
     try:
-        return DiagnosisService.get_diagnosis(
+        diagnosis = DiagnosisService.get_diagnosis(
             db=db, diagnosis_id=diagnosis_id, user_id=current_user.id
         )
+        
+        # Enrich with disease and classifier information
+        diagnosis_dict = {
+            "id": diagnosis.id,
+            "user_id": diagnosis.user_id,
+            "disease_id": diagnosis.disease_id,
+            "classifier_id": diagnosis.classifier_id,
+            "modality": diagnosis.modality,
+            "name": diagnosis.name,
+            "age": diagnosis.age,
+            "sex": diagnosis.sex,
+            "input_file": diagnosis.input_file,
+            "input_data": diagnosis.input_data,
+            "prediction": diagnosis.prediction,
+            "confidence": diagnosis.confidence,
+            "probabilities": diagnosis.probabilities,
+            "status": diagnosis.status.value if diagnosis.status else None,
+            "error_message": diagnosis.error_message,
+            "processing_time": diagnosis.processing_time,
+            "created_at": diagnosis.created_at,
+            "started_at": diagnosis.started_at,
+            "completed_at": diagnosis.completed_at,
+            # Disease info
+            "disease_name": diagnosis.disease.name if diagnosis.disease else None,
+            "disease_description": diagnosis.disease.description if diagnosis.disease else None,
+            "disease_blog_link": diagnosis.disease.blog_link if diagnosis.disease else None,
+            # Classifier info
+            "classifier_name": diagnosis.classifier.name if diagnosis.classifier else None,
+            "classifier_title": diagnosis.classifier.name if diagnosis.classifier else None,
+            "classifier_description": diagnosis.classifier.description if diagnosis.classifier else None,
+            "classifier_blog_link": diagnosis.classifier.blog_link if diagnosis.classifier else None,
+            "classifier_paper_link": diagnosis.classifier.paper_link if diagnosis.classifier else None,
+        }
+        
+        return diagnosis_dict
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

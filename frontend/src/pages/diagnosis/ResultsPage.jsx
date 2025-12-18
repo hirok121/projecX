@@ -11,6 +11,7 @@ import {
   CircularProgress,
   Button,
   Alert,
+  Divider,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { diagnosisAPI } from "../../services/diagnosisAPI";
@@ -20,6 +21,11 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import HomeIcon from "@mui/icons-material/Home";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import PrintIcon from "@mui/icons-material/Print";
+import ArticleIcon from "@mui/icons-material/Article";
+import LinkIcon from "@mui/icons-material/Link";
+import ScienceIcon from "@mui/icons-material/Science";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import logger from "../../utils/logger";
 
 function ResultsPage() {
@@ -133,6 +139,10 @@ function ResultsPage() {
 
   const handleBack = () => {
     navigate("/diagnosis");
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   if (loading) {
@@ -520,6 +530,147 @@ function ResultsPage() {
           </CardContent>
         </Card>
 
+        {/* Disease Information */}
+        {(diagnosis.disease_name || diagnosis.disease_description || diagnosis.disease_blog_link) && (
+          <Card
+            sx={{
+              mt: 3,
+              borderRadius: 3,
+              boxShadow: 4,
+            }}
+          >
+            <CardContent sx={{ p: 4 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={3}>
+                <LocalHospitalIcon sx={{ color: "success.main", fontSize: 28 }} />
+                <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                  Disease Information
+                </Typography>
+              </Box>
+              <Divider sx={{ mb: 3 }} />
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    Disease Name
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                    {diagnosis.disease_name || "Unknown"}
+                  </Typography>
+                </Grid>
+                
+                {diagnosis.disease_description && (
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      Description
+                    </Typography>
+                    <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
+                      {diagnosis.disease_description}
+                    </Typography>
+                  </Grid>
+                )}
+                
+                {diagnosis.disease_blog_link && (
+                  <Grid item xs={12}>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      startIcon={<ArticleIcon />}
+                      href={diagnosis.disease_blog_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ mt: 1 }}
+                    >
+                      Learn More About This Disease
+                    </Button>
+                  </Grid>
+                )}
+              </Grid>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Classifier Information */}
+        {(diagnosis.classifier_name || diagnosis.classifier_description || 
+          diagnosis.classifier_blog_link || diagnosis.classifier_paper_link) && (
+          <Card
+            sx={{
+              mt: 3,
+              borderRadius: 3,
+              boxShadow: 4,
+            }}
+          >
+            <CardContent sx={{ p: 4 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={3}>
+                <ScienceIcon sx={{ color: "primary.main", fontSize: 28 }} />
+                <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                  Classifier Information
+                </Typography>
+              </Box>
+              <Divider sx={{ mb: 3 }} />
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    Classifier Name
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {diagnosis.classifier_name || "Unknown"}
+                  </Typography>
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    Modality
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {getModalityLabel(diagnosis.modality)}
+                  </Typography>
+                </Grid>
+                
+                {diagnosis.classifier_description && (
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      Description
+                    </Typography>
+                    <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
+                      {diagnosis.classifier_description}
+                    </Typography>
+                  </Grid>
+                )}
+                
+                <Grid item xs={12}>
+                  <Box display="flex" gap={2} flexWrap="wrap">
+                    {diagnosis.classifier_blog_link && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<ArticleIcon />}
+                        href={diagnosis.classifier_blog_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Learn More About Classifier
+                      </Button>
+                    )}
+                    {diagnosis.classifier_paper_link && (
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<LinkIcon />}
+                        href={diagnosis.classifier_paper_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View Research Paper
+                      </Button>
+                    )}
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Important Notice */}
         <Paper
           sx={{
@@ -551,6 +702,9 @@ function ResultsPage() {
             gap: 2,
             justifyContent: "center",
             flexWrap: "wrap",
+            "@media print": {
+              display: "none",
+            },
           }}
         >
           <Button
@@ -568,6 +722,15 @@ function ResultsPage() {
             onClick={handleNewPrediction}
           >
             New Prediction
+          </Button>
+          <Button
+            variant="contained"
+            size="large"
+            color="success"
+            startIcon={<PrintIcon />}
+            onClick={handlePrint}
+          >
+            Print Results
           </Button>
         </Box>
       </Container>
