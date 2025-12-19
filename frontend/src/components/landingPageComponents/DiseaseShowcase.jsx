@@ -1,22 +1,17 @@
+import { useState, useEffect } from "react";
 import {
   Box,
   Container,
   Typography,
   Button,
   Paper,
-  Card,
-  CardContent,
-  Chip,
+  CircularProgress,
 } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
-import {
-  Favorite,
-  Bloodtype,
-  LocalHospital,
-  MonitorHeart,
-  ArrowForward,
-} from "@mui/icons-material";
+import { ArrowForward } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { diseaseAPI } from "../../services/diseaseAPI";
+import DiseaseCard from "../diagnosis/DiseaseCard";
 
 // Animations
 const fadeInAnimation = keyframes`
@@ -42,81 +37,34 @@ const AnimatedBox = styled(Box)(({ animationDelay = "0s" }) => ({
   animation: `${fadeInAnimation} 0.8s ease-out ${animationDelay} both`,
 }));
 
-const DiseaseCard = styled(Card)(({ theme }) => ({
-  height: "420px",
-  display: "flex",
-  flexDirection: "column",
-  borderRadius: theme.shape.borderRadius,
-  border: `1px solid ${theme.palette.divider}`,
-  boxShadow: "none",
-  transition: "all 0.2s ease",
-  cursor: "pointer",
-  backgroundColor: theme.palette.background.paper,
-  "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: theme.shadows[4],
-    borderColor: theme.palette.text.primary,
-  },
-}));
-
-const IconWrapper = styled(Box)(({ theme }) => ({
-  width: "56px",
-  height: "56px",
-  borderRadius: "50%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: theme.palette.success.light + "20",
-  color: theme.palette.primary.main,
-  marginBottom: theme.spacing(2),
-}));
-
-// Default featured diseases (fallback if API fails)
-const defaultDiseases = [
-  {
-    id: 1,
-    name: "Hepatocellular Carcinoma (HCV)",
-    icon: <Bloodtype sx={{ fontSize: 40 }} />,
-    modalities: ["Lab Data", "Ultrasound", "MRI", "CT Scan"],
-    modelCount: 7,
-    accuracy: 92,
-    category: "Hepatology",
-  },
-  {
-    id: 2,
-    name: "Alzheimer's Disease",
-    icon: <LocalHospital sx={{ fontSize: 40 }} />,
-    modalities: ["MRI", "PET Scan", "Cognitive Tests", "Blood Tests"],
-    modelCount: 5,
-    accuracy: 88,
-    category: "Neurology",
-  },
-  {
-    id: 3,
-    name: "Brain Tumor Detection",
-    icon: <MonitorHeart sx={{ fontSize: 40 }} />,
-    modalities: ["MRI", "CT Scan", "PET Scan", "Biopsy"],
-    modelCount: 12,
-    accuracy: 94,
-    category: "Oncology",
-  },
-  {
-    id: 4,
-    name: "Cardiac Arrhythmia",
-    icon: <Favorite sx={{ fontSize: 40 }} />,
-    modalities: ["ECG", "Holter Monitor", "Echocardiogram", "Stress Test"],
-    modelCount: 9,
-    accuracy: 91,
-    category: "Cardiology",
-  },
-];
-
 const DiseaseShowcase = ({ id }) => {
   const navigate = useNavigate();
-  const diseases = defaultDiseases;
+  const [diseases, setDiseases] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleDiseaseClick = (diseaseId) => {
-    navigate(`/diagnosis?disease_id=${diseaseId}`);
+  // Fetch diseases from API
+  useEffect(() => {
+    const fetchDiseases = async () => {
+      try {
+        const data = await diseaseAPI.getDiseases({
+          is_active: true,
+          limit: 4,
+          skip: 0,
+        });
+        setDiseases(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching diseases:", error);
+        setDiseases([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDiseases();
+  }, []);
+
+  const handleDiseaseClick = (disease) => {
+    navigate(`/diagnosis/${disease.id}/modality`);
   };
 
   return (
@@ -160,105 +108,59 @@ const DiseaseShowcase = ({ id }) => {
           </Box>
 
           {/* Disease Cards Grid */}
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                lg: "repeat(4, 1fr)",
-              },
-              gap: 4,
-              mb: 6,
-            }}
-          >
-            {diseases.map((disease, index) => (
-              <AnimatedBox key={disease.id} animationDelay={`${0.1 + index * 0.1}s`}>
-                <DiseaseCard onClick={() => handleDiseaseClick(disease.id)}>
-                  <CardContent sx={{ p: 3 }}>
-                      <IconWrapper>{disease.icon}</IconWrapper>
-                      <Typography
-                        variant="h4"
-                        gutterBottom
-                        sx={{ mb: 2, minHeight: "70px", fontSize: "1.2rem" }}
-                      >
-                        {disease.name}
-                      </Typography>
-
-                      <Box sx={{ mb: 2 }}>
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: 600, mb: 1 }}
-                        >
-                          Modalities:
-                        </Typography>
-                        <Box
-                          sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
-                        >
-                          {disease.modalities
-                            .slice(0, 2)
-                            .map((modality, idx) => (
-                              <Chip
-                                key={idx}
-                                label={modality}
-                                size="small"
-                                sx={{
-                                  backgroundColor: (theme) =>
-                                    `${theme.palette.primary.main}14`,
-                                  color: "primary.main",
-                                  fontSize: "0.75rem",
-                                }}
-                              />
-                            ))}
-                          {disease.modalities.length > 2 && (
-                            <Chip
-                              label={`+${disease.modalities.length - 2}`}
-                              size="small"
-                              sx={{
-                                backgroundColor: "grey.100",
-                                color: "text.secondary",
-                                fontSize: "0.75rem",
-                              }}
-                            />
-                          )}
-                        </Box>
-                      </Box>
-
-                      <Box sx={{ mb: 2 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          <strong>{disease.modelCount}</strong> classifiers
-                          available
-                        </Typography>
-                      </Box>
-
-                      {disease.accuracy > 0 && (
-                        <Box sx={{ mb: 2 }}>
-                          <Chip
-                            label={`Up to ${disease.accuracy}% Accuracy`}
-                            size="small"
-                            color="success"
-                            sx={{ fontWeight: 600 }}
-                          />
-                        </Box>
-                      )}
-
-                      <Button
-                        variant="text"
-                        color="primary"
-                        endIcon={<ArrowForward />}
-                        fullWidth
-                        sx={{ mt: 1, justifyContent: "space-between" }}
-                      >
-                        Diagnose{" "}
-                        {disease.category === "Hepatology"
-                          ? "HCV"
-                          : disease.category}
-                      </Button>
-                  </CardContent>
-                </DiseaseCard>
-              </AnimatedBox>
-            ))}
-          </Box>
+          {loading ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "400px",
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : diseases.length === 0 ? (
+            <Box
+              sx={{
+                textAlign: "center",
+                py: 8,
+                px: 2,
+              }}
+            >
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                No diseases available yet
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Check back soon for available diagnostic tools.
+              </Typography>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  lg: "repeat(4, 1fr)",
+                },
+                gap: 4,
+                mb: 6,
+              }}
+            >
+              {diseases.map((disease, index) => (
+                <AnimatedBox
+                  key={disease.id}
+                  animationDelay={`${0.1 + index * 0.1}s`}
+                >
+                  <DiseaseCard
+                    disease={disease}
+                    onClick={handleDiseaseClick}
+                    compact={false}
+                  />
+                </AnimatedBox>
+              ))}
+            </Box>
+          )}
 
           {/* Bottom CTA */}
           <Box sx={{ textAlign: "center", mt: 6 }}>

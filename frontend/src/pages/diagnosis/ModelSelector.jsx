@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   Container,
   Typography,
-  Grid,
   Box,
   Button,
   CircularProgress,
@@ -127,21 +126,28 @@ function ModelSelector() {
           </Alert>
         )}
 
-        {/* Models Grid */}
-        <Grid container spacing={3}>
-          {models.map((model) => {
-            return (
-              <Grid item xs={12} md={6} key={model.id}>
-                <ClassifierCard
-                  classifier={model}
-                  selected={false}
-                  onClick={handleSelectModel}
-                  showLinks={true}
-                />
-              </Grid>
-            );
-          })}
-        </Grid>
+        {/* Models Grid - 3 per row using CSS Grid */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+            },
+            gap: 3,
+          }}
+        >
+          {models.map((model) => (
+            <ClassifierCard
+              key={model.id}
+              classifier={model}
+              selected={false}
+              onClick={handleSelectModel}
+              showLinks={true}
+            />
+          ))}
+        </Box>
       </Container>
     </Box>
   );

@@ -8,13 +8,12 @@ import {
   Box,
   CircularProgress,
   Button,
-  Chip,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { diseaseAPI } from "../../services/diseaseAPI";
 import NavBar from "../../components/layout/NavBar";
+import DiseaseInfoCard from "../../components/diagnosis/DiseaseInfoCard";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import InfoIcon from "@mui/icons-material/Info";
 import logger from "../../utils/logger";
 
 function ModalitySelector() {
@@ -90,12 +89,6 @@ function ModalitySelector() {
     navigate("/diagnosis");
   };
 
-  const handleShowMoreInfo = () => {
-    if (disease?.blog_link) {
-      window.open(disease.blog_link, "_blank", "noopener,noreferrer");
-    }
-  };
-
   if (loading) {
     return (
       <Box sx={{ backgroundColor: "#F0F4F8", minHeight: "100vh" }}>
@@ -128,106 +121,9 @@ function ModalitySelector() {
           Back to Diseases
         </Button>
 
-        {/* Disease Information Section */}
+        {/* Disease Information Card */}
         {disease && (
-          <Box
-            sx={{
-              mb: 4,
-              p: 3,
-              backgroundColor: "#FFFFFF",
-              borderRadius: 2,
-              border: "1px solid #E8EAED",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-            }}
-          >
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="flex-start"
-              flexWrap="wrap"
-              gap={2}
-            >
-              <Box flex={1}>
-                <Typography
-                  variant="h4"
-                  sx={{ fontWeight: 700, color: "#10B981", mb: 1 }}
-                >
-                  {disease.name}
-                </Typography>
-                {disease.category && (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "#64748B",
-                      fontWeight: 500,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                      display: "block",
-                      mb: 2,
-                    }}
-                  >
-                    {disease.category}
-                  </Typography>
-                )}
-                {disease.description && (
-                  <Typography
-                    variant="body1"
-                    sx={{ color: "#64748B", mb: 2, lineHeight: 1.6 }}
-                  >
-                    {disease.description}
-                  </Typography>
-                )}
-                {disease.available_modalities &&
-                  disease.available_modalities.length > 0 && (
-                    <Box>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: "#64748B",
-                          fontWeight: 600,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          mb: 1,
-                          display: "block",
-                        }}
-                      >
-                        Available Modalities
-                      </Typography>
-                      <Box display="flex" gap={1} flexWrap="wrap">
-                        {disease.available_modalities.map((modality, index) => (
-                          <Chip
-                            key={index}
-                            label={modality}
-                            size="small"
-                            color="primary"
-                            sx={{ fontWeight: 600 }}
-                          />
-                        ))}
-                      </Box>
-                    </Box>
-                  )}
-              </Box>
-              {disease.blog_link && (
-                <Button
-                  variant="outlined"
-                  startIcon={<InfoIcon />}
-                  onClick={handleShowMoreInfo}
-                  sx={{
-                    color: "#10B981",
-                    borderColor: "#10B981",
-                    fontWeight: 600,
-                    textTransform: "none",
-                    "&:hover": {
-                      bgcolor: "#ECFDF5",
-                      borderColor: "#10B981",
-                    },
-                  }}
-                >
-                  Show More Info
-                </Button>
-              )}
-            </Box>
-          </Box>
+          <DiseaseInfoCard disease={disease} modalityOptions={modalityOptions} />
         )}
 
         {/* Header */}
