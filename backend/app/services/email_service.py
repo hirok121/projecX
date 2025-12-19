@@ -206,6 +206,7 @@ class EmailService:
         diagnosis_id: int,
         disease_name: str,
         error_message: str,
+        result_link: str = None,
     ) -> bool:
         """
         Send email notification when diagnosis fails.
@@ -216,11 +217,23 @@ class EmailService:
             diagnosis_id: Diagnosis ID
             disease_name: Disease name
             error_message: Error message
+            result_link: Link to view diagnosis details
 
         Returns:
             bool: True if email sent successfully
         """
         subject = f"Issue with Your {disease_name} Diagnosis - {settings.app_name}"
+
+        # Build result link button if provided
+        result_link_html = ""
+        if result_link:
+            result_link_html = f"""
+                    <p style="text-align: center; margin: 30px 0;">
+                        <a href="{result_link}" style="background-color: #2196F3; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">
+                            View Diagnosis Details
+                        </a>
+                    </p>
+            """
 
         html_content = f"""
         <html>
@@ -229,9 +242,9 @@ class EmailService:
                     <h2 style="color: #2c3e50;">Hello {user_name},</h2>
                     <p>We encountered an issue processing your diagnosis request (ID: <strong>{diagnosis_id}</strong>) for <strong>{disease_name}</strong>.</p>
                     
-                    <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
-                        <strong>Error:</strong> {error_message}
-                    </div>
+                    
+                    <p>Your diagnosis record has been saved and you can view the details below.</p>
+                    {result_link_html}
                     
                     <p>Please try submitting your request again, or contact our support team if the issue persists.</p>
                     

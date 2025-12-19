@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Box, Alert, Container, IconButton } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
+import WebsiteTheme from "../../theme/WebsiteTheme";
 import NavBar from "./NavBar";
 import Hero from "../landingPageComponents/Hero";
 import PlatformOverview from "../landingPageComponents/PlatformOverview";
@@ -35,43 +36,45 @@ export default function LandingPage() {
   }, [location]);
 
   return (
-    <Box>
-      <NavBar />
-      
-      {/* Alert Message */}
-      {alertMessage && (
-        <Container maxWidth="lg" sx={{ pt: 2 }}>
-          <Alert
-            severity={alertMessage.type}
-            sx={{
-              borderRadius: 2,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              "& .MuiAlert-message": {
-                width: "100%",
-              },
-            }}
-            action={
-              <IconButton
-                aria-label="close"
-                color="inherit"
-                size="small"
-                onClick={() => setAlertMessage(null)}
-              >
-                <Close fontSize="inherit" />
-              </IconButton>
-            }
-          >
-            {alertMessage.message}
-          </Alert>
-        </Container>
-      )}
+    <WebsiteTheme>
+      <Box>
+        <NavBar />
 
-      <Hero />
-      <PlatformOverview id="platform-overview" />
-      <DiseaseShowcase id="disease-showcase" />
-      <AiMedicalAssistant id="ai-medical-assistant" />
-      <BlogSection id="blog-section" />
-      <Footer />
-    </Box>
+        {/* Alert Message */}
+        {alertMessage && (
+          <Container maxWidth="lg" sx={{ pt: 2 }}>
+            <Alert
+              severity={alertMessage.type}
+              sx={{
+                borderRadius: 2,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                "& .MuiAlert-message": {
+                  width: "100%",
+                },
+              }}
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => setAlertMessage(null)}
+                >
+                  <Close fontSize="inherit" />
+                </IconButton>
+              }
+            >
+              {alertMessage.message}
+            </Alert>
+          </Container>
+        )}
+
+        <Hero />
+        <PlatformOverview id="platform-overview" />
+        <DiseaseShowcase id="disease-showcase" />
+        <AiMedicalAssistant id="ai-medical-assistant" />
+        <BlogSection id="blog-section" />
+        <Footer />
+      </Box>
+    </WebsiteTheme>
   );
 }

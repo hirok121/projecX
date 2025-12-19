@@ -1,24 +1,18 @@
-import React from "react";
+
 import {
   Box,
   Container,
   Typography,
   Button,
   Paper,
-  ThemeProvider,
-  createTheme,
-  Grid,
   Card,
   CardContent,
 } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import {
   Psychology,
-  HealthAndSafety,
   Medication,
-  Timeline,
   Chat,
-  SmartToy,
   LocalHospital,
   MenuBook,
   Science,
@@ -39,10 +33,10 @@ const fadeInAnimation = keyframes`
 const StyledSection = styled(Paper)(({ theme }) => ({
   paddingTop: theme.spacing(12),
   paddingBottom: theme.spacing(12),
-  backgroundColor: "#FFFFFF",
+  backgroundColor: theme.palette.background.paper,
   borderRadius: 0,
   boxShadow: "none",
-  borderBottom: "1px solid #E8EAED",
+  borderBottom: `1px solid ${theme.palette.divider}`,
   "@media (max-width: 600px)": {
     paddingTop: theme.spacing(8),
     paddingBottom: theme.spacing(8),
@@ -55,15 +49,15 @@ const AnimatedBox = styled(Box)(({ animationDelay = "0s" }) => ({
 
 const FeatureCard = styled(Card)(({ theme }) => ({
   height: "100%",
-  borderRadius: "8px",
-  border: "1px solid #E8EAED",
+  borderRadius: theme.shape.borderRadius,
+  border: `1px solid ${theme.palette.divider}`,
   boxShadow: "none",
   transition: "all 0.2s ease",
-  backgroundColor: "#F8F9FA",
+  backgroundColor: theme.palette.grey[50],
   "&:hover": {
     transform: "translateY(-2px)",
-    boxShadow: "0 2px 8px rgba(44, 62, 80, 0.08)",
-    borderColor: "#D1D5DB",
+    boxShadow: theme.shadows[3],
+    borderColor: theme.palette.grey[300],
   },
 }));
 
@@ -74,90 +68,10 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: "#ECFDF5",
-  color: "#10B981",
+  backgroundColor: theme.palette.success.light + "20", // Light green with transparency
+  color: theme.palette.primary.main,
   marginBottom: theme.spacing(2),
 }));
-
-// Matching theme from DiagnosticToolSection
-const theme = createTheme({
-  palette: {
-    primary: { main: "#10B981" },
-    secondary: { main: "#34D399" },
-    background: {
-      default: "#F0F4F8",
-      paper: "#FFFFFF",
-      hero: "#0F172A",
-      sectionAlternate: "#FFFFFF",
-      sectionDefault: "#F0F4F8",
-    },
-    text: {
-      primary: "#1E293B",
-      secondary: "#475569",
-      heroPrimary: "#FFFFFF",
-      heroSecondary: "rgba(255, 255, 255, 0.85)",
-    },
-  },
-  typography: {
-    fontFamily: "Inter, sans-serif",
-    h2: {
-      fontWeight: 700,
-      fontSize: "2.25rem",
-      marginBottom: "1rem",
-      color: "#1E293B",
-      "@media (min-width:600px)": { fontSize: "2.75rem" },
-    },
-    h3: {
-      fontWeight: 600,
-      fontSize: "1.5rem",
-      color: "#1E293B",
-      marginBottom: "0.5rem",
-    },
-    h5: {
-      fontSize: "1.125rem",
-      color: "#475569",
-      lineHeight: 1.7,
-      "@media (min-width:600px)": { fontSize: "1.25rem" },
-    },
-    body1: {
-      fontSize: "1rem",
-      lineHeight: 1.7,
-      color: "#475569",
-    },
-    body2: {
-      fontSize: "0.875rem",
-      lineHeight: 1.6,
-      color: "#475569",
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: "8px",
-          textTransform: "none",
-          padding: "10px 24px",
-          fontWeight: 600,
-          boxShadow: "none",
-          transition: "background-color 0.3s ease, transform 0.2s ease",
-        },
-        containedPrimary: {
-          color: "white",
-          "&:hover": { backgroundColor: "#059669", transform: "scale(1.03)" },
-        },
-        containedSizeLarge: { padding: "12px 28px", fontSize: "1rem" },
-        outlinedPrimary: {
-          borderColor: "#10B981",
-          color: "#10B981",
-          "&:hover": {
-            backgroundColor: "rgba(37, 99, 235, 0.04)",
-            borderColor: "#1D4ED8",
-          },
-        },
-      },
-    },
-  },
-});
 
 const AiMedicalAssistant = ({ id }) => {
   const navigate = useNavigate();
@@ -195,17 +109,16 @@ const AiMedicalAssistant = ({ id }) => {
   ];
 
   return (
-    <ThemeProvider theme={theme}>
-      <StyledSection
-        id={id}
-        elevation={0}
-        sx={{
-          backgroundColor: "transparent",
-          mt: 0,
-          pt: { xs: 4, md: 6 },
-          pb: { xs: 4, md: 6 },
-        }}
-      >
+    <StyledSection
+      id={id}
+      elevation={0}
+      sx={{
+        backgroundColor: "transparent",
+        mt: 0,
+        pt: { xs: 4, md: 6 },
+        pb: { xs: 4, md: 6 },
+      }}
+    >
         <Container maxWidth="lg">
           {/* Header Section */}
           <AnimatedBox animationDelay="0.1s">
@@ -219,14 +132,14 @@ const AiMedicalAssistant = ({ id }) => {
                 }}
               >
                 <AutoAwesome
-                  sx={{ color: theme.palette.primary.main, fontSize: "2rem" }}
+                  sx={{
+                    color: "primary.main",
+                    fontSize: "2rem",
+                  }}
                 />
                 <Typography variant="h2">
                   Your Intelligent{" "}
-                  <Box
-                    component="span"
-                    sx={{ color: theme.palette.primary.main }}
-                  >
+                  <Box component="span" sx={{ color: "primary.main" }}>
                     Medical Research Companion
                   </Box>
                 </Typography>
@@ -237,7 +150,7 @@ const AiMedicalAssistant = ({ id }) => {
                 sx={{
                   maxWidth: "80ch",
                   mx: "auto",
-                  color: "#475569",
+                  color: "text.secondary",
                   fontWeight: 400,
                   mb: 4,
                 }}
@@ -247,12 +160,13 @@ const AiMedicalAssistant = ({ id }) => {
                 <Box
                   component="span"
                   sx={{
-                    color: theme.palette.primary.main,
+                    color: "primary.main",
                     fontWeight: 600,
-                    backgroundColor: "rgba(37, 99, 235, 0.1)",
+                    backgroundColor: (theme) =>
+                      `${theme.palette.primary.main}1A`,
                     px: 1,
                     py: 0.25,
-                    borderRadius: "4px",
+                    borderRadius: 1,
                   }}
                 >
                   comprehensive guidance on diseases, symptoms, treatments
@@ -269,20 +183,21 @@ const AiMedicalAssistant = ({ id }) => {
                   alignItems: "center",
                   gap: 1,
                   p: 2,
-                  backgroundColor: "rgba(37, 99, 235, 0.05)",
-                  borderRadius: "12px",
-                  border: "1px solid rgba(37, 99, 235, 0.1)",
+                  backgroundColor: (theme) =>
+                    `${theme.palette.primary.main}0D`,
+                  borderRadius: 3,
+                  border: (theme) => `1px solid ${theme.palette.primary.main}1A`,
                   mb: 4,
                 }}
               >
-                <LocalHospital sx={{ color: "#059669" }} />
+                <LocalHospital sx={{ color: "primary.dark" }} />
                 <Typography
                   variant="body2"
-                  sx={{ color: "#059669", fontWeight: 600 }}
+                  sx={{ color: "primary.dark", fontWeight: 600 }}
                 >
                   Educational & Research Platform
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#475569" }}>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   • Always consult qualified healthcare professionals for
                   medical decisions
                 </Typography>
@@ -328,7 +243,7 @@ const AiMedicalAssistant = ({ id }) => {
                         <Typography variant="h3" gutterBottom>
                           {feature.title}
                         </Typography>
-                        <Typography variant="body1" sx={{ color: "#64748B" }}>
+                        <Typography variant="body1" sx={{ color: "text.secondary" }}>
                           {feature.desc}
                         </Typography>
                       </CardContent>
@@ -368,7 +283,7 @@ const AiMedicalAssistant = ({ id }) => {
                         <Typography variant="h3" gutterBottom>
                           {feature.title}
                         </Typography>
-                        <Typography variant="body1" sx={{ color: "#64748B" }}>
+                        <Typography variant="body1" sx={{ color: "text.secondary" }}>
                           {feature.desc}
                         </Typography>
                       </CardContent>
@@ -385,9 +300,9 @@ const AiMedicalAssistant = ({ id }) => {
               sx={{
                 textAlign: "center",
                 p: 4,
-                backgroundColor: "rgba(37, 99, 235, 0.02)",
-                borderRadius: "20px",
-                border: "1px solid rgba(37, 99, 235, 0.08)",
+                backgroundColor: (theme) => `${theme.palette.primary.main}05`,
+                borderRadius: 5,
+                border: (theme) => `1px solid ${theme.palette.primary.main}14`,
               }}
             >
               <Typography variant="h3" gutterBottom sx={{ mb: 3 }}>
@@ -431,12 +346,6 @@ const AiMedicalAssistant = ({ id }) => {
                   onClick={() => navigate("/research")}
                   sx={{
                     minWidth: "180px",
-                    borderColor: theme.palette.primary.main,
-                    color: theme.palette.primary.main,
-                    "&:hover": {
-                      backgroundColor: "rgba(37, 99, 235, 0.04)",
-                      borderColor: "#1D4ED8",
-                    },
                   }}
                 >
                   Medical Library
@@ -446,8 +355,7 @@ const AiMedicalAssistant = ({ id }) => {
           </AnimatedBox>
         </Container>
       </StyledSection>
-    </ThemeProvider>
-  );
-};
+    );
+  };
 
 export default AiMedicalAssistant;

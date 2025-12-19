@@ -1,12 +1,9 @@
-import React from "react";
 import {
   Box,
   Container,
   Typography,
   Button,
   Paper,
-  ThemeProvider,
-  createTheme,
   Grid,
   Divider,
   IconButton,
@@ -27,91 +24,6 @@ import {
   Support,
 } from "@mui/icons-material";
 
-// Matching theme from Hero
-const theme = createTheme({
-  palette: {
-    primary: { main: "#10B981" },
-    secondary: { main: "#34D399" },
-    background: {
-      default: "#F0F4F8",
-      paper: "#FFFFFF",
-      hero: "#0F172A",
-      sectionAlternate: "#FFFFFF",
-      sectionDefault: "#F0F4F8",
-    },
-    text: {
-      primary: "#1E293B",
-      secondary: "#475569",
-      heroPrimary: "#FFFFFF",
-      heroSecondary: "rgba(255, 255, 255, 0.85)",
-    },
-  },
-  typography: {
-    fontFamily: "Inter, sans-serif",
-    h1: {
-      fontWeight: 700,
-      fontSize: "2.5rem",
-      lineHeight: 1.2,
-      color: "white",
-      "@media (min-width:600px)": { fontSize: "3rem" },
-      "@media (min-width:900px)": { fontSize: "3.75rem" },
-      letterSpacing: "-0.5px",
-    },
-    h2: {
-      fontWeight: 700,
-      fontSize: "2.25rem",
-      marginBottom: "1rem",
-      color: "#FFFFFF",
-      "@media (min-width:600px)": { fontSize: "2.75rem" },
-    },
-    h3: {
-      fontWeight: 600,
-      fontSize: "1.5rem",
-      marginBottom: "0.75rem",
-      color: "#FFFFFF",
-    },
-    h4: { fontWeight: 600, fontSize: "1.25rem", color: "#FFFFFF" },
-    h5: { fontWeight: 600, fontSize: "1.125rem", color: "#FFFFFF" },
-    body1: {
-      fontSize: "1rem",
-      lineHeight: 1.7,
-      color: "rgba(255, 255, 255, 0.85)",
-    },
-    body2: {
-      fontSize: "0.875rem",
-      lineHeight: 1.6,
-      color: "rgba(255, 255, 255, 0.7)",
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: "8px",
-          textTransform: "none",
-          padding: "10px 24px",
-          fontWeight: 600,
-          boxShadow: "none",
-          transition: "background-color 0.3s ease, transform 0.2s ease",
-        },
-        containedPrimary: {
-          color: "white",
-          "&:hover": { backgroundColor: "#059669", transform: "scale(1.03)" },
-        },
-        containedSizeLarge: { padding: "12px 28px", fontSize: "1rem" },
-        outlinedPrimary: {
-          borderColor: "rgba(255, 255, 255, 0.3)",
-          color: "white",
-          "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-            borderColor: "rgba(255, 255, 255, 0.5)",
-          },
-        },
-      },
-    },
-  },
-});
-
 const StyledFooter = styled(Paper)(({ theme }) => ({
   paddingTop: theme.spacing(8),
   paddingBottom: theme.spacing(4),
@@ -119,6 +31,7 @@ const StyledFooter = styled(Paper)(({ theme }) => ({
   borderRadius: 0,
   boxShadow: "none",
   marginTop: 0,
+  color: "rgba(255, 255, 255, 0.85)",
 }));
 
 const FooterSection = styled(Box)(({ theme }) => ({
@@ -157,11 +70,11 @@ const BackToTopButton = styled(Button)(({ theme }) => ({
   height: "56px",
   backgroundColor: theme.palette.primary.main,
   color: "white",
-  boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+  boxShadow: `0 4px 12px ${theme.palette.primary.main}4D`,
   "&:hover": {
-    backgroundColor: "#1D4ED8",
+    backgroundColor: theme.palette.primary.dark,
     transform: "translateY(-2px)",
-    boxShadow: "0 6px 16px rgba(37, 99, 235, 0.4)",
+    boxShadow: `0 6px 16px ${theme.palette.primary.main}66`,
   },
   zIndex: 1000,
 }));
@@ -177,18 +90,28 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <ThemeProvider theme={theme}>
-      <StyledFooter elevation={0}>
+    <StyledFooter elevation={0}>
         <Container maxWidth="lg">
           {/* Main Footer Content */}
           <Grid container spacing={4} sx={{ mb: 4 }}>
             {/* Company Info */}
             <Grid item xs={12} md={4}>
               <FooterSection>
-                <Typography variant="h4" gutterBottom sx={{ mb: 2 }}>
+                <Typography
+                  variant="h4"
+                  gutterBottom
+                  sx={{ mb: 2, color: "white" }}
+                >
                   DeepMed
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 3, maxWidth: "300px" }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    mb: 3,
+                    maxWidth: "300px",
+                    color: "rgba(255, 255, 255, 0.85)",
+                  }}
+                >
                   AI-powered medical diagnosis platform providing access to
                   research-grade machine learning models for multiple diseases.
                   Empowering healthcare through innovation.
@@ -206,17 +129,22 @@ const Footer = () => {
                       key={index}
                       sx={{ display: "flex", alignItems: "center", mb: 1 }}
                     >
-                      <Box sx={{ color: theme.palette.primary.main, mr: 1 }}>
+                      <Box sx={{ color: "primary.main", mr: 1 }}>
                         {feature.icon}
                       </Box>
-                      <Typography variant="body2">{feature.text}</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                      >
+                        {feature.text}
+                      </Typography>
                     </Box>
                   ))}
                 </Box>
 
                 {/* Social Media */}
                 <Box>
-                  <Typography variant="h5" gutterBottom>
+                  <Typography variant="h5" gutterBottom sx={{ color: "white" }}>
                     Follow Us
                   </Typography>
                   <Box>
@@ -240,7 +168,7 @@ const Footer = () => {
             {/* Quick Links */}
             <Grid item xs={12} sm={6} md={2}>
               <FooterSection>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h5" gutterBottom sx={{ color: "white" }}>
                   Platform
                 </Typography>
                 <Box>
@@ -256,7 +184,7 @@ const Footer = () => {
             {/* Resources */}
             <Grid item xs={12} sm={6} md={2}>
               <FooterSection>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h5" gutterBottom sx={{ color: "white" }}>
                   Resources
                 </Typography>
                 <Box>
@@ -272,7 +200,7 @@ const Footer = () => {
             {/* Support */}
             <Grid item xs={12} sm={6} md={2}>
               <FooterSection>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h5" gutterBottom sx={{ color: "white" }}>
                   Support
                 </Typography>
                 <Box>
@@ -288,25 +216,38 @@ const Footer = () => {
             {/* Contact Info */}
             <Grid item xs={12} sm={6} md={2}>
               <FooterSection>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h5" gutterBottom sx={{ color: "white" }}>
                   Contact
                 </Typography>
                 <Box>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                    <Email sx={{ mr: 1, color: theme.palette.primary.main }} />
-                    <Typography variant="body2">support@deepmed.com</Typography>
+                    <Email sx={{ mr: 1, color: "primary.main" }} />
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "rgba(255, 255, 255, 0.85)" }}
+                    >
+                      support@deepmed.com
+                    </Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                    <Phone sx={{ mr: 1, color: theme.palette.primary.main }} />
-                    <Typography variant="body2">+1 (555) 123-4567</Typography>
+                    <Phone sx={{ mr: 1, color: "primary.main" }} />
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "rgba(255, 255, 255, 0.85)" }}
+                    >
+                      +1 (555) 123-4567
+                    </Typography>
                   </Box>
                   <Box
                     sx={{ display: "flex", alignItems: "flex-start", mb: 2 }}
                   >
                     <LocationOn
-                      sx={{ mr: 1, mt: 0.5, color: theme.palette.primary.main }}
+                      sx={{ mr: 1, mt: 0.5, color: "primary.main" }}
                     />
-                    <Typography variant="body2">
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "rgba(255, 255, 255, 0.85)" }}
+                    >
                       123 Medical Center Dr
                       <br />
                       Health Innovation District
@@ -385,8 +326,7 @@ const Footer = () => {
           <ArrowUpward />
         </BackToTopButton>
       </StyledFooter>
-    </ThemeProvider>
-  );
-};
+    );
+  };
 
 export default Footer;

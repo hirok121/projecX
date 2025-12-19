@@ -1,12 +1,9 @@
-import React from "react";
 import {
   Box,
   Container,
   Typography,
   Button,
   Paper,
-  ThemeProvider,
-  createTheme,
   Grid,
   Card,
   CardContent,
@@ -33,10 +30,10 @@ const fadeInAnimation = keyframes`
 const StyledSection = styled(Paper)(({ theme }) => ({
   paddingTop: theme.spacing(12),
   paddingBottom: theme.spacing(12),
-  backgroundColor: "#FFFFFF",
+  backgroundColor: theme.palette.background.paper,
   borderRadius: 0,
   boxShadow: "none",
-  borderBottom: "1px solid #E8EAED",
+  borderBottom: `1px solid ${theme.palette.divider}`,
   "@media (max-width: 600px)": {
     paddingTop: theme.spacing(8),
     paddingBottom: theme.spacing(8),
@@ -52,14 +49,14 @@ const FeatureCard = styled(Card)(({ theme }) => ({
   width: "100%",
   display: "flex",
   flexDirection: "column",
-  borderRadius: "8px",
-  border: "1px solid #E8EAED",
+  borderRadius: theme.shape.borderRadius,
+  border: `1px solid ${theme.palette.divider}`,
   boxShadow: "none",
   transition: "all 0.2s ease",
-  backgroundColor: "#FFFFFF",
+  backgroundColor: theme.palette.background.paper,
   "&:hover": {
-    borderColor: "#2C3E50",
-    boxShadow: "0 2px 8px rgba(44, 62, 80, 0.08)",
+    borderColor: theme.palette.text.primary,
+    boxShadow: theme.shadows[3],
   },
 }));
 
@@ -70,85 +67,18 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: "#ECFDF5",
-  color: "#10B981",
+  backgroundColor: theme.palette.success.light + "20",
+  color: theme.palette.primary.main,
   marginBottom: theme.spacing(2),
 }));
 
 const StatBox = styled(Box)(({ theme }) => ({
   textAlign: "center",
   padding: theme.spacing(4),
-  borderRadius: "8px",
-  backgroundColor: "#F8F9FA",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.grey[50],
   border: "none",
 }));
-
-const theme = createTheme({
-  palette: {
-    primary: { main: "#10B981" },
-    secondary: { main: "#34D399" },
-    background: {
-      default: "#F0F4F8",
-      paper: "#FFFFFF",
-      hero: "#0F172A",
-      sectionAlternate: "#FFFFFF",
-      sectionDefault: "#F0F4F8",
-    },
-    text: {
-      primary: "#1E293B",
-      secondary: "#475569",
-    },
-  },
-  typography: {
-    fontFamily: "Inter, sans-serif",
-    h2: {
-      fontWeight: 700,
-      fontSize: "2.25rem",
-      marginBottom: "1rem",
-      color: "#1E293B",
-      "@media (min-width:600px)": { fontSize: "2.75rem" },
-    },
-    h5: {
-      fontSize: "1.125rem",
-      color: "#475569",
-      lineHeight: 1.7,
-      "@media (min-width:600px)": { fontSize: "1.25rem" },
-    },
-    h4: {
-      fontWeight: 600,
-      fontSize: "1.25rem",
-      color: "#1E293B",
-    },
-    h6: {
-      fontWeight: 600,
-      fontSize: "1rem",
-      color: "#1E293B",
-    },
-    body1: {
-      fontSize: "1rem",
-      lineHeight: 1.7,
-      color: "#475569",
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: "8px",
-          textTransform: "none",
-          padding: "10px 24px",
-          fontWeight: 600,
-          boxShadow: "none",
-          transition: "background-color 0.3s ease, transform 0.2s ease",
-        },
-        containedPrimary: {
-          color: "white",
-          "&:hover": { backgroundColor: "#059669", transform: "scale(1.03)" },
-        },
-      },
-    },
-  },
-});
 
 const features = [
   {
@@ -183,19 +113,19 @@ const features = [
 
 const statistics = [
   {
-    icon: <MedicalServices sx={{ fontSize: 40, color: "#10B981" }} />,
+    icon: <MedicalServices sx={{ fontSize: 40, color: "primary.main" }} />,
     value: "15+",
     label: "Disease Categories",
     delay: "0.5s",
   },
   {
-    icon: <Psychology sx={{ fontSize: 40, color: "#10B981" }} />,
+    icon: <Psychology sx={{ fontSize: 40, color: "primary.main" }} />,
     value: "50+",
     label: "ML Models Available",
     delay: "0.6s",
   },
   {
-    icon: <School sx={{ fontSize: 40, color: "#10B981" }} />,
+    icon: <School sx={{ fontSize: 40, color: "primary.main" }} />,
     value: "Published",
     label: "Research Models",
     delay: "0.7s",
@@ -206,17 +136,16 @@ const PlatformOverview = ({ id }) => {
   const navigate = useNavigate();
 
   return (
-    <ThemeProvider theme={theme}>
-      <StyledSection
-        id={id}
-        elevation={0}
-        sx={{
-          backgroundColor: "transparent",
-          mt: 0,
-          pt: { xs: 6, md: 10 },
-          pb: { xs: 6, md: 10 },
-        }}
-      >
+    <StyledSection
+      id={id}
+      elevation={0}
+      sx={{
+        backgroundColor: "transparent",
+        mt: 0,
+        pt: { xs: 6, md: 10 },
+        pb: { xs: 6, md: 10 },
+      }}
+    >
         <Container maxWidth="lg">
           {/* Title section */}
           <Box
@@ -234,11 +163,10 @@ const PlatformOverview = ({ id }) => {
               </Typography>
               <Typography
                 variant="h5"
-                paragraph
                 sx={{
                   maxWidth: "70ch",
                   mx: "auto",
-                  color: "#475569",
+                  color: "text.secondary",
                 }}
               >
                 Access cutting-edge machine learning models from research
@@ -249,20 +177,20 @@ const PlatformOverview = ({ id }) => {
           </Box>
 
           {/* Features Grid */}
-          <Box sx={{ mb: 6, display: "flex", flexWrap: "wrap", gap: 3 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, 1fr)",
+                lg: "repeat(4, 1fr)",
+              },
+              gap: 3,
+              mb: 6,
+            }}
+          >
             {features.map((feature, index) => (
-              <Box
-                key={index}
-                sx={{
-                  flex: {
-                    xs: "0 0 100%",
-                    sm: "0 0 calc(50% - 12px)",
-                    lg: "0 0 calc(25% - 18px)",
-                  },
-                  minWidth: 0,
-                }}
-              >
-                <AnimatedBox animationDelay={feature.delay}>
+              <AnimatedBox key={index} animationDelay={feature.delay}>
                   <FeatureCard>
                     <CardContent sx={{ p: 3 }}>
                       <IconWrapper>{feature.icon}</IconWrapper>
@@ -279,9 +207,8 @@ const PlatformOverview = ({ id }) => {
                     </CardContent>
                   </FeatureCard>
                 </AnimatedBox>
-              </Box>
-            ))}
-          </Box>
+              ))}
+            </Box>
 
           {/* Statistics Bar */}
           <Grid container spacing={3} sx={{ mb: 4, justifyContent: "center" }}>
@@ -292,7 +219,7 @@ const PlatformOverview = ({ id }) => {
                     <Box sx={{ mb: 1 }}>{stat.icon}</Box>
                     <Typography
                       variant="h4"
-                      sx={{ fontWeight: 700, color: "#10B981", mb: 0.5 }}
+                      sx={{ fontWeight: 700, color: "primary.main", mb: 0.5 }}
                     >
                       {stat.value}
                     </Typography>
@@ -321,8 +248,7 @@ const PlatformOverview = ({ id }) => {
           </Box>
         </Container>
       </StyledSection>
-    </ThemeProvider>
-  );
-};
+    );
+  };
 
 export default PlatformOverview;

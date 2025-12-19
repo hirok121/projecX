@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
   Typography,
   Button,
   Paper,
-  ThemeProvider,
-  createTheme,
-  Grid,
   Card,
   CardContent,
   Chip,
@@ -21,7 +17,6 @@ import {
   ArrowForward,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { diagnosisAPI } from "../../services/diagnosisAPI";
 
 // Animations
 const fadeInAnimation = keyframes`
@@ -33,10 +28,10 @@ const fadeInAnimation = keyframes`
 const StyledSection = styled(Paper)(({ theme }) => ({
   paddingTop: theme.spacing(12),
   paddingBottom: theme.spacing(12),
-  backgroundColor: "#F8F9FA",
+  backgroundColor: theme.palette.grey[50],
   borderRadius: 0,
   boxShadow: "none",
-  borderBottom: "1px solid #E8EAED",
+  borderBottom: `1px solid ${theme.palette.divider}`,
   "@media (max-width: 600px)": {
     paddingTop: theme.spacing(8),
     paddingBottom: theme.spacing(8),
@@ -51,16 +46,16 @@ const DiseaseCard = styled(Card)(({ theme }) => ({
   height: "420px",
   display: "flex",
   flexDirection: "column",
-  borderRadius: "8px",
-  border: "1px solid #E8EAED",
+  borderRadius: theme.shape.borderRadius,
+  border: `1px solid ${theme.palette.divider}`,
   boxShadow: "none",
   transition: "all 0.2s ease",
   cursor: "pointer",
-  backgroundColor: "#FFFFFF",
+  backgroundColor: theme.palette.background.paper,
   "&:hover": {
     transform: "translateY(-2px)",
-    boxShadow: "0 4px 12px rgba(44, 62, 80, 0.12)",
-    borderColor: "#2C3E50",
+    boxShadow: theme.shadows[4],
+    borderColor: theme.palette.text.primary,
   },
 }));
 
@@ -71,78 +66,10 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: "#ECFDF5",
-  color: "#10B981",
+  backgroundColor: theme.palette.success.light + "20",
+  color: theme.palette.primary.main,
   marginBottom: theme.spacing(2),
 }));
-
-const theme = createTheme({
-  palette: {
-    primary: { main: "#10B981" },
-    secondary: { main: "#34D399" },
-    success: { main: "#059669" },
-    text: {
-      primary: "#1E293B",
-      secondary: "#475569",
-    },
-  },
-  typography: {
-    fontFamily: "Inter, sans-serif",
-    h2: {
-      fontWeight: 700,
-      fontSize: "2.25rem",
-      marginBottom: "1rem",
-      color: "#1E293B",
-      "@media (min-width:600px)": { fontSize: "2.75rem" },
-    },
-    h5: {
-      fontSize: "1.125rem",
-      color: "#475569",
-      lineHeight: 1.7,
-      "@media (min-width:600px)": { fontSize: "1.25rem" },
-    },
-    h4: {
-      fontWeight: 600,
-      fontSize: "1.4rem",
-      color: "#1E293B",
-    },
-    body1: {
-      fontSize: "1rem",
-      lineHeight: 1.7,
-      color: "#475569",
-    },
-    body2: {
-      fontSize: "0.875rem",
-      lineHeight: 1.6,
-      color: "#64748B",
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: "8px",
-          textTransform: "none",
-          padding: "10px 24px",
-          fontWeight: 600,
-          boxShadow: "none",
-          transition: "all 0.3s ease",
-        },
-        containedPrimary: {
-          color: "white",
-          "&:hover": { backgroundColor: "#059669", transform: "scale(1.03)" },
-        },
-        outlinedPrimary: {
-          borderWidth: "2px",
-          "&:hover": {
-            borderWidth: "2px",
-            backgroundColor: "rgba(37, 99, 235, 0.04)",
-          },
-        },
-      },
-    },
-  },
-});
 
 // Default featured diseases (fallback if API fails)
 const defaultDiseases = [
@@ -193,17 +120,16 @@ const DiseaseShowcase = ({ id }) => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <StyledSection
-        id={id}
-        elevation={0}
-        sx={{
-          backgroundColor: "transparent",
-          mt: 0,
-          pt: { xs: 6, md: 10 },
-          pb: { xs: 6, md: 10 },
-        }}
-      >
+    <StyledSection
+      id={id}
+      elevation={0}
+      sx={{
+        backgroundColor: "transparent",
+        mt: 0,
+        pt: { xs: 6, md: 10 },
+        pb: { xs: 6, md: 10 },
+      }}
+    >
         <Container maxWidth="lg">
           {/* Title section */}
           <Box
@@ -215,20 +141,16 @@ const DiseaseShowcase = ({ id }) => {
             <AnimatedBox animationDelay="0s">
               <Typography variant="h2" gutterBottom sx={{ mb: 2 }}>
                 Diagnose Across{" "}
-                <Box
-                  component="span"
-                  sx={{ color: theme.palette.primary.main }}
-                >
+                <Box component="span" sx={{ color: "primary.main" }}>
                   Multiple Medical Conditions
                 </Box>
               </Typography>
               <Typography
                 variant="h5"
-                paragraph
                 sx={{
                   maxWidth: "70ch",
                   mx: "auto",
-                  color: "#475569",
+                  color: "text.secondary",
                 }}
               >
                 Each disease supported by multiple ML models with different
@@ -238,22 +160,22 @@ const DiseaseShowcase = ({ id }) => {
           </Box>
 
           {/* Disease Cards Grid */}
-          <Box sx={{ mb: 6, display: "flex", flexWrap: "wrap", gap: 4 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, 1fr)",
+                lg: "repeat(4, 1fr)",
+              },
+              gap: 4,
+              mb: 6,
+            }}
+          >
             {diseases.map((disease, index) => (
-              <Box
-                key={disease.id}
-                sx={{
-                  flex: {
-                    xs: "0 0 100%",
-                    sm: "0 0 calc(50% - 16px)",
-                    lg: "0 0 calc(25% - 24px)",
-                  },
-                  minWidth: 0,
-                }}
-              >
-                <AnimatedBox animationDelay={`${0.1 + index * 0.1}s`}>
-                  <DiseaseCard onClick={() => handleDiseaseClick(disease.id)}>
-                    <CardContent sx={{ p: 3 }}>
+              <AnimatedBox key={disease.id} animationDelay={`${0.1 + index * 0.1}s`}>
+                <DiseaseCard onClick={() => handleDiseaseClick(disease.id)}>
+                  <CardContent sx={{ p: 3 }}>
                       <IconWrapper>{disease.icon}</IconWrapper>
                       <Typography
                         variant="h4"
@@ -281,8 +203,9 @@ const DiseaseShowcase = ({ id }) => {
                                 label={modality}
                                 size="small"
                                 sx={{
-                                  backgroundColor: "#EFF6FF",
-                                  color: "#10B981",
+                                  backgroundColor: (theme) =>
+                                    `${theme.palette.primary.main}14`,
+                                  color: "primary.main",
                                   fontSize: "0.75rem",
                                 }}
                               />
@@ -292,8 +215,8 @@ const DiseaseShowcase = ({ id }) => {
                               label={`+${disease.modalities.length - 2}`}
                               size="small"
                               sx={{
-                                backgroundColor: "#F0F4F8",
-                                color: "#475569",
+                                backgroundColor: "grey.100",
+                                color: "text.secondary",
                                 fontSize: "0.75rem",
                               }}
                             />
@@ -331,10 +254,9 @@ const DiseaseShowcase = ({ id }) => {
                           ? "HCV"
                           : disease.category}
                       </Button>
-                    </CardContent>
-                  </DiseaseCard>
-                </AnimatedBox>
-              </Box>
+                  </CardContent>
+                </DiseaseCard>
+              </AnimatedBox>
             ))}
           </Box>
 
@@ -355,8 +277,7 @@ const DiseaseShowcase = ({ id }) => {
           </Box>
         </Container>
       </StyledSection>
-    </ThemeProvider>
-  );
-};
+    );
+  };
 
 export default DiseaseShowcase;

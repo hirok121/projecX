@@ -262,6 +262,8 @@ class DiagnosisService:
         user = diagnosis.user
         disease = diagnosis.disease
 
+        result_link = f"{settings.frontend_url}/diagnosis/{diagnosis.id}"
+
         # Send email
         try:
             EmailService.send_diagnosis_failed_email(
@@ -270,6 +272,7 @@ class DiagnosisService:
                 diagnosis_id=diagnosis.id,
                 disease_name=disease.name,
                 error_message=diagnosis.error_message or "Unknown error",
+                result_link=result_link,
             )
         except Exception as e:
             logger.error(f"Failed to send failure email: {str(e)}")
@@ -281,8 +284,8 @@ class DiagnosisService:
                 user_id=user.id,
                 notification_type=NotificationType.DIAGNOSIS_FAILED,
                 title=f"{disease.name} Diagnosis Failed",
-                message=f"We encountered an issue processing your diagnosis. Error: {diagnosis.error_message or 'Unknown error'}",
-                link=None,
+                message=f"We encountered an issue processing your diagnosis. View details to learn more.",
+                link=result_link,
                 diagnosis_id=diagnosis.id,
             )
         except Exception as e:
