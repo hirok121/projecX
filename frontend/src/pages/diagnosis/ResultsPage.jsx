@@ -3,7 +3,6 @@ import {
   Container,
   Typography,
   Box,
-  Paper,
   Grid,
   Card,
   CardContent,
@@ -11,14 +10,11 @@ import {
   CircularProgress,
   Button,
   Alert,
-  Divider,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { diagnosisAPI } from "../../services/diagnosisAPI";
 import { notificationAPI } from "../../services/notificationAPI";
 import NavBar from "../../components/layout/NavBar";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
 import HomeIcon from "@mui/icons-material/Home";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import PrintIcon from "@mui/icons-material/Print";
@@ -108,38 +104,12 @@ function ResultsPage() {
     return colors[status?.toLowerCase()] || "default";
   };
 
-  const getResultColor = (prediction) => {
-    if (!prediction) return "info";
-    // This is a simple heuristic - adjust based on your needs
-    if (
-      prediction.toLowerCase().includes("positive") ||
-      prediction.toLowerCase().includes("disease")
-    ) {
-      return "error";
-    }
-    if (
-      prediction.toLowerCase().includes("negative") ||
-      prediction.toLowerCase().includes("healthy")
-    ) {
-      return "success";
-    }
-    return "info";
-  };
-
-  const getResultIcon = (prediction) => {
-    const color = getResultColor(prediction);
-    if (color === "success") {
-      return <CheckCircleIcon fontSize="large" />;
-    }
-    return <CancelIcon fontSize="large" />;
-  };
-
   const handleNewPrediction = () => {
     navigate("/diagnosis");
   };
 
-  const handleBack = () => {
-    navigate("/diagnosis");
+  const handleHome = () => {
+    navigate("/");
   };
 
   const handlePrint = () => {
@@ -189,549 +159,374 @@ function ResultsPage() {
     );
   }
 
+  const getProbabilityColor = (probability) => {
+    if (probability >= 0.7) return "error";
+    if (probability >= 0.5) return "warning";
+    return "success";
+  };
+
+  const sortedProbabilities = diagnosis?.probabilities 
+    ? Object.entries(diagnosis.probabilities).sort(([, a], [, b]) => b - a)
+    : [];
+
   return (
     <Box sx={{ backgroundColor: "#F0F4F8", minHeight: "100vh" }}>
       <NavBar />
 
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        {/* Header */}
-        <Typography
-          variant="h3"
-          gutterBottom
-          sx={{ fontWeight: 700, color: "#1976d2", textAlign: "center" }}
-        >
-          Diagnosis Results
-        </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mb: 2, textAlign: "center" }}
-        >
-          {getModalityLabel(diagnosis.modality)} Analysis
-        </Typography>
-
-        {/* Status Chip */}
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
-          <Chip
-            label={diagnosis.status.toUpperCase()}
-            color={getStatusColor(diagnosis.status)}
-            sx={{ fontWeight: 600, fontSize: "0.9rem", px: 2 }}
-          />
+      <Container maxWidth="xl" sx={{ py: 3, px: { xs: 2, sm: 4, md: 8, lg: 12 } }}>
+        {/* Compact Header */}
+        <Box sx={{ textAlign: "center", mb: 3 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: "#1976d2", mb: 0.5 }}>
+            Diagnosis Results
+          </Typography>
+          <Box sx={{ display: "flex", justifyContent: "center", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
+            <Chip 
+              label={getModalityLabel(diagnosis.modality)} 
+              size="small" 
+              variant="outlined"
+            />
+            <Chip
+              label={diagnosis.status.toUpperCase()}
+              color={getStatusColor(diagnosis.status)}
+              size="small"
+            />
+            {diagnosis.id && (
+              <Chip 
+                label={`#${diagnosis.id}`} 
+                size="small" 
+                variant="outlined"
+              />
+            )}
+          </Box>
         </Box>
 
         {/* Main Result Card */}
-        <Card
-          sx={{
-            borderRadius: 3,
-            border: diagnosis.prediction ? `3px solid` : "none",
-            borderColor: diagnosis.prediction
-              ? `${getResultColor(diagnosis.prediction)}.main`
-              : "transparent",
-            boxShadow: 4,
-            mb: 3,
-          }}
-        >
-          <CardContent sx={{ p: 4 }}>
-            {/* Header with Icon */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3,
-              }}
-            >
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                Diagnosis #{diagnosis.id}
-              </Typography>
-              {diagnosis.prediction && (
-                <Box
-                  sx={{
-                    color: `${getResultColor(diagnosis.prediction)}.main`,
-                  }}
-                >
-                  {getResultIcon(diagnosis.prediction)}
-                </Box>
-              )}
-            </Box>
-
-            {/* Patient Information */}
-            {(diagnosis.name || diagnosis.age || diagnosis.sex) && (
-              <Paper
-                sx={{
-                  p: 2,
-                  mb: 3,
-                  backgroundColor: "grey.50",
-                  borderRadius: 2,
-                }}
-              >
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                  sx={{ fontWeight: 600 }}
-                >
-                  Patient Information
-                </Typography>
-                <Grid container spacing={2}>
-                  {diagnosis.name && (
-                    <Grid item xs={12} sm={4}>
-                      <Typography variant="body2" color="text.secondary">
-                        Name
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {diagnosis.name}
-                      </Typography>
-                    </Grid>
-                  )}
-                  {diagnosis.age && (
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="body2" color="text.secondary">
-                        Age
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {diagnosis.age} years
-                      </Typography>
-                    </Grid>
-                  )}
-                  {diagnosis.sex && (
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="body2" color="text.secondary">
-                        Sex
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {diagnosis.sex}
-                      </Typography>
-                    </Grid>
-                  )}
-                </Grid>
-              </Paper>
-            )}
-
-            {/* Prediction Result */}
+        <Card sx={{ borderRadius: 2, boxShadow: 3, mb: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            {/* Prediction Result - Compact */}
             {diagnosis.prediction ? (
-              <Paper
-                sx={{
-                  p: 3,
-                  mb: 3,
-                  backgroundColor: `${getResultColor(diagnosis.prediction)}.50`,
-                  textAlign: "center",
-                  borderRadius: 2,
-                }}
-              >
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  Prediction
-                </Typography>
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontWeight: 700,
-                    color: `${getResultColor(diagnosis.prediction)}.main`,
-                  }}
-                >
-                  {diagnosis.prediction}
-                </Typography>
-              </Paper>
-            ) : (
-              <Alert severity="info" sx={{ mb: 3 }}>
-                {diagnosis.status === "pending" &&
-                  "Your diagnosis is pending. Results will appear here once processing is complete."}
-                {diagnosis.status === "processing" &&
-                  "Your diagnosis is being processed. Please check back shortly."}
-                {diagnosis.status === "failed" &&
-                  `Processing failed: ${diagnosis.error_message || "Unknown error"}`}
-              </Alert>
-            )}
-
-            {/* Confidence Score */}
-            {diagnosis.confidence && (
-              <Box sx={{ mb: 3 }}>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  Confidence Score
-                </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Box
-                      sx={{
-                        width: "100%",
-                        height: 12,
-                        backgroundColor: "grey.200",
-                        borderRadius: 2,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: `${diagnosis.confidence * 100}%`,
-                          height: "100%",
-                          backgroundColor: `${getResultColor(
-                            diagnosis.prediction
-                          )}.main`,
-                          transition: "width 1s ease-in-out",
-                        }}
-                      />
+              <>
+                {/* Patient Info Inline with Prediction */}
+                {(diagnosis.name || diagnosis.age || diagnosis.sex) && (
+                  <Box 
+                    sx={{ 
+                      mb: 3, 
+                      p: 2, 
+                      backgroundColor: "primary.50", 
+                      borderRadius: 1,
+                      border: "1px solid",
+                      borderColor: "primary.100"
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1, fontWeight: 600 }}>
+                      Patient Information
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
+                      {diagnosis.name && (
+                        <Chip 
+                          label={`Name: ${diagnosis.name}`} 
+                          size="medium" 
+                          sx={{ fontWeight: 600, fontSize: "0.875rem" }}
+                        />
+                      )}
+                      {diagnosis.age && (
+                        <Chip 
+                          label={`Age: ${diagnosis.age} years`} 
+                          size="medium" 
+                          variant="outlined"
+                          sx={{ fontWeight: 500 }}
+                        />
+                      )}
+                      {diagnosis.sex && (
+                        <Chip 
+                          label={`Sex: ${diagnosis.sex}`} 
+                          size="medium" 
+                          variant="outlined"
+                          sx={{ fontWeight: 500 }}
+                        />
+                      )}
                     </Box>
                   </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    {(diagnosis.confidence * 100).toFixed(1)}%
+                )}
+
+                <Box sx={{ mb: 2, textAlign: "center", py: 3, backgroundColor: "grey.50", borderRadius: 1 }}>
+                  <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                    Predicted Class
                   </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: "primary.main", mb: 1.5 }}>
+                    {diagnosis.prediction}
+                  </Typography>
+                  {diagnosis.confidence && (
+                    <Chip 
+                      label={`Confidence: ${(diagnosis.confidence * 100).toFixed(1)}%`}
+                      color={getProbabilityColor(diagnosis.confidence)}
+                      size="large"
+                      sx={{ fontWeight: 700, fontSize: "1rem", px: 2, py: 2.5 }}
+                    />
+                  )}
+                </Box>
+
+                {/* Class Probabilities as Chips */}
+                {sortedProbabilities.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 600 }}>
+                      All Classes
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "center" }}>
+                      {sortedProbabilities.map(([className, probability]) => (
+                        <Chip
+                          key={className}
+                          label={`${className}: ${(probability * 100).toFixed(1)}%`}
+                          color={getProbabilityColor(probability)}
+                          variant={className === diagnosis.prediction ? "filled" : "outlined"}
+                          size="medium"
+                          sx={{ 
+                            fontWeight: className === diagnosis.prediction ? 700 : 500,
+                            fontSize: "0.9rem",
+                            px: 1.5,
+                            py: 2
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Patient Info for non-completed predictions */}
+                {(diagnosis.name || diagnosis.age || diagnosis.sex) && (
+                  <Box 
+                    sx={{ 
+                      mb: 2, 
+                      p: 2, 
+                      backgroundColor: "primary.50", 
+                      borderRadius: 1,
+                      border: "1px solid",
+                      borderColor: "primary.100"
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1, fontWeight: 600 }}>
+                      Patient Information
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
+                      {diagnosis.name && (
+                        <Chip 
+                          label={diagnosis.name} 
+                          size="medium" 
+                          icon={<LocalHospitalIcon />}
+                          sx={{ fontWeight: 600, fontSize: "0.875rem" }}
+                        />
+                      )}
+                      {diagnosis.age && (
+                        <Chip 
+                          label={`Age: ${diagnosis.age} years`} 
+                          size="medium" 
+                          variant="outlined"
+                          sx={{ fontWeight: 500 }}
+                        />
+                      )}
+                      {diagnosis.sex && (
+                        <Chip 
+                          label={`Sex: ${diagnosis.sex}`} 
+                          size="medium" 
+                          variant="outlined"
+                          sx={{ fontWeight: 500 }}
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                )}
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  {diagnosis.status === "pending" && "Pending processing..."}
+                  {diagnosis.status === "processing" && "Processing..."}
+                  {diagnosis.status === "failed" && `Failed: ${diagnosis.error_message || "Unknown error"}`}
+                </Alert>
+              </>
+            )}
+
+            {/* Input Data - Compact Tabular */}
+            {diagnosis.input_data && diagnosis.modality?.toLowerCase() === "tabular" && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                  Clinical Data
+                </Typography>
+                <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+                  {Object.entries(diagnosis.input_data).slice(0, 10).map(([feature, value]) => (
+                    <Chip
+                      key={feature}
+                      label={`${feature.replace(/_/g, " ")}: ${value !== null && value !== undefined ? value : "N/A"}`}
+                      size="small"
+                      variant="outlined"
+                    />
+                  ))}
+                  {Object.keys(diagnosis.input_data).length > 10 && (
+                    <Chip
+                      label={`+${Object.keys(diagnosis.input_data).length - 10} more`}
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
                 </Box>
               </Box>
             )}
 
-            {/* Probabilities */}
-            {diagnosis.probabilities && (
-              <Box sx={{ mb: 3 }}>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                  sx={{ fontWeight: 600 }}
-                >
-                  Class Probabilities
-                </Typography>
-                <Paper sx={{ p: 2, backgroundColor: "grey.50" }}>
-                  <Grid container spacing={2}>
-                    {Object.entries(diagnosis.probabilities).map(
-                      ([className, probability]) => (
-                        <Grid item xs={12} sm={6} key={className}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <Typography variant="body2">{className}</Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: 600 }}
-                            >
-                              {(probability * 100).toFixed(1)}%
-                            </Typography>
-                          </Box>
-                        </Grid>
-                      )
-                    )}
-                  </Grid>
-                </Paper>
-              </Box>
-            )}
-
-            {/* Input Data - Tabular */}
-            {diagnosis.input_data && diagnosis.modality?.toLowerCase() === "tabular" && (
-              <Box sx={{ mb: 3 }}>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                  sx={{ fontWeight: 600 }}
-                >
-                  Clinical Input Data
-                </Typography>
-                <Paper
-                  sx={{
-                    p: 2,
-                    backgroundColor: "grey.50",
-                    maxHeight: 400,
-                    overflow: "auto",
-                  }}
-                >
-                  <Grid container spacing={2}>
-                    {Object.entries(diagnosis.input_data).map(
-                      ([feature, value]) => (
-                        <Grid item xs={12} sm={6} md={4} key={feature}>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ textTransform: "capitalize" }}
-                          >
-                            {feature.replace(/_/g, " ")}
-                          </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {value !== null && value !== undefined
-                              ? value.toString()
-                              : "N/A"}
-                          </Typography>
-                        </Grid>
-                      )
-                    )}
-                  </Grid>
-                </Paper>
-              </Box>
-            )}
-
-            {/* Input Data - Image */}
+            {/* Input File - Compact */}
             {diagnosis.input_file && diagnosis.modality?.toLowerCase() !== "tabular" && (
-              <Box sx={{ mb: 3 }}>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                  sx={{ fontWeight: 600 }}
-                >
-                  Input Image
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
+                  Input File
                 </Typography>
-                <Paper sx={{ p: 2, backgroundColor: "grey.50" }}>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontFamily: "monospace", wordBreak: "break-all" }}
-                  >
-                    {diagnosis.input_file}
-                  </Typography>
-                </Paper>
+                <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.75rem", wordBreak: "break-all" }}>
+                  {diagnosis.input_file}
+                </Typography>
               </Box>
             )}
 
-            {/* Metadata */}
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                flexWrap: "wrap",
-                mt: 3,
-              }}
-            >
+            {/* Metadata - Compact */}
+            <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", pt: 1, borderTop: "1px solid", borderColor: "divider" }}>
               {diagnosis.created_at && (
                 <Chip
-                  label={`Created: ${new Date(
-                    diagnosis.created_at
-                  ).toLocaleString()}`}
+                  label={new Date(diagnosis.created_at).toLocaleString()}
                   size="small"
                   variant="outlined"
-                />
-              )}
-              {diagnosis.completed_at && (
-                <Chip
-                  label={`Completed: ${new Date(
-                    diagnosis.completed_at
-                  ).toLocaleString()}`}
-                  size="small"
-                  variant="outlined"
+                  sx={{ fontSize: "0.7rem" }}
                 />
               )}
               {diagnosis.processing_time && (
                 <Chip
-                  label={`Processing Time: ${diagnosis.processing_time.toFixed(
-                    2
-                  )}s`}
+                  label={`${diagnosis.processing_time.toFixed(2)}s`}
                   size="small"
                   variant="outlined"
+                  sx={{ fontSize: "0.7rem" }}
                 />
               )}
             </Box>
           </CardContent>
         </Card>
 
-        {/* Disease Information */}
-        {(diagnosis.disease_name || diagnosis.disease_description || diagnosis.disease_blog_link) && (
-          <Card
-            sx={{
-              mt: 3,
-              borderRadius: 3,
-              boxShadow: 4,
-            }}
-          >
-            <CardContent sx={{ p: 4 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={3}>
-                <LocalHospitalIcon sx={{ color: "success.main", fontSize: 28 }} />
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                  Disease Information
-                </Typography>
-              </Box>
-              <Divider sx={{ mb: 3 }} />
-              
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Disease Name
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                    {diagnosis.disease_name || "Unknown"}
-                  </Typography>
-                </Grid>
-                
-                {diagnosis.disease_description && (
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Description
+        {/* Disease & Classifier Info - Compact */}
+        {(diagnosis.disease_name || diagnosis.classifier_name) && (
+          <Card sx={{ borderRadius: 2, boxShadow: 3, mb: 2 }}>
+            <CardContent sx={{ p: 2 }}>
+              <Grid container spacing={2}>
+                {diagnosis.disease_name && (
+                  <Grid item xs={12} sm={6}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                      <LocalHospitalIcon sx={{ color: "success.main", fontSize: 20 }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        Disease
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      {diagnosis.disease_name}
                     </Typography>
-                    <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
-                      {diagnosis.disease_description}
-                    </Typography>
-                  </Grid>
-                )}
-                
-                {diagnosis.disease_blog_link && (
-                  <Grid item xs={12}>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      startIcon={<ArticleIcon />}
-                      href={diagnosis.disease_blog_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      sx={{ mt: 1 }}
-                    >
-                      Learn More About This Disease
-                    </Button>
-                  </Grid>
-                )}
-              </Grid>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Classifier Information */}
-        {(diagnosis.classifier_name || diagnosis.classifier_description || 
-          diagnosis.classifier_blog_link || diagnosis.classifier_paper_link) && (
-          <Card
-            sx={{
-              mt: 3,
-              borderRadius: 3,
-              boxShadow: 4,
-            }}
-          >
-            <CardContent sx={{ p: 4 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={3}>
-                <ScienceIcon sx={{ color: "primary.main", fontSize: 28 }} />
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                  Classifier Information
-                </Typography>
-              </Box>
-              <Divider sx={{ mb: 3 }} />
-              
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Classifier Name
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {diagnosis.classifier_name || "Unknown"}
-                  </Typography>
-                </Grid>
-                
-                <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Modality
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {getModalityLabel(diagnosis.modality)}
-                  </Typography>
-                </Grid>
-                
-                {diagnosis.classifier_description && (
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Description
-                    </Typography>
-                    <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
-                      {diagnosis.classifier_description}
-                    </Typography>
-                  </Grid>
-                )}
-                
-                <Grid item xs={12}>
-                  <Box display="flex" gap={2} flexWrap="wrap">
-                    {diagnosis.classifier_blog_link && (
+                    {diagnosis.disease_description && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+                        {diagnosis.disease_description.slice(0, 200)}...
+                      </Typography>
+                    )}
+                    {diagnosis.disease_blog_link && (
                       <Button
-                        variant="contained"
-                        color="primary"
+                        size="small"
                         startIcon={<ArticleIcon />}
-                        href={diagnosis.classifier_blog_link}
+                        href={diagnosis.disease_blog_link}
                         target="_blank"
-                        rel="noopener noreferrer"
                       >
-                        Learn More About Classifier
+                        Learn More
                       </Button>
                     )}
-                    {diagnosis.classifier_paper_link && (
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        startIcon={<LinkIcon />}
-                        href={diagnosis.classifier_paper_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        View Research Paper
-                      </Button>
+                  </Grid>
+                )}
+                
+                {diagnosis.classifier_name && (
+                  <Grid item xs={12} sm={6}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                      <ScienceIcon sx={{ color: "primary.main", fontSize: 20 }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        Classifier
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      {diagnosis.classifier_name}
+                    </Typography>
+                    {diagnosis.classifier_description && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+                        {diagnosis.classifier_description.slice(0, 200)}...
+                      </Typography>
                     )}
-                  </Box>
-                </Grid>
+                    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                      {diagnosis.classifier_blog_link && (
+                        <Button
+                          size="small"
+                          startIcon={<ArticleIcon />}
+                          href={diagnosis.classifier_blog_link}
+                          target="_blank"
+                        >
+                          Learn More
+                        </Button>
+                      )}
+                      {diagnosis.classifier_paper_link && (
+                        <Button
+                          size="small"
+                          startIcon={<LinkIcon />}
+                          href={diagnosis.classifier_paper_link}
+                          target="_blank"
+                        >
+                          Research Paper
+                        </Button>
+                      )}
+                    </Box>
+                  </Grid>
+                )}
               </Grid>
             </CardContent>
           </Card>
         )}
 
-        {/* Important Notice */}
-        <Paper
-          sx={{
-            mt: 4,
-            p: 3,
-            backgroundColor: "warning.50",
-            border: "2px solid",
-            borderColor: "warning.main",
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>
-            ⚠️ Important Medical Disclaimer
+        {/* Disclaimer - Compact */}
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          <Typography variant="caption" sx={{ fontWeight: 600 }}>
+            ⚠️ Medical Disclaimer
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            These predictions are generated by AI models for research and
-            educational purposes only. They should NOT be used as the sole basis
-            for medical diagnosis or treatment decisions. Always consult with
-            qualified healthcare professionals for proper medical evaluation and
-            advice.
+          <Typography variant="caption" display="block">
+            AI predictions for research/educational use only. Consult healthcare professionals for medical decisions.
           </Typography>
-        </Paper>
+        </Alert>
 
-        {/* Action Buttons */}
+        {/* Action Buttons - Compact */}
         <Box
           sx={{
-            mt: 4,
             display: "flex",
-            gap: 2,
+            gap: 1,
             justifyContent: "center",
             flexWrap: "wrap",
-            "@media print": {
-              display: "none",
-            },
+            "@media print": { display: "none" },
           }}
         >
           <Button
             variant="outlined"
-            size="large"
+            size="small"
             startIcon={<HomeIcon />}
-            onClick={handleBack}
+            onClick={handleHome}
           >
-            Back to Diseases
+            Home
           </Button>
           <Button
             variant="contained"
-            size="large"
+            size="small"
             startIcon={<RestartAltIcon />}
             onClick={handleNewPrediction}
           >
-            New Prediction
+            New
           </Button>
           <Button
-            variant="contained"
-            size="large"
-            color="success"
+            variant="outlined"
+            size="small"
             startIcon={<PrintIcon />}
             onClick={handlePrint}
           >
-            Print Results
+            Print
           </Button>
         </Box>
       </Container>

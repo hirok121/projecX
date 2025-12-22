@@ -11,15 +11,11 @@ import {
   Container,
   Grid,
   CircularProgress,
-  IconButton,
   Snackbar,
 } from "@mui/material";
 import {
-  Person,
   Email,
   CheckCircle,
-  PhotoCamera,
-  CalendarToday,
   Edit,
   Save,
   Close,
@@ -31,26 +27,23 @@ import { useProfile, useProfileUpdate } from "../../hooks/useProfile";
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: 2,
-    "&:hover fieldset": { borderColor: "#2563EB" },
-    "&.Mui-focused fieldset": { borderColor: "#2563EB" },
+    "&:hover fieldset": { borderColor: "#10B981" },
+    "&.Mui-focused fieldset": { borderColor: "#10B981" },
   },
 };
 
 const emptyForm = {
   first_name: "",
   last_name: "",
-  birthday: "",
   phone_number: "",
   country: "",
   city: "",
-  timezone: "",
 };
 
 export default function ProfilePage() {
   const { profile, loading, error, refetch } = useProfile();
   const {
     updateProfile,
-    updateProfilePicture,
     updating,
     updateError,
     updateSuccess,
@@ -66,17 +59,18 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!normalizedProfile) return;
-    const [first = "", last = ""] =
-      normalizedProfile.full_name?.split(" ") ?? [];
+    
+    // Split full_name into first and last name
+    const nameParts = normalizedProfile.full_name?.trim().split(/\s+/) || [];
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
 
     setFormData({
-      first_name: first,
-      last_name: last,
-      birthday: normalizedProfile.birthday ?? "",
-      phone_number: normalizedProfile.phone_number ?? "",
-      country: normalizedProfile.location ?? "",
-      city: normalizedProfile.city ?? "",
-      timezone: normalizedProfile.timezone ?? "",
+      first_name: firstName,
+      last_name: lastName,
+      phone_number: normalizedProfile.phone_number || "",
+      country: normalizedProfile.country || "",
+      city: normalizedProfile.city || "",
     });
   }, [normalizedProfile]);
 
@@ -99,20 +93,18 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     if (!validate()) return;
+    
+    // Combine first and last name into full_name
+    const full_name = `${formData.first_name.trim()} ${formData.last_name.trim()}`.trim();
+    
     await updateProfile({
-      ...formData,
-      birthday: formData.birthday || null,
+      full_name,
+      phone_number: formData.phone_number || null,
+      country: formData.country || null,
+      city: formData.city || null,
     });
     setEditing(false);
     refetch();
-  };
-
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      await updateProfilePicture(file);
-      refetch();
-    }
   };
 
   if (loading) {
@@ -156,21 +148,12 @@ export default function ProfilePage() {
         <Card sx={{ p: 3, mb: 4 }}>
           <Grid container spacing={3} alignItems="center">
             <Grid item>
-              <Box position="relative">
-                <Avatar
-                  src={normalizedProfile?.avatar_url}
-                  sx={{ width: 100, height: 100 }}
-                >
-                  {normalizedProfile?.username?.[0]?.toUpperCase()}
-                </Avatar>
-                <IconButton
-                  component="label"
-                  sx={{ position: "absolute", bottom: 0, right: 0 }}
-                >
-                  <PhotoCamera />
-                  <input hidden type="file" onChange={handleAvatarChange} />
-                </IconButton>
-              </Box>
+              <Avatar
+                src={normalizedProfile?.avatar_url}
+                sx={{ width: 100, height: 100 }}
+              >
+                {normalizedProfile?.username?.[0]?.toUpperCase()}
+              </Avatar>
             </Grid>
 
             <Grid item xs>
@@ -193,7 +176,19 @@ export default function ProfilePage() {
 
             <Grid item>
               {!editing ? (
-                <Button startIcon={<Edit />} onClick={() => setEditing(true)}>
+                <Button 
+                  startIcon={<Edit />} 
+                  onClick={() => setEditing(true)}
+                  sx={{
+                    color: "#10B981",
+                    borderColor: "#10B981",
+                    "&:hover": {
+                      backgroundColor: "#ECFDF5",
+                      borderColor: "#059669",
+                    },
+                  }}
+                  variant="outlined"
+                >
                   Edit
                 </Button>
               ) : (
@@ -201,15 +196,34 @@ export default function ProfilePage() {
                   <Button
                     startIcon={<Close />}
                     onClick={() => setEditing(false)}
+                    sx={{
+                      color: "#6B7280",
+                      "&:hover": {
+                        backgroundColor: "#F3F4F6",
+                      },
+                      mr: 1,
+                    }}
                   >
                     Cancel
                   </Button>
                   <Button
                     startIcon={
-                      updating ? <CircularProgress size={16} /> : <Save />
+                      updating ? <CircularProgress size={16} sx={{ color: "white" }} /> : <Save />
                     }
                     onClick={handleSave}
                     disabled={updating}
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "#10B981",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "#059669",
+                      },
+                      "&:disabled": {
+                        backgroundColor: "#D1FAE5",
+                        color: "#6EE7B7",
+                      },
+                    }}
                   >
                     Save
                   </Button>
@@ -225,11 +239,9 @@ export default function ProfilePage() {
             {[
               ["first_name", "First Name"],
               ["last_name", "Last Name"],
-              ["birthday", "Birthday", "date"],
               ["phone_number", "Phone"],
               ["country", "Country"],
               ["city", "City"],
-              ["timezone", "Timezone"],
             ].map(([name, label, type]) => (
               <Grid item xs={12} sm={6} key={name}>
                 <TextField
@@ -242,7 +254,9 @@ export default function ProfilePage() {
                   disabled={!editing}
                   error={!!errors[name]}
                   helperText={errors[name]}
-                  InputLabelProps={type === "date" ? { shrink: true } : {}}
+                  slotProps={{
+                    inputLabel: type === "date" ? { shrink: true } : {},
+                  }}
                   sx={fieldSx}
                 />
               </Grid>

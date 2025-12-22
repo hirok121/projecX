@@ -15,12 +15,12 @@ import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import Container from "@mui/material/Container";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, createTheme, ThemeProvider } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import LinearProgress from "@mui/material/LinearProgress";
 import Chip from "@mui/material/Chip";
-import Badge from "@mui/material/Badge";
 import { Link as RouterLink } from "react-router-dom";
+import PropTypes from "prop-types";
 
 // Icons - Updated with more appropriate medical/health icons
 import MenuIcon from "@mui/icons-material/Menu";
@@ -39,7 +39,6 @@ import ForumIcon from "@mui/icons-material/Forum";
 import InfoIcon from "@mui/icons-material/Info";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import LoginIcon from "@mui/icons-material/Login";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { useAuth } from "../../context/AuthContext";
@@ -53,6 +52,16 @@ const LinkBehavior = forwardRef((props, ref) => {
   return <RouterLink ref={ref} to={href} {...other} />;
 });
 LinkBehavior.displayName = "LinkBehavior";
+LinkBehavior.propTypes = {
+  href: PropTypes.string.isRequired,
+};
+
+// Create isolated theme for NavBar
+const navBarTheme = createTheme({
+  typography: {
+    fontSize: 14,
+  },
+});
 
 function NavBar() {
   const navigate = useNavigate();
@@ -302,7 +311,7 @@ function NavBar() {
   ];
 
   return (
-    <>
+    <ThemeProvider theme={navBarTheme}>
       {/* Enhanced AppBar */}
       <AppBar
         position="static"
@@ -501,7 +510,7 @@ function NavBar() {
                           boxShadow: "0 2px 8px rgba(16, 185, 129, 0.2)",
                         }}
                         alt={user?.full_name || user?.email || "User"}
-                        src={user?.profile_picture || undefined}
+                        src={user?.avatar_url || undefined}
                       >
                         {user?.full_name ? (
                           user.full_name.charAt(0).toUpperCase()
@@ -675,7 +684,7 @@ function NavBar() {
                   fontSize: "1.8rem",
                 }}
                 alt={user?.full_name || user?.email || "User"}
-                src={user?.profile_picture || undefined}
+                src={user?.avatar_url || undefined}
               >
                 {user?.full_name ? (
                   user.full_name.charAt(0).toUpperCase()
@@ -810,7 +819,7 @@ function NavBar() {
           </Box>
         </Drawer>
       )}{" "}
-    </>
+    </ThemeProvider>
   );
 }
 

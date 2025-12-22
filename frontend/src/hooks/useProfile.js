@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import userAPI from '../services/userAPI';
+import logger from '../utils/logger';
 
 export const useProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -75,30 +76,6 @@ export const useProfileUpdate = () => {
     }
   };
 
-  const updateProfilePicture = async (file) => {
-    try {
-      setUpdating(true);
-      setUpdateError(null);
-      setUpdateSuccess(false);
-      
-      const updatedProfile = await userAPI.updateProfilePicture(file);
-      setUpdateSuccess(true);
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setUpdateSuccess(false), 3000);
-      
-      return updatedProfile;
-    } catch (err) {
-      const errorMessage = err.response?.data?.detail || 
-                          err.response?.data?.message || 
-                          'Failed to update profile picture';
-      setUpdateError(errorMessage);
-      throw err;
-    } finally {
-      setUpdating(false);
-    }
-  };
-
   const clearMessages = () => {
     setUpdateError(null);
     setUpdateSuccess(false);
@@ -106,7 +83,6 @@ export const useProfileUpdate = () => {
 
   return {
     updateProfile,
-    updateProfilePicture,
     updating,
     updateError,
     updateSuccess,

@@ -8,7 +8,7 @@ import {
   Divider,
   IconButton,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Email,
   Phone,
@@ -23,6 +23,20 @@ import {
   Security,
   Support,
 } from "@mui/icons-material";
+
+// Create isolated green theme for Footer
+const footerTheme = createTheme({
+  palette: {
+    primary: {
+      main: "#10B981", // Green
+      dark: "#059669",
+      light: "#34D399",
+    },
+  },
+  typography: {
+    fontSize: 14,
+  },
+});
 
 const StyledFooter = styled(Paper)(({ theme }) => ({
   paddingTop: theme.spacing(8),
@@ -90,7 +104,8 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <StyledFooter elevation={0}>
+    <ThemeProvider theme={footerTheme}>
+      <StyledFooter elevation={0}>
         <Container maxWidth="lg">
           {/* Main Footer Content */}
           <Grid container spacing={4} sx={{ mb: 4 }}>
@@ -322,11 +337,12 @@ const Footer = () => {
         </Container>
 
         {/* Back to Top Button */}
-        <BackToTopButton onClick={scrollToTop}>
+        {/* <BackToTopButton onClick={scrollToTop}>
           <ArrowUpward />
-        </BackToTopButton>
+        </BackToTopButton> */}
       </StyledFooter>
-    );
-  };
+    </ThemeProvider>
+  );
+};
 
 export default Footer;

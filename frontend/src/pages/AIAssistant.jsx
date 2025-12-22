@@ -17,6 +17,7 @@ import ChatSidebar from "../components/aiassistant/ChatSidebar";
 import ChatMessages from "../components/aiassistant/ChatMessages";
 import ChatInput from "../components/aiassistant/ChatInput";
 import { aiAssistantService } from "../services/aiAssistantAPI";
+import logger from "../utils/logger";
 
 // Helper function to generate unique IDs
 const generateUniqueId = (prefix = "") => {
