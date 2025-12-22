@@ -239,7 +239,7 @@ const PlatformOverview = ({ id }) => {
                 variant="contained"
                 color="primary"
                 size="large"
-                onClick={() => navigate("/about")}
+                onClick={() => navigate("/how-it-works")}
                 sx={{ minWidth: "200px" }}
               >
                 Learn How It Works

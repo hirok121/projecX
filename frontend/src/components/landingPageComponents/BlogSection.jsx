@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Container,
@@ -69,7 +70,11 @@ const BlogSection = ({ id }) => {
 
   // Navigation handlers
   const handleViewAllArticles = () => {
-    navigate("/blogs");
+    navigate("/blogs", { state: { scrollToTop: true } });
+    // Immediate scroll to top
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
   };
 
   return (
@@ -202,5 +207,9 @@ const BlogSection = ({ id }) => {
       </StyledSection>
     );
   };
+
+BlogSection.propTypes = {
+  id: PropTypes.string,
+};
 
 export default BlogSection;

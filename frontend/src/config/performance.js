@@ -58,6 +58,7 @@ export const LazyComponents = {
   Contact: lazy(() => import('../pages/public/Contact')),
   Methodology: lazy(() => import('../pages/public/Methodology')),
   FAQ: lazy(() => import('../pages/public/FAQ')),
+  HowItWorks: lazy(() => import('../pages/public/HowItWorks')),
   NotFound: lazy(() => import('../pages/public/NotFound')),
     // Authentication Components (use existing pages/auth)
   SignIn: lazy(() => import('../pages/auth/SignIn')),

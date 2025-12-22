@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AuthCallback from "./components/auth/AuthCallback";
 import AuthDebugPanel from "./components/auth/AuthDebugPanel";
 import { AuthProvider } from "./context/AuthContext";
+import FloatingAIButton from "./components/aiassistant/FloatingAIButton";
 
 // add constants for API and AUTH configuration
 import { FEATURES } from "./config/constants";
@@ -34,6 +35,10 @@ function App() {
         <Suspense fallback={<LoadingFallback />}>
           {/* Global AuthDebugPanel for development */}
           {FEATURES.ENABLE_DEBUG_CONSOLE && <AuthDebugPanel />}
+          
+          {/* Floating AI Assistant Button */}
+          <FloatingAIButton />
+          
           <Routes>
             {/* Main application routes */}
             <Route path="/" element={<LazyComponents.Home />} />{" "}
@@ -205,6 +210,7 @@ function App() {
               element={<LazyComponents.CommunityForum />}
             />
             <Route path="/about" element={<LazyComponents.About />} />
+            <Route path="/how-it-works" element={<LazyComponents.HowItWorks />} />
             <Route path="/contact" element={<LazyComponents.Contact />} />
             <Route
               path="/methodology"
