@@ -264,3 +264,52 @@ class EmailService:
             f"📧 Sending diagnosis failure email to {to_email} for diagnosis {diagnosis_id}"
         )
         return EmailService._send_email(to_email, subject, html_content)
+
+    @staticmethod
+    def send_contact_form_email(
+        name: str, email: str, subject: str, message: str
+    ) -> bool:
+        """
+        Send contact form submission to admin email.
+
+        Args:
+            name: Sender's name
+            email: Sender's email
+            subject: Message subject
+            message: Message content
+
+        Returns:
+            bool: True if email sent successfully
+        """
+        admin_email = "hirokreza121@gmail.com"
+        email_subject = f"Contact Form: {subject}"
+
+        html_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #10B981;">New Contact Form Submission</h2>
+                    
+                    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                        <p><strong>From:</strong> {name}</p>
+                        <p><strong>Email:</strong> {email}</p>
+                        <p><strong>Subject:</strong> {subject}</p>
+                    </div>
+                    
+                    <div style="background-color: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #2c3e50;">Message:</h3>
+                        <p style="white-space: pre-wrap;">{message}</p>
+                    </div>
+                    
+                    <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+                    <p style="color: gray; font-size: 12px; text-align: center;">
+                        This message was sent via the {settings.app_name} contact form<br>
+                        Reply directly to {email} to respond to the sender
+                    </p>
+                </div>
+            </body>
+        </html>
+        """
+
+        logger.info(f"📧 Sending contact form email from {email} to {admin_email}")
+        return EmailService._send_email(admin_email, email_subject, html_content)

@@ -81,7 +81,7 @@ function Contact() {
     {
       icon: <EmailIcon />,
       title: "Email",
-      content: "hirokrezawww1@gmail.com",
+      content: "hirokreza121@gmail.com",
       description: "Send us an email anytime",
     },
     {
@@ -111,7 +111,7 @@ function Contact() {
         <Box sx={{ py: 4 }}>
           <Box sx={{ textAlign: "center", mb: 4 }}>
             <ContactSupportIcon
-              sx={{ fontSize: "4rem", color: "#2563EB", mb: 2 }}
+              sx={{ fontSize: "4rem", color: "#10B981", mb: 2 }}
             />
             <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
               Contact Us
@@ -195,8 +195,11 @@ function Contact() {
                         py: 1.5,
                         fontSize: "1rem",
                         borderRadius: "12px",
-                        background: "linear-gradient(135deg, #2563EB, #7C3AED)",
+                        background: "linear-gradient(135deg, #10B981, #059669)",
                         alignSelf: "flex-end",
+                        "&:hover": {
+                          background: "linear-gradient(135deg, #059669, #047857)",
+                        },
                       }}
                     >
                       {loading ? "Sending..." : "Send Message"}
@@ -214,7 +217,7 @@ function Contact() {
                 <List sx={{ p: 0 }}>
                   {contactInfo.map((info, index) => (
                     <ListItem key={index} sx={{ px: 0, mb: 2 }}>
-                      <ListItemIcon sx={{ color: "#2563EB", minWidth: "40px" }}>
+                      <ListItemIcon sx={{ color: "#10B981", minWidth: "40px" }}>
                         {info.icon}
                       </ListItemIcon>
                       <ListItemText
@@ -251,12 +254,13 @@ function Contact() {
             sx={{
               p: 3,
               borderRadius: "16px",
-              backgroundColor: "#f8f9fa",
+              backgroundColor: "#ECFDF5",
+              border: "1px solid #D1FAE5",
             }}
           >
             <Typography
               variant="h6"
-              sx={{ fontWeight: 700, mb: 2, color: "#dc3545" }}
+              sx={{ fontWeight: 700, mb: 2, color: "#10B981" }}
             >
               Emergency?
             </Typography>

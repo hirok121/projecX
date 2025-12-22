@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.db.connection import get_db
 from app.schemas.user import User, UserUpdate
+from app.schemas.contact import ContactMessage, ContactResponse
 from app.services.user_service import UserService
+from app.services.email_service import EmailService
 from app.routers.auth import get_current_user
 from app.core.logging import track_endpoint_performance, log_endpoint_activity
 from app.utils.helpers import get_client_ip
@@ -575,3 +577,77 @@ def demote_user_from_staff(
     )
 
     return {"message": f"User {user.email} demoted from staff successfully"}
+
+
+@router.post("/contact/me/", response_model=ContactResponse)
+@track_endpoint_performance("users", "contact_form_submission")
+def submit_contact_form(
+    contact_data: ContactMessage,
+    request: Request,
+):
+    """Submit contact form (public endpoint)."""
+    client_ip = get_client_ip(request)
+
+    # Log contact form submission
+    log_endpoint_activity(
+        "users",
+        "contact_form_submitted",
+        user_email=contact_data.email,
+        ip_address=client_ip,
+        additional_info={
+            "name": contact_data.name,
+            "subject": contact_data.subject,
+            "message_length": len(contact_data.message),
+        },
+    )
+
+    # Send email to admin
+    try:
+        email_sent = EmailService.send_contact_form_email(
+            name=contact_data.name,
+            email=contact_data.email,
+            subject=contact_data.subject,
+            message=contact_data.message,
+        )
+
+        if email_sent:
+            log_endpoint_activity(
+                "users",
+                "contact_email_sent",
+                user_email=contact_data.email,
+                ip_address=client_ip,
+                additional_info={
+                    "name": contact_data.name,
+                    "subject": contact_data.subject,
+                },
+            )
+        else:
+            log_endpoint_activity(
+                "users",
+                "contact_email_failed",
+                user_email=contact_data.email,
+                ip_address=client_ip,
+                success=False,
+                additional_info={
+                    "name": contact_data.name,
+                    "subject": contact_data.subject,
+                },
+            )
+    except Exception as e:
+        log_endpoint_activity(
+            "users",
+            "contact_email_error",
+            user_email=contact_data.email,
+            ip_address=client_ip,
+            success=False,
+            additional_info={
+                "name": contact_data.name,
+                "subject": contact_data.subject,
+                "error": str(e),
+            },
+        )
+
+    return ContactResponse(
+        status="success",
+        message="Thank you for contacting us! We'll get back to you soon.",
+    )
