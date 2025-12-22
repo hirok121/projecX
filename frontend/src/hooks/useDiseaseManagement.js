@@ -25,7 +25,10 @@ export function useDiseaseManagement() {
       return { success: true };
     } catch (err) {
       console.error("Failed to load diseases:", err);
-      return { success: false, error: "Failed to load diseases" };
+      return { 
+        success: false, 
+        error: err.response?.data?.detail || "Failed to load diseases" 
+      };
     } finally {
       setLoading(false);
     }
@@ -99,7 +102,10 @@ export function useDiseaseManagement() {
       await loadDiseases();
       return { success: true, message: "Disease deleted successfully" };
     } catch (err) {
-      return { success: false, error: "Failed to delete disease" };
+      return { 
+        success: false, 
+        error: err.response?.data?.detail || "Failed to delete disease" 
+      };
     }
   };
 
@@ -115,7 +121,7 @@ export function useDiseaseManagement() {
     } catch (err) {
       return { 
         success: false, 
-        error: "Failed to toggle disease status" 
+        error: err.response?.data?.detail || "Failed to toggle disease status" 
       };
     }
   };

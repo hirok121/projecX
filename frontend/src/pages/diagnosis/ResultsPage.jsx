@@ -27,6 +27,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import ScienceIcon from "@mui/icons-material/Science";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import logger from "../../utils/logger";
+import Footer from "../../components/landingPageComponents/Footer.jsx"
 
 function ResultsPage() {
   const { predictionId } = useParams();
@@ -734,6 +735,7 @@ function ResultsPage() {
           </Button>
         </Box>
       </Container>
+      <Footer/>
     </Box>
   );
 }

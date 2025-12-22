@@ -17,6 +17,7 @@ import ClassifierInfoCard from "../../components/diagnosis/ClassifierInfoCard";
 import PatientInfoSection from "../../components/diagnosis/PatientInfoSection";
 import ClinicalDataSection from "../../components/diagnosis/ClinicalDataSection";
 import DiagnosisResultDialog from "../../components/diagnosis/DiagnosisResultDialog";
+import Footer from "../../components/landingPageComponents/Footer.jsx"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import logger from "../../utils/logger";
 
@@ -313,6 +314,7 @@ function PredictionForm() {
         onGoHome={handleGoHome}
         onNewDiagnosis={handleNewDiagnosis}
       />
+      <Footer/>
     </Box>
   );
 }

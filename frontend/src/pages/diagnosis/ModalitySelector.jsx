@@ -13,6 +13,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { diseaseAPI } from "../../services/diseaseAPI";
 import NavBar from "../../components/layout/NavBar";
 import DiseaseInfoCard from "../../components/diagnosis/DiseaseInfoCard";
+import Footer from "../../components/landingPageComponents/Footer.jsx"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import logger from "../../utils/logger";
 
@@ -212,6 +213,7 @@ function ModalitySelector() {
           </Box>
         )}
       </Container>
+    <Footer/>
     </Box>
   );
 }

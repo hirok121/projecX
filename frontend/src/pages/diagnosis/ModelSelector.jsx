@@ -12,6 +12,7 @@ import { diseaseAPI } from "../../services/diseaseAPI";
 import { classifierAPI } from "../../services/classifierAPI";
 import NavBar from "../../components/layout/NavBar";
 import ClassifierCard from "../../components/diagnosis/ClassifierCard";
+import Footer from "../../components/landingPageComponents/Footer.jsx"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import logger from "../../utils/logger";
 
@@ -149,6 +150,7 @@ function ModelSelector() {
           ))}
         </Box>
       </Container>
+        <Footer />
     </Box>
   );
 }

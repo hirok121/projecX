@@ -34,7 +34,10 @@ export function useClassifierManagement() {
       return { success: true };
     } catch (err) {
       console.error("Failed to load classifiers:", err);
-      return { success: false, error: "Failed to load classifiers" };
+      return { 
+        success: false, 
+        error: err.response?.data?.detail || "Failed to load classifiers" 
+      };
     }
   };
 
@@ -279,7 +282,10 @@ export function useClassifierManagement() {
       await loadClassifiers();
       return { success: true, message: "Classifier deleted successfully" };
     } catch (err) {
-      return { success: false, error: "Failed to delete classifier" };
+      return { 
+        success: false, 
+        error: err.response?.data?.detail || "Failed to delete classifier" 
+      };
     }
   };
 
@@ -295,7 +301,7 @@ export function useClassifierManagement() {
     } catch (err) {
       return { 
         success: false, 
-        error: "Failed to toggle classifier status" 
+        error: err.response?.data?.detail || "Failed to toggle classifier status" 
       };
     }
   };

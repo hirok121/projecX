@@ -176,6 +176,18 @@ const websiteTheme = createTheme({
     "0 68px 144px rgba(44, 62, 80, 0.46)",
   ],
   components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          "& .MuiButton-root": {
+            fontSize: "1.1rem", // Preserve navbar button font size
+          },
+          "& .MuiTypography-root": {
+            fontSize: "inherit", // Preserve navbar typography
+          },
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {

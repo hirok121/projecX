@@ -27,7 +27,7 @@ export const useUserDiagnoses = (params = {}) => {
         setError(null);
       } catch (err) {
         logger.error("Error fetching user diagnoses:", err);
-        setError(err);
+        setError(err.response?.data?.detail || err.message || "Failed to fetch diagnoses");
         setData([]);
       } finally {
         setIsLoading(false);

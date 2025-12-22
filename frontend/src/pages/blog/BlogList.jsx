@@ -16,6 +16,7 @@ import { Search, LocalOffer, Article } from "@mui/icons-material";
 import { blogAPI } from "../../services/blogAPI";
 import NavBar from "../../components/layout/NavBar";
 import BlogCard from "../../components/common/BlogCard";
+import Footer from "../../components/landingPageComponents/Footer.jsx"
 import logger from "../../utils/logger";
 
 function BlogList() {
@@ -276,6 +277,7 @@ function BlogList() {
           )}
         </Container>
       </Box>
+        <Footer />
     </>
   );
 }
