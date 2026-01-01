@@ -15,8 +15,13 @@ logger = logging.getLogger(__name__)
 class StorageService:
     """Service for managing disease and classifier storage directories."""
 
-    # Base directory for all model storage (convert to absolute path)
-    BASE_DIR = Path(settings.ml_models_path).resolve()
+    # Base directory for all model storage
+    # Resolve relative to the backend directory (parent of app/)
+    _backend_dir = Path(__file__).parent.parent  # backend/
+    BASE_DIR = (_backend_dir / settings.ml_models_path).resolve()
+
+    # Log the resolved path for debugging
+    logger.info(f"🗂️  ML Models BASE_DIR resolved to: {BASE_DIR}")
 
     @classmethod
     def create_disease_directory(cls, disease_storage_path: str) -> Path:
@@ -146,6 +151,10 @@ class StorageService:
             disease_storage_path, classifier_model_path
         )
 
+        # Ensure directory exists before saving files
+        classifier_dir.mkdir(parents=True, exist_ok=True)
+        logger.info(f"📁 Ensuring classifier directory exists: {classifier_dir}")
+
         saved_paths = {}
         for filename, content in files.items():
             file_path = classifier_dir / filename
@@ -178,7 +187,9 @@ class StorageService:
         Returns:
             str: Full path to the file
         """
-        return str(cls.BASE_DIR / disease_storage_path / classifier_model_path / filename)
+        return str(
+            cls.BASE_DIR / disease_storage_path / classifier_model_path / filename
+        )
 
     @classmethod
     def get_full_storage_path(

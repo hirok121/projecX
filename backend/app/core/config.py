@@ -58,9 +58,8 @@ class Settings(BaseSettings):
     max_tokens: int = 4000
 
     # ML Models storage settings
-    ml_models_path: str = os.path.join(
-        Path(__file__).parent.parent.parent, "ml_models"
-    )  # Absolute path to backend/ml_models directory
+    ml_models_path: str = "./ml_models"  # Relative to backend directory
+
     # Supabase storage (optional)
     supabase_url: Optional[str] = None
     supabase_service_role_key: Optional[str] = None
