@@ -17,8 +17,7 @@ class StorageService:
 
     # Base directory for all model storage
     # Resolve relative to the backend directory (parent of app/)
-    _backend_dir = Path(__file__).parent.parent  # backend/
-    BASE_DIR = (_backend_dir / settings.ml_models_path).resolve()
+    BASE_DIR = Path(settings.ml_models_path).resolve()
 
     # Log the resolved path for debugging
     logger.info(f"🗂️  ML Models BASE_DIR resolved to: {BASE_DIR}")
