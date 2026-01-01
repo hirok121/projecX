@@ -40,7 +40,6 @@ export const LazyComponents = {
   PredictionForm: lazy(() => import('../pages/diagnosis/PredictionForm')),
   ResultsPage: lazy(() => import('../pages/diagnosis/ResultsPage')),
   
-  Analytics: lazy(() => import('../pages/AnalyticsPage')),
   AIAssistant: lazy(() => import('../pages/AIAssistant')),
   PatientEducation: lazy(() => import('../pages/PatientEducation')),
   // Blog pages
@@ -56,7 +55,6 @@ export const LazyComponents = {
   // Public Pages
   About: lazy(() => import('../pages/public/About')),
   Contact: lazy(() => import('../pages/public/Contact')),
-  Methodology: lazy(() => import('../pages/public/Methodology')),
   FAQ: lazy(() => import('../pages/public/FAQ')),
   HowItWorks: lazy(() => import('../pages/public/HowItWorks')),
   NotFound: lazy(() => import('../pages/public/NotFound')),

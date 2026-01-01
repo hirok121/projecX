@@ -92,14 +92,6 @@ function App() {
               }
             />{" "}
             <Route
-              path="/analytics"
-              element={
-                <ProtectedRoute>
-                  <LazyComponents.Analytics />
-                </ProtectedRoute>
-              }
-            />{" "}
-            <Route
               path="/my-health-dashboard"
               element={
                 <ProtectedRoute>
@@ -212,10 +204,7 @@ function App() {
             <Route path="/about" element={<LazyComponents.About />} />
             <Route path="/how-it-works" element={<LazyComponents.HowItWorks />} />
             <Route path="/contact" element={<LazyComponents.Contact />} />
-            <Route
-              path="/methodology"
-              element={<LazyComponents.Methodology />}
-            />
+
             {/* Authentication routes */}
             <Route path="/signin" element={<LazyComponents.SignIn />} />
             <Route path="/signup" element={<LazyComponents.SignUp />} />
