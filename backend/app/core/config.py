@@ -53,7 +53,8 @@ class Settings(BaseSettings):
     max_tokens: int = 4000
 
     # ML Models storage settings (Railway volume mounted at /app/backend/classifiers)
-    ml_models_path: str = "./classifiers"  # Relative to backend directory
+    # Root directory in Railway is /backend, so paths are relative to /app/backend
+    ml_models_path: str = "classifiers"  # Will be /app/backend/classifiers in Railway
 
     # AWS S3 / Railway Bucket storage settings
     aws_endpoint_url: Optional[str] = None  # For S3-compatible services like Railway

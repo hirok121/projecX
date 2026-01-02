@@ -59,9 +59,7 @@ class StorageService:
         Raises:
             OSError: If directory creation fails
         """
-        classifier_dir = (
-            Path(settings.ml_models_path) / disease_storage_path / classifier_model_path
-        )
+        classifier_dir = cls.BASE_DIR / disease_storage_path / classifier_model_path
         classifier_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info(f"✅ Created classifier directory: {classifier_dir}")

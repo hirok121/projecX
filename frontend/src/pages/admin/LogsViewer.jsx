@@ -21,6 +21,7 @@ import {
   Chip,
   Stack,
   Tooltip,
+  Container,
 } from "@mui/material";
 import {
   Download as DownloadIcon,
@@ -30,6 +31,7 @@ import {
   FolderZip as ZipIcon,
 } from "@mui/icons-material";
 import api from "../../services/api";
+import AdminNavBar from "../../components/admin/AdminNavbar";
 
 const LogsViewer = () => {
   const [logs, setLogs] = useState([]);
@@ -157,135 +159,143 @@ const LogsViewer = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper sx={{ p: 3 }}>
-        {/* Header */}
-        <Box
-          sx={{
-            mb: 3,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Box>
-            <Typography variant="h4" gutterBottom>
-              System Logs
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              View, download, and manage application logs
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={2}>
-            <Button
-              variant="outlined"
-              startIcon={<RefreshIcon />}
-              onClick={fetchLogs}
-              disabled={loading}
-            >
-              Refresh
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={
-                downloading ? <CircularProgress size={20} /> : <ZipIcon />
-              }
-              onClick={handleDownloadAll}
-              disabled={loading || logs.length === 0 || downloading}
-            >
-              Download All as ZIP
-            </Button>
-          </Stack>
-        </Box>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#F8F9FA" }}>
+      <AdminNavBar />
 
-        {/* Summary */}
-        {!loading && logs.length > 0 && (
-          <Box sx={{ mb: 2 }}>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Paper sx={{ p: 3 }}>
+          {/* Header */}
+          <Box
+            sx={{
+              mb: 3,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box>
+              <Typography variant="h4" gutterBottom>
+                System Logs
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                View, download, and manage application logs
+              </Typography>
+            </Box>
             <Stack direction="row" spacing={2}>
-              <Chip label={`${logs.length} log files`} color="primary" />
-              <Chip
-                label={`Total size: ${totalSize.toFixed(2)} MB`}
-                color="secondary"
-              />
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={fetchLogs}
+                disabled={loading}
+              >
+                Refresh
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={
+                  downloading ? <CircularProgress size={20} /> : <ZipIcon />
+                }
+                onClick={handleDownloadAll}
+                disabled={loading || logs.length === 0 || downloading}
+              >
+                Download All as ZIP
+              </Button>
             </Stack>
           </Box>
-        )}
 
-        {/* Error Alert */}
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-            {error}
-          </Alert>
-        )}
+          {/* Summary */}
+          {!loading && logs.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Stack direction="row" spacing={2}>
+                <Chip label={`${logs.length} log files`} color="primary" />
+                <Chip
+                  label={`Total size: ${totalSize.toFixed(2)} MB`}
+                  color="secondary"
+                />
+              </Stack>
+            </Box>
+          )}
 
-        {/* Loading */}
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : logs.length === 0 ? (
-          <Alert severity="info">No log files found</Alert>
-        ) : (
-          /* Log Files Table */
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>File Name</TableCell>
-                  <TableCell>Size</TableCell>
-                  <TableCell>Last Modified</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {logs.map((log) => (
-                  <TableRow key={log.name} hover>
-                    <TableCell>
-                      <Typography
-                        variant="body2"
-                        sx={{ fontFamily: "monospace" }}
-                      >
-                        {log.name}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{formatFileSize(log.size)}</TableCell>
-                    <TableCell>{formatDate(log.modified)}</TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="View Log">
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => handleViewFile(log.name)}
-                        >
-                          <ViewIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Download">
-                        <IconButton
-                          size="small"
-                          color="info"
-                          onClick={() => handleDownloadFile(log.name)}
-                        >
-                          <DownloadIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Clear (Superuser only)">
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleClearFile(log.name)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
+          {/* Error Alert */}
+          {error && (
+            <Alert
+              severity="error"
+              sx={{ mb: 2 }}
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
+          )}
+
+          {/* Loading */}
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : logs.length === 0 ? (
+            <Alert severity="info">No log files found</Alert>
+          ) : (
+            /* Log Files Table */
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>File Name</TableCell>
+                    <TableCell>Size</TableCell>
+                    <TableCell>Last Modified</TableCell>
+                    <TableCell align="right">Actions</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Paper>
+                </TableHead>
+                <TableBody>
+                  {logs.map((log) => (
+                    <TableRow key={log.name} hover>
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontFamily: "monospace" }}
+                        >
+                          {log.name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{formatFileSize(log.size)}</TableCell>
+                      <TableCell>{formatDate(log.modified)}</TableCell>
+                      <TableCell align="right">
+                        <Tooltip title="View Log">
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => handleViewFile(log.name)}
+                          >
+                            <ViewIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Download">
+                          <IconButton
+                            size="small"
+                            color="info"
+                            onClick={() => handleDownloadFile(log.name)}
+                          >
+                            <DownloadIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Clear (Superuser only)">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleClearFile(log.name)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Paper>
+      </Container>
 
       {/* View Dialog */}
       <Dialog

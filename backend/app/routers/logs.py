@@ -17,14 +17,15 @@ from app.db.connection import get_db
 from app.models.user import User
 from app.routers.auth import get_current_user
 from app.core.logging import log_endpoint_activity, track_endpoint_performance
+from app.core.config import settings
 import logging
 
 logger = logging.getLogger("admin")
 
 router = APIRouter(prefix="/admin/logs", tags=["admin-logs"])
 
-# Path to logs directory
-LOGS_DIR = Path(__file__).parent.parent.parent / "classifiers" / "logs"
+# Path to logs directory (consistent with logging.py)
+LOGS_DIR = Path(settings.ml_models_path) / "logs"
 
 
 def require_admin(current_user: User = Depends(get_current_user)):
