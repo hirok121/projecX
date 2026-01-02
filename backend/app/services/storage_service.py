@@ -16,7 +16,7 @@ class StorageService:
     """Service for managing disease and classifier storage directories."""
 
     # Base directory for all model storage
-    # Resolve relative to the backend directory (parent of app/)
+    # Resolve relative to the backend directory
     BASE_DIR = Path(settings.ml_models_path).resolve()
 
     # Log the resolved path for debugging
