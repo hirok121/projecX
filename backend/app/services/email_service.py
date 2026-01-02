@@ -1,8 +1,7 @@
-import smtplib
-import ssl
-from email.mime.text import MIMEText
+from __future__ import print_function
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 from typing import Optional
-from datetime import datetime
 from pathlib import Path
 from app.core.config import settings
 import logging
@@ -11,7 +10,16 @@ logger = logging.getLogger("email")
 
 
 class EmailService:
-    """Simple email service for sending verification and reset emails"""
+    """Email service using Brevo (Sendinblue) API for transactional emails"""
+
+    @staticmethod
+    def _get_api_instance():
+        """Get configured Brevo API instance"""
+        configuration = sib_api_v3_sdk.Configuration()
+        configuration.api_key["api-key"] = settings.brevo_api_key
+        return sib_api_v3_sdk.TransactionalEmailsApi(
+            sib_api_v3_sdk.ApiClient(configuration)
+        )
 
     @staticmethod
     def _load_template(template_name: str) -> str:
@@ -31,61 +39,47 @@ class EmailService:
 
     @staticmethod
     def _send_email(to_email: str, subject: str, html_content: str) -> bool:
-        """Internal method to send email"""
+        """Internal method to send email via Brevo API"""
         try:
-            # Create HTML message
-            message = MIMEText(html_content, "html")
-            message["Subject"] = subject
-
-            # Format sender with display name
-            if settings.smtp_from_email:
-                from_name = getattr(settings, "smtp_from_name", "ProjectX")
-                message["From"] = f"{from_name} <{settings.smtp_from_email}>"
-            else:
-                message["From"] = "ProjectX <noreply@projectx.com>"
-
-            message["To"] = to_email
-
-            # Send email
-            if settings.smtp_enabled and settings.smtp_from_email:
-                logger.info(f"Attempting to send email to {to_email} via SMTP")
-                context = ssl.create_default_context()
-                with smtplib.SMTP(settings.smtp_server, settings.smtp_port) as server:
-                    logger.info(
-                        f"Connected to SMTP server {settings.smtp_server}:{settings.smtp_port}"
-                    )
-
-                    if settings.smtp_tls:
-                        server.starttls(context=context)
-                        logger.info("TLS started successfully")
-
-                    if settings.smtp_username and settings.smtp_password:
-                        server.login(settings.smtp_username, settings.smtp_password)
-                        logger.info(
-                            f"SMTP login successful for {settings.smtp_username}"
-                        )
-
-                    server.sendmail(
-                        settings.smtp_from_email, to_email, message.as_string()
-                    )
-                    logger.info(f"Email sent successfully to {to_email}")
-
-                return True
-            else:
-                # Log for development (when SMTP is disabled)
-                logger.info(f"Email sending disabled. Subject: {subject} to {to_email}")
+            # Check if Brevo API is configured
+            if not settings.brevo_api_key or not settings.brevo_from_email:
+                # Log for development (when Brevo is not configured)
+                logger.warning(
+                    f"Brevo API not configured. Subject: {subject} to {to_email}"
+                )
                 print(f"📧 Email: {subject}")
                 print(f"📩 To: {to_email}")
+                print(f"⚠️  Brevo API not configured - email not sent")
                 return True
 
-        except smtplib.SMTPAuthenticationError as e:
-            logger.error(f"SMTP Authentication failed for {to_email}: {str(e)}")
-            return False
-        except smtplib.SMTPRecipientsRefused as e:
-            logger.error(f"SMTP Recipients refused for {to_email}: {str(e)}")
-            return False
-        except smtplib.SMTPServerDisconnected as e:
-            logger.error(f"SMTP Server disconnected for {to_email}: {str(e)}")
+            # Initialize Brevo API
+            api_instance = EmailService._get_api_instance()
+
+            # Create email object
+            send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+                to=[{"email": to_email}],
+                sender={
+                    "name": settings.brevo_from_name,
+                    "email": settings.brevo_from_email,
+                },
+                subject=subject,
+                html_content=html_content,
+            )
+
+            # Send email via Brevo API
+            logger.info(f"Attempting to send email to {to_email} via Brevo API")
+            api_response = api_instance.send_transac_email(send_smtp_email)
+
+            # Get message ID if available
+            message_id = getattr(api_response, "message_id", "N/A")
+            logger.info(
+                f"Email sent successfully to {to_email}. Message ID: {message_id}"
+            )
+
+            return True
+
+        except ApiException as e:
+            logger.error(f"Brevo API Exception when sending to {to_email}: {str(e)}")
             return False
         except Exception as e:
             logger.error(f"Failed to send email to {to_email}: {str(e)}")
@@ -206,7 +200,7 @@ class EmailService:
         diagnosis_id: int,
         disease_name: str,
         error_message: str,
-        result_link: str = None,
+        result_link: Optional[str] = None,
     ) -> bool:
         """
         Send email notification when diagnosis fails.

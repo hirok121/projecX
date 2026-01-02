@@ -27,15 +27,10 @@ class Settings(BaseSettings):
     # Frontend settings
     frontend_url: str = "http://localhost:5173"
 
-    # Email settings
-    smtp_enabled: bool = False
-    smtp_server: str = "smtp.gmail.com"
-    smtp_port: int = 587
-    smtp_tls: bool = True
-    smtp_username: Optional[str] = None
-    smtp_password: Optional[str] = None
-    smtp_from_email: Optional[str] = None
-    smtp_from_name: str = "DeepMed"
+    # Brevo Email API settings
+    brevo_api_key: Optional[str] = None
+    brevo_from_email: Optional[str] = None
+    brevo_from_name: str = "DeepMed"
 
     # Superuser settings
     superuser_email: str = ""
