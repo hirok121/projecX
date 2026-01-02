@@ -17,7 +17,7 @@ from app.services.user_service import UserService
 from app.routers.auth import get_current_user
 from app.models.user import User
 from app.core.logging import app_logger
-from app.services.s3_storage import S3Storage
+from app.services.supabase_storage import SupabaseStorage
 from app.core.config import settings
 import uuid
 
@@ -158,9 +158,7 @@ def create_blog(
             # build path: <slug>/<uuid>_<filename>
             filename = f"{uuid.uuid4().hex}_{image.filename}"
             path = f"{slug}/{filename}"
-            image_url = S3Storage.upload_file(
-                settings.aws_s3_bucket_name, path, image.file
-            )
+            image_url = SupabaseStorage.upload_file("blogs", path, image.file)
 
         payload = BlogCreate(
             title=title,
@@ -233,9 +231,7 @@ def update_blog(
             filename = f"{uuid.uuid4().hex}_{image.filename}"
             current_slug = slug if slug else getattr(blog, "slug")
             path = f"{current_slug}/{filename}"
-            image_url = S3Storage.upload_file(
-                settings.aws_s3_bucket_name, path, image.file
-            )
+            image_url = SupabaseStorage.upload_file("blogs", path, image.file)
 
         # Build update payload
         payload = BlogUpdate(

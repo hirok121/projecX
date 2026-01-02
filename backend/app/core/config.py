@@ -56,14 +56,7 @@ class Settings(BaseSettings):
     # Root directory in Railway is /backend, so paths are relative to /app/backend
     ml_models_path: str = "classifiers"  # Will be /app/backend/classifiers in Railway
 
-    # AWS S3 / Railway Bucket storage settings
-    aws_endpoint_url: Optional[str] = None  # For S3-compatible services like Railway
-    aws_s3_bucket_name: Optional[str] = None
-    aws_default_region: str = "us-east-1"
-    aws_access_key_id: Optional[str] = None
-    aws_secret_access_key: Optional[str] = None
-
-    # Supabase storage (deprecated - use S3 storage instead)
+    # Supabase storage
     supabase_url: Optional[str] = None
     supabase_service_role_key: Optional[str] = None
     supabase_public_bucket: str = "blogs"
