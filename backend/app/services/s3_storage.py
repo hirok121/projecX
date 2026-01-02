@@ -110,10 +110,15 @@ class S3Storage:
 
         # Upload to S3
         try:
-            extra_args = {
-                "ContentType": content_type,
-                "ACL": "public-read",  # Make file publicly accessible
-            }
+            # Railway buckets don't support ACL - only set if not using Railway endpoint
+            extra_args = {"ContentType": content_type}
+
+            # Only add ACL for AWS S3, not Railway
+            if (
+                not settings.aws_endpoint_url
+                or "railway" not in settings.aws_endpoint_url.lower()
+            ):
+                extra_args["ACL"] = "public-read"
 
             s3_client.put_object(Bucket=bucket, Key=path, Body=data, **extra_args)
 
@@ -125,13 +130,16 @@ class S3Storage:
             )
             raise RuntimeError(f"Failed to upload file to S3: {str(e)}")
 
-        # Construct public URL
+        # Construct public URL (presigned for Railway, direct for AWS S3)
         public_url = cls.get_public_url(bucket, path)
         return public_url
 
     @classmethod
     def get_public_url(cls, bucket: Optional[str], path: str) -> str:
         """Generate public URL for an object in S3.
+
+        For Railway buckets, generates a presigned URL with maximum expiration (10 years).
+        For AWS S3 with public-read ACL, returns direct public URL.
 
         Args:
             bucket: bucket name (uses default from settings if None)
@@ -143,8 +151,29 @@ class S3Storage:
         bucket = bucket or settings.aws_s3_bucket_name
         endpoint_url = settings.aws_endpoint_url
 
-        if endpoint_url:
-            # For S3-compatible services (Railway), construct URL with endpoint
+        # For Railway buckets, use presigned URLs with very long expiration
+        if endpoint_url and "railway" in endpoint_url.lower():
+            try:
+                s3_client = cls._get_s3_client()
+                # Set to 10 years (effectively permanent)
+                expires_in = 315360000  # 10 years in seconds
+                presigned_url = s3_client.generate_presigned_url(
+                    "get_object",
+                    Params={"Bucket": bucket, "Key": path},
+                    ExpiresIn=expires_in,
+                )
+                logger.debug(
+                    f"Generated presigned URL (10 year expiry) for Railway bucket: {path}"
+                )
+                return presigned_url
+            except Exception as e:
+                logger.error(f"Failed to generate presigned URL: {str(e)}")
+                # Fallback to direct URL
+                base_url = endpoint_url.rstrip("/")
+                return f"{base_url}/{bucket}/{path}"
+
+        # For other S3-compatible services, try direct URL
+        elif endpoint_url:
             base_url = endpoint_url.rstrip("/")
             public_url = f"{base_url}/{bucket}/{path}"
         else:
