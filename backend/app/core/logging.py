@@ -13,7 +13,7 @@ def setup_logging():
 
     # Create logs directory if it doesn't exist
     log_dir = Path("classifiers/logs")
-    log_dir.mkdir(exist_ok=True)
+    log_dir.mkdir(parents=True, exist_ok=True)
 
     # Create main app log file handler (for common/basic logs)
     main_file_handler = TimedRotatingFileHandler(
