@@ -64,3 +64,38 @@ def read_root():
 def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+
+@app.get("/debug/logs")
+def get_recent_logs():
+    """Get recent log files (Railway: shows what's in container, won't persist)."""
+    from pathlib import Path
+    import os
+
+    log_dir = Path("logs")
+    logs_info = {
+        "log_dir_exists": log_dir.exists(),
+        "log_dir_path": str(log_dir.absolute()),
+        "files": [],
+    }
+
+    if log_dir.exists():
+        for log_file in log_dir.glob("*.log*"):
+            try:
+                size = os.path.getsize(log_file)
+                # Read last 50 lines
+                with open(log_file, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
+                    last_lines = lines[-50:] if len(lines) > 50 else lines
+
+                logs_info["files"].append(
+                    {
+                        "name": log_file.name,
+                        "size_bytes": size,
+                        "last_50_lines": last_lines,
+                    }
+                )
+            except Exception as e:
+                logs_info["files"].append({"name": log_file.name, "error": str(e)})
+
+    return logs_info

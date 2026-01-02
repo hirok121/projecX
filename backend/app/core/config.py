@@ -57,8 +57,8 @@ class Settings(BaseSettings):
     ]
     max_tokens: int = 4000
 
-    # ML Models storage settings
-    ml_models_path: str = "./ml_models"  # Relative to backend directory
+    # ML Models storage settings (Railway volume mounted at /app/backend/classifiers)
+    ml_models_path: str = "./classifiers"  # Relative to backend directory
 
     # Supabase storage (optional)
     supabase_url: Optional[str] = None

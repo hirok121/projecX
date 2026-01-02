@@ -65,6 +65,7 @@ class StorageService:
         classifier_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info(f"✅ Created classifier directory: {classifier_dir}")
+        print(f"✅ Created classifier directory: {classifier_dir}")
         return classifier_dir
 
     @classmethod
