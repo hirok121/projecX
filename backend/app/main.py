@@ -10,6 +10,7 @@ from app.routers import (
     notification,
     diagnosis,
     blog,
+    logs,
 )
 from app.core.config import settings
 from app.core.logging import app_logger
@@ -51,6 +52,7 @@ app.include_router(diagnosis.router)
 app.include_router(notification.router)
 app.include_router(admin_diagnosis.router)
 app.include_router(blog.router)
+app.include_router(logs.router)
 
 
 @app.get("/")
@@ -72,7 +74,7 @@ def get_recent_logs():
     from pathlib import Path
     import os
 
-    log_dir = Path("logs")
+    log_dir = Path("classifiers/logs")
     logs_info = {
         "log_dir_exists": log_dir.exists(),
         "log_dir_path": str(log_dir.absolute()),

@@ -35,10 +35,10 @@ function App() {
         <Suspense fallback={<LoadingFallback />}>
           {/* Global AuthDebugPanel for development */}
           {FEATURES.ENABLE_DEBUG_CONSOLE && <AuthDebugPanel />}
-          
+
           {/* Floating AI Assistant Button */}
           <FloatingAIButton />
-          
+
           <Routes>
             {/* Main application routes */}
             <Route path="/" element={<LazyComponents.Home />} />{" "}
@@ -165,6 +165,14 @@ function App() {
               }
             />
             <Route
+              path="/admin/logs"
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <LazyComponents.LogsViewer />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/ai-assistant"
               element={
                 <ProtectedRoute>
@@ -202,9 +210,11 @@ function App() {
               element={<LazyComponents.CommunityForum />}
             />
             <Route path="/about" element={<LazyComponents.About />} />
-            <Route path="/how-it-works" element={<LazyComponents.HowItWorks />} />
+            <Route
+              path="/how-it-works"
+              element={<LazyComponents.HowItWorks />}
+            />
             <Route path="/contact" element={<LazyComponents.Contact />} />
-
             {/* Authentication routes */}
             <Route path="/signin" element={<LazyComponents.SignIn />} />
             <Route path="/signup" element={<LazyComponents.SignUp />} />

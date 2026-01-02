@@ -80,7 +80,8 @@ function AdminNavbar() {
       icon: Upload,
     },
     { label: "Blog Management", path: "/admin/blogs", icon: LibraryBooks },
-    { label: "Debug Console", path: "/admin/debug", icon: BugReport },
+    { label: "System Logs", path: "/admin/logs", icon: BugReport },
+    { label: "Debug Console", path: "/admin/debug", icon: Security },
     {
       label: "Analytics",
       path: "/admin/under-construction",

@@ -12,7 +12,7 @@ def setup_logging():
     """Setup logging configuration with main app log for common events"""
 
     # Create logs directory if it doesn't exist
-    log_dir = Path("logs")
+    log_dir = Path("classifiers/logs")
     log_dir.mkdir(exist_ok=True)
 
     # Create main app log file handler (for common/basic logs)
@@ -74,8 +74,8 @@ def get_logger(name: str) -> logging.Logger:
 
     # Don't add handlers if already configured
     if not logger.handlers:
-        log_dir = Path("logs")
-        log_dir.mkdir(exist_ok=True)
+        log_dir = Path("classifiers/logs")
+        log_dir.mkdir(parents=True, exist_ok=True)
 
         # Create feature-specific file handler
         file_handler = TimedRotatingFileHandler(
