@@ -17,7 +17,7 @@ from app.services.user_service import UserService
 from app.routers.auth import get_current_user
 from app.models.user import User
 from app.core.logging import app_logger
-from app.services.supabase_storage import SupabaseStorage
+from app.services.s3_storage import S3Storage
 from app.core.config import settings
 import uuid
 
@@ -45,7 +45,7 @@ def list_blogs(
             limit=limit,
             offset=offset,
         )
-        
+
         # Convert to BlogWithAuthor to include author details
         blogs_with_author = []
         for blog in blogs:
@@ -69,7 +69,7 @@ def list_blogs(
                 ),
             }
             blogs_with_author.append(BlogWithAuthor(**blog_dict))
-        
+
         app_logger.info(f"Listed {len(blogs_with_author)} blogs")
         return blogs_with_author
     except Exception as e:
@@ -158,8 +158,8 @@ def create_blog(
             # build path: <slug>/<uuid>_<filename>
             filename = f"{uuid.uuid4().hex}_{image.filename}"
             path = f"{slug}/{filename}"
-            image_url = SupabaseStorage.upload_file(
-                settings.supabase_public_bucket, path, image.file
+            image_url = S3Storage.upload_file(
+                settings.aws_s3_bucket_name, path, image.file
             )
 
         payload = BlogCreate(
@@ -233,8 +233,8 @@ def update_blog(
             filename = f"{uuid.uuid4().hex}_{image.filename}"
             current_slug = slug if slug else getattr(blog, "slug")
             path = f"{current_slug}/{filename}"
-            image_url = SupabaseStorage.upload_file(
-                settings.supabase_public_bucket, path, image.file
+            image_url = S3Storage.upload_file(
+                settings.aws_s3_bucket_name, path, image.file
             )
 
         # Build update payload

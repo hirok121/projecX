@@ -60,7 +60,14 @@ class Settings(BaseSettings):
     # ML Models storage settings (Railway volume mounted at /app/backend/classifiers)
     ml_models_path: str = "./classifiers"  # Relative to backend directory
 
-    # Supabase storage (optional)
+    # AWS S3 / Railway Bucket storage settings
+    aws_endpoint_url: Optional[str] = None  # For S3-compatible services like Railway
+    aws_s3_bucket_name: Optional[str] = None
+    aws_default_region: str = "us-east-1"
+    aws_access_key_id: Optional[str] = None
+    aws_secret_access_key: Optional[str] = None
+
+    # Supabase storage (deprecated - use S3 storage instead)
     supabase_url: Optional[str] = None
     supabase_service_role_key: Optional[str] = None
     supabase_public_bucket: str = "blogs"
